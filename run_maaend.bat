@@ -1,0 +1,1 @@
+start "" "D:\Services\MaaEnd-win-x86_64-v2.4.0\MaaEnd.exe"

@@ -1,0 +1,1 @@
+schtasks /Create /TN "RunMyBatchAtLogon" /TR "\"D:\Services\AutoDailyGame\main.bat"" /SC ONLOGON /RL LIMITED /F
