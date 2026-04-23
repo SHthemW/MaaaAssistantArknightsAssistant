@@ -1,23 +1,36 @@
-﻿using System.Text;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Game_Daily_Routine_Launcher;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
     public MainWindow()
     {
         InitializeComponent();
+
+        ((INotifyCollectionChanged)LogListBox.Items).CollectionChanged += (_, _) =>
+        {
+            if (LogListBox.Items.Count > 0)
+                LogListBox.ScrollIntoView(LogListBox.Items[^1]);
+        };
+    }
+}
+
+public class MuteTextConverter : IValueConverter
+{
+    public static readonly MuteTextConverter Instance = new();
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        return value is true ? "取消静音" : "静音";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
     }
 }
