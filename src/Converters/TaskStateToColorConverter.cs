@@ -1,9 +1,8 @@
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using Game_Daily_Routine_Launcher.Models;
 
-namespace Game_Daily_Routine_Launcher.Converters;
+namespace Game_Daily_Routine_Launcher;
 
 public class TaskStateToColorConverter : IValueConverter
 {

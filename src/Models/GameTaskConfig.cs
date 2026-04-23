@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Game_Daily_Routine_Launcher.Models;
+namespace Game_Daily_Routine_Launcher;
 
 public enum LaunchMode
 {

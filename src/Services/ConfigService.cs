@@ -1,9 +1,8 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Game_Daily_Routine_Launcher.Models;
 
-namespace Game_Daily_Routine_Launcher.Services;
+namespace Game_Daily_Routine_Launcher;
 
 public class ConfigService
 {

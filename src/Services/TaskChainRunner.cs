@@ -1,7 +1,6 @@
 using System.Diagnostics;
-using Game_Daily_Routine_Launcher.Models;
 
-namespace Game_Daily_Routine_Launcher.Services;
+namespace Game_Daily_Routine_Launcher;
 
 public class TaskChainRunner : IDisposable
 {

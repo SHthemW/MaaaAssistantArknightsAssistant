@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Game_Daily_Routine_Launcher.Services;
+namespace Game_Daily_Routine_Launcher;
 
 public class ProcessMonitor : IDisposable
 {

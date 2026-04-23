@@ -1,4 +1,4 @@
-namespace Game_Daily_Routine_Launcher.Models;
+namespace Game_Daily_Routine_Launcher;
 
 public class AppConfig
 {

@@ -3,10 +3,8 @@ using System.Diagnostics;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Game_Daily_Routine_Launcher.Models;
-using Game_Daily_Routine_Launcher.Services;
 
-namespace Game_Daily_Routine_Launcher.ViewModels;
+namespace Game_Daily_Routine_Launcher;
 
 public partial class MainViewModel : ObservableObject
 {

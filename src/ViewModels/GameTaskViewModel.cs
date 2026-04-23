@@ -1,9 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Game_Daily_Routine_Launcher.Models;
 using Microsoft.Win32;
 
-namespace Game_Daily_Routine_Launcher.ViewModels;
+namespace Game_Daily_Routine_Launcher;
 
 public partial class GameTaskViewModel : ObservableObject
 {
