@@ -1,0 +1,137 @@
+# Maaa Assistant Arknights Assistant (MAAA)
+
+一个基于 WPF 的游戏日常任务自动化启动器，用于统一管理和编排多款游戏的自动化工具。
+
+## 功能
+
+- **任务链编排**：按顺序自动执行多个游戏的日常任务，前一个游戏进程退出后自动启动下一个
+- **进程监控**：实时轮询监控游戏进程状态（启动、运行中、已退出）
+- **可视化管理**：GUI 界面展示所有任务状态，支持单独启动或全部启动
+- **路径可配置**：所有自动化工具路径通过 JSON 配置文件管理，支持在界面中直接修改
+- **音量控制**：启动时自动静音，避免凌晨执行时打扰
+- **开机自启**：一键注册/取消 Windows 任务计划，实现开机自动执行
+- **完成后关机**：全部任务完成后可自动关机
+
+## 支持的游戏及自动化工具
+
+| 游戏           | 自动化工具                                                                           |
+| -------------- | ------------------------------------------------------------------------------------ |
+| 明日方舟       | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights)                |
+| 崩坏：星穹铁道 | [March7th Assistant](https://github.com/moesnow/March7thAssistant)                   |
+| 绝区零         | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
+| 原神           | [BetterGI](https://github.com/babalae/better-genshin-impact)                         |
+| 鸣潮           | [ok-ww](https://github.com/ok-oldking/ok-ww)                                         |
+
+## 安装
+
+从 [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) 页面下载最新版本，解压后运行即可。
+
+## 配置
+
+首次运行会生成 `appsettings.json` 配置文件。可直接编辑该文件或在程序界面中修改：
+
+- 各工具的可执行文件路径和启动参数
+- 需要监控的游戏进程名
+- 启动前延迟时间
+- 定时启动时间和轮询间隔
+
+## 开发
+
+### 环境要求
+
+- Windows 10/11
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+### 构建与运行
+
+```bash
+dotnet build
+dotnet run
+```
+
+### 项目结构
+
+```
+├── Game-Daily-Routine-Launcher.csproj
+├── appsettings.json          # 默认配置
+├── res/
+│   └── icon.png              # 程序图标
+└── src/
+    ├── App.xaml              # 应用入口与全局样式
+    ├── MainWindow.xaml       # 主界面
+    ├── Models/               # 数据模型（任务配置、状态枚举）
+    ├── Services/             # 业务逻辑（配置、进程监控、任务链、音量、系统）
+    ├── ViewModels/           # MVVM ViewModel
+    ├── Converters/           # WPF 值转换器
+    └── batch/                # 原始批处理脚本（留存参考）
+```
+
+<br/>
+
+# Maaa Assistant Arknights Assistant (MAAA)
+
+A WPF-based game daily routine automation launcher for managing and orchestrating automation tools across multiple games.
+
+## Features
+
+- **Task Chain Orchestration**: Sequentially execute daily tasks for multiple games — automatically starts the next task when the previous game process exits
+- **Process Monitoring**: Real-time polling of game process status (started, running, exited)
+- **Visual Management**: GUI displaying all task statuses with individual or batch launch support
+- **Configurable Paths**: All automation tool paths managed via JSON config, editable directly in the UI
+- **Volume Control**: Auto-mute on launch to avoid disturbance during early morning runs
+- **Auto-Start on Login**: One-click Windows Task Scheduler registration
+- **Shutdown on Completion**: Optionally shut down the PC after all tasks finish
+
+## Supported Games & Automation Tools
+
+| Game              | Automation Tool                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| Arknights         | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights)                |
+| Honkai: Star Rail | [March7th Assistant](https://github.com/moesnow/March7thAssistant)                   |
+| Zenless Zone Zero | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
+| Genshin Impact    | [BetterGI](https://github.com/babalae/better-genshin-impact)                         |
+| Wuthering Waves   | [ok-ww](https://github.com/ok-oldking/ok-ww)                                         |
+
+## Installation
+
+Download the latest version from the [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) page, extract, and run.
+
+## Configuration
+
+On first launch, an `appsettings.json` config file is generated. Edit it directly or through the program UI:
+
+- Executable paths and arguments for each tool
+- Game process names to monitor
+- Pre-launch delay
+- Scheduled launch time and polling interval
+
+## Development
+
+### Requirements
+
+- Windows 10/11
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+### Build & Run
+
+```bash
+dotnet build
+dotnet run
+```
+
+### Project Structure
+
+```
+├── Game-Daily-Routine-Launcher.csproj
+├── appsettings.json          # Default configuration
+├── res/
+│   └── icon.png              # Application icon
+└── src/
+    ├── App.xaml              # App entry & global styles
+    ├── MainWindow.xaml       # Main window UI
+    ├── Models/               # Data models (task config, state enum)
+    ├── Services/             # Business logic (config, process monitor, task chain, audio, system)
+    ├── ViewModels/           # MVVM ViewModels
+    ├── Converters/           # WPF value converters
+    └── batch/                # Original batch scripts (kept for reference)
+```
