@@ -2,6 +2,10 @@
 
 一个基于 WPF 的游戏日常任务自动化启动器，用于统一管理和编排多款游戏的自动化工具。
 
+<p align="center">
+  <img src="res/icon.png" width="20%" />
+</p>
+
 ## 功能
 
 - **任务链编排**：按顺序自动执行多个游戏的日常任务，前一个游戏进程退出后自动启动下一个
@@ -71,6 +75,10 @@ dotnet run
 # Maaa Assistant Arknights Assistant (MAAA)
 
 A WPF-based game daily routine automation launcher for managing and orchestrating automation tools across multiple games.
+
+<p align="center">
+  <img src="res/icon.png" width="20%" />
+</p>
 
 ## Features
 
