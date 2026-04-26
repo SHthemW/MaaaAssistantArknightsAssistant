@@ -138,6 +138,7 @@
                                                        Margin="0,0,0,4" />
                                             <TextBox Grid.Row="0" Grid.Column="1"
                                                      Text="{Binding ToolPath, UpdateSourceTrigger=PropertyChanged}"
+                                                     VerticalContentAlignment="Center"
                                                      Margin="0,0,4,4" />
                                             <Button Grid.Row="0" Grid.Column="2"
                                                     Content="..."
@@ -152,6 +153,7 @@
                                                        Margin="0,0,0,4" />
                                             <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                                                      Text="{Binding ToolArgs, UpdateSourceTrigger=PropertyChanged}"
+                                                     VerticalContentAlignment="Center"
                                                      Margin="0,0,0,4" />
 
                                             <TextBlock Grid.Row="2" Grid.Column="0"
@@ -160,6 +162,7 @@
                                                        Margin="0,0,0,4" />
                                             <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                                                      Text="{Binding GameProcessName, UpdateSourceTrigger=PropertyChanged}"
+                                                     VerticalContentAlignment="Center"
                                                      Margin="0,0,0,4" />
 
                                             <TextBlock Grid.Row="3" Grid.Column="0"
@@ -167,6 +170,7 @@
                                                        VerticalAlignment="Center" />
                                             <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
                                                      Text="{Binding DelayBeforeStartMs, UpdateSourceTrigger=PropertyChanged}"
+                                                     VerticalContentAlignment="Center"
                                                      Width="80"
                                                      HorizontalAlignment="Left" />
                                         </Grid>
@@ -247,7 +251,8 @@
                            Margin="0,0,4,0" />
                 <TextBox Text="{Binding PollIntervalSeconds}"
                          Width="50" Margin="0,0,16,0"
-                         HorizontalContentAlignment="Center" />
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center" />
 
                 <Button Content="保存配置"
                         Style="{StaticResource SmallButton}"

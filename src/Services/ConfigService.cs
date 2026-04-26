@@ -18,7 +18,7 @@ public class ConfigService
     public ConfigService()
     {
         var appDir = AppDomain.CurrentDomain.BaseDirectory;
-        _configPath = Path.Combine(appDir, "appsettings.json");
+        _configPath = Path.Combine(appDir, "appsettings.Local.json");
     }
 
     public AppConfig Load()
