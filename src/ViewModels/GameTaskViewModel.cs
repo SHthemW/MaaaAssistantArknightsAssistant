@@ -94,9 +94,9 @@ public partial class GameTaskViewModel : ObservableObject
         if (LaunchMode == LaunchMode.Uri)
         {
             if (string.IsNullOrWhiteSpace(ToolPath))
-                SetValidation("未配置 URI");
+                SetValidation("未配置 URL");
             else if (!Uri.TryCreate(ToolPath, UriKind.Absolute, out _))
-                SetValidation($"URI 格式无效: {ToolPath}");
+                SetValidation($"URL 格式无效: {ToolPath}");
             else
                 ClearValidation();
         }

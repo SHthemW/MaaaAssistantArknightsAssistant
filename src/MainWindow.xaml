@@ -91,7 +91,7 @@
                                                        Foreground="{Binding NameForeground}" />
                                             <TextBlock Text="{Binding ValidationMessage}"
                                                        FontSize="11"
-                                                       Foreground="#EF5350"
+                                                       Foreground="#9E9E9E"
                                                        Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         </StackPanel>
 

@@ -57,12 +57,14 @@ public class ConfigService
                 {
                     Id = "zzz",
                     Name = "绝区零 (OneDragon)",
+                    ToolArgs = "-o -c",
                     GameProcessName = "ZenlessZoneZero",
                 },
                 new GameTaskConfig
                 {
                     Id = "genshin",
                     Name = "原神 (BetterGI)",
+                    ToolPath = "bettergi://startOneDragon",
                     LaunchMode = LaunchMode.Uri,
                     GameProcessName = "YuanShen",
                 },
@@ -75,6 +77,7 @@ public class ConfigService
                 {
                     Id = "ww",
                     Name = "鸣潮 (ok-ww)",
+                    ToolArgs = "-t 1 -e",
                     GameProcessName = "Wuthering Waves",
                 }
             ]
