@@ -1,3 +1,5 @@
+using System.IO;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
@@ -6,6 +8,9 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class GameTaskViewModel : ObservableObject
 {
+    private static readonly Brush NormalBrush = new SolidColorBrush(Color.FromRgb(0x21, 0x21, 0x21));
+    private static readonly Brush ErrorBrush = new SolidColorBrush(Color.FromRgb(0xEF, 0x53, 0x50));
+
     private readonly GameTaskConfig _config;
 
     public string Id => _config.Id;
@@ -37,6 +42,14 @@ public partial class GameTaskViewModel : ObservableObject
     [ObservableProperty]
     private bool _isConfigExpanded;
 
+    [ObservableProperty]
+    private string _validationMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasValidationError;
+
+    public Brush NameForeground => HasValidationError ? ErrorBrush : NormalBrush;
+
     public string StateText => State switch
     {
         TaskState.Idle => "等待中",
@@ -58,11 +71,56 @@ public partial class GameTaskViewModel : ObservableObject
         _enabled = config.Enabled;
         _launchMode = config.LaunchMode;
         _delayBeforeStartMs = config.DelayBeforeStartMs;
+
+        Validate();
     }
 
     partial void OnStateChanged(TaskState value)
     {
         OnPropertyChanged(nameof(StateText));
+    }
+
+    partial void OnToolPathChanged(string value) => Validate();
+
+    partial void OnLaunchModeChanged(LaunchMode value) => Validate();
+
+    partial void OnHasValidationErrorChanged(bool value)
+    {
+        OnPropertyChanged(nameof(NameForeground));
+    }
+
+    private void Validate()
+    {
+        if (LaunchMode == LaunchMode.Uri)
+        {
+            if (string.IsNullOrWhiteSpace(ToolPath))
+                SetValidation("未配置 URI");
+            else if (!Uri.TryCreate(ToolPath, UriKind.Absolute, out _))
+                SetValidation($"URI 格式无效: {ToolPath}");
+            else
+                ClearValidation();
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(ToolPath))
+                SetValidation("未配置工具路径");
+            else if (!File.Exists(ToolPath))
+                SetValidation($"工具路径不存在: {ToolPath}");
+            else
+                ClearValidation();
+        }
+    }
+
+    private void SetValidation(string message)
+    {
+        ValidationMessage = message;
+        HasValidationError = true;
+    }
+
+    private void ClearValidation()
+    {
+        ValidationMessage = string.Empty;
+        HasValidationError = false;
     }
 
     [RelayCommand]

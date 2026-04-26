@@ -84,11 +84,16 @@
                                                   VerticalAlignment="Center"
                                                   Margin="0,0,8,0" />
 
-                                        <!-- 任务名称 -->
-                                        <TextBlock Grid.Column="2"
-                                                   Text="{Binding Name}"
-                                                   FontSize="13"
-                                                   VerticalAlignment="Center" />
+                                        <!-- 任务名称 + 校验提示 -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="13"
+                                                       Foreground="{Binding NameForeground}" />
+                                            <TextBlock Text="{Binding ValidationMessage}"
+                                                       FontSize="11"
+                                                       Foreground="#EF5350"
+                                                       Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </StackPanel>
 
                                         <!-- 状态文字 -->
                                         <TextBlock Grid.Column="3"
