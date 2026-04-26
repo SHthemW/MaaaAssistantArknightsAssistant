@@ -87,11 +87,10 @@
                                         <!-- 任务名称 + 校验提示 -->
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}"
-                                                       FontSize="13"
-                                                       Foreground="{Binding NameForeground}" />
+                                                       FontSize="13" />
                                             <TextBlock Text="{Binding ValidationMessage}"
                                                        FontSize="11"
-                                                       Foreground="#9E9E9E"
+                                                       Foreground="#EF5350"
                                                        Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         </StackPanel>
 

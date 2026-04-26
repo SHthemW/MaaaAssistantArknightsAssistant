@@ -1,5 +1,4 @@
 using System.IO;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
@@ -8,9 +7,6 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class GameTaskViewModel : ObservableObject
 {
-    private static readonly Brush NormalBrush = new SolidColorBrush(Color.FromRgb(0x21, 0x21, 0x21));
-    private static readonly Brush ErrorBrush = new SolidColorBrush(Color.FromRgb(0xEF, 0x53, 0x50));
-
     private readonly GameTaskConfig _config;
 
     public string Id => _config.Id;
@@ -48,8 +44,6 @@ public partial class GameTaskViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasValidationError;
 
-    public Brush NameForeground => HasValidationError ? ErrorBrush : NormalBrush;
-
     public string StateText => State switch
     {
         TaskState.Idle => "等待中",
@@ -84,11 +78,6 @@ public partial class GameTaskViewModel : ObservableObject
 
     partial void OnLaunchModeChanged(LaunchMode value) => Validate();
 
-    partial void OnHasValidationErrorChanged(bool value)
-    {
-        OnPropertyChanged(nameof(NameForeground));
-    }
-
     private void Validate()
     {
         if (LaunchMode == LaunchMode.Uri)
@@ -96,7 +85,7 @@ public partial class GameTaskViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(ToolPath))
                 SetValidation("未配置 URL");
             else if (!Uri.TryCreate(ToolPath, UriKind.Absolute, out _))
-                SetValidation($"URL 格式无效: {ToolPath}");
+                SetValidation("URL 格式无效");
             else
                 ClearValidation();
         }
@@ -105,7 +94,7 @@ public partial class GameTaskViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(ToolPath))
                 SetValidation("未配置工具路径");
             else if (!File.Exists(ToolPath))
-                SetValidation($"工具路径不存在: {ToolPath}");
+                SetValidation("工具路径不存在");
             else
                 ClearValidation();
         }
