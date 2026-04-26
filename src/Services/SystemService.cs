@@ -1,9 +1,13 @@
 using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace Game_Daily_Routine_Launcher;
 
 public static class SystemService
 {
+    private const string RunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+    private const string DefaultTaskName = "GameDailyRoutineLauncher";
+
     public static void Shutdown(int delaySeconds = 10)
     {
         Process.Start(new ProcessStartInfo
@@ -26,56 +30,62 @@ public static class SystemService
         });
     }
 
-    public static (bool success, string message) RegisterAutoRun(string taskName = "GameDailyRoutineLauncher")
+    public static (bool success, string message) RegisterAutoRun(string taskName = DefaultTaskName)
     {
         var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
         if (exePath == null)
             return (false, "无法获取当前程序路径");
 
-        var args = $"/Create /TN \"{taskName}\" /TR \"\\\"{exePath}\\\" --autorun\" /SC ONLOGON /RL LIMITED /F";
-
-        return RunSchtasks(args);
-    }
-
-    public static (bool success, string message) UnregisterAutoRun(string taskName = "GameDailyRoutineLauncher")
-    {
-        return RunSchtasks($"/Delete /TN \"{taskName}\" /F");
-    }
-
-    public static bool IsAutoRunRegistered(string taskName = "GameDailyRoutineLauncher")
-    {
-        var (success, _) = RunSchtasks($"/Query /TN \"{taskName}\"");
-        return success;
-    }
-
-    private static (bool success, string message) RunSchtasks(string arguments)
-    {
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "schtasks.exe",
-                Arguments = arguments,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
+            using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+            if (key == null)
+                return (false, $"无法打开注册表项 HKCU\\{RunKey}");
 
-            var process = Process.Start(psi);
-            if (process == null)
-                return (false, "无法启动 schtasks.exe");
+            var command = $"\"{exePath}\" --autorun";
+            key.SetValue(taskName, command);
 
-            var stdout = process.StandardOutput.ReadToEnd().Trim();
-            var stderr = process.StandardError.ReadToEnd().Trim();
-            process.WaitForExit(5000);
-
-            var output = !string.IsNullOrEmpty(stdout) ? stdout : stderr;
-            return (process.ExitCode == 0, output);
+            var saved = key.GetValue(taskName) as string;
+            return saved == command
+                ? (true, $"已写入注册表 HKCU\\{RunKey}\\{taskName} = {command}")
+                : (false, "注册表写入后回读不一致");
         }
         catch (Exception ex)
         {
             return (false, ex.Message);
+        }
+    }
+
+    public static (bool success, string message) UnregisterAutoRun(string taskName = DefaultTaskName)
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+            if (key == null)
+                return (false, $"无法打开注册表项 HKCU\\{RunKey}");
+
+            if (key.GetValue(taskName) == null)
+                return (true, "注册表中不存在该项，无需删除");
+
+            key.DeleteValue(taskName);
+            return (true, $"已删除注册表项 HKCU\\{RunKey}\\{taskName}");
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static bool IsAutoRunRegistered(string taskName = DefaultTaskName)
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(RunKey);
+            return key?.GetValue(taskName) != null;
+        }
+        catch
+        {
+            return false;
         }
     }
 }
