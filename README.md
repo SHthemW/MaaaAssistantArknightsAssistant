@@ -13,7 +13,8 @@
 - **可视化管理**：GUI 界面展示所有任务状态，支持单独启动或全部启动
 - **路径可配置**：所有自动化工具路径通过 JSON 配置文件管理，支持在界面中直接修改
 - **音量控制**：启动时自动静音，避免凌晨执行时打扰
-- **开机自启**：一键注册/取消 Windows 任务计划，实现开机自动执行
+- **开机自启**：一键注册/取消 Windows 开机自启（基于注册表 `HKCU\...\Run`，无需管理员权限）
+- **定时启动窗口**：可配置允许自动启动的时间范围（如 04:00 ~ 06:00），开机自启时若不在该时间范围内则静默退出，手动启动不受影响
 - **完成后关机**：全部任务完成后可自动关机
 
 ## 支持的游戏及自动化工具
@@ -32,12 +33,12 @@
 
 ## 配置
 
-首次运行会生成 `appsettings.json` 配置文件。可直接编辑该文件或在程序界面中修改：
+首次运行会自动生成 `appsettings.Local.json` 配置文件（不纳入版本控制）。可直接编辑该文件或在程序界面中修改：
 
 - 各工具的可执行文件路径和启动参数
 - 需要监控的游戏进程名
 - 启动前延迟时间
-- 定时启动时间和轮询间隔
+- 定时启动时间范围和轮询间隔
 
 ## 开发
 
@@ -53,11 +54,19 @@ dotnet build
 dotnet run
 ```
 
+### 发布
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained false
+```
+
+发布后会自动压缩为 zip，输出到 `bin/Release-Archives/`，文件名格式为 `MaaaAssistantArknightsAssistant-{平台}-{日期时间}.zip`。
+
 ### 项目结构
 
 ```
 ├── Game-Daily-Routine-Launcher.csproj
-├── appsettings.json          # 默认配置
+├── appsettings.Local.json    # 本地配置（自动生成，不纳入版本控制）
 ├── res/
 │   └── icon.png              # 程序图标
 └── src/
@@ -66,8 +75,7 @@ dotnet run
     ├── Models/               # 数据模型（任务配置、状态枚举）
     ├── Services/             # 业务逻辑（配置、进程监控、任务链、音量、系统）
     ├── ViewModels/           # MVVM ViewModel
-    ├── Converters/           # WPF 值转换器
-    └── batch/                # 原始批处理脚本（留存参考）
+    └── Converters/           # WPF 值转换器
 ```
 
 <br/>
@@ -87,7 +95,8 @@ A WPF-based game daily routine automation launcher for managing and orchestratin
 - **Visual Management**: GUI displaying all task statuses with individual or batch launch support
 - **Configurable Paths**: All automation tool paths managed via JSON config, editable directly in the UI
 - **Volume Control**: Auto-mute on launch to avoid disturbance during early morning runs
-- **Auto-Start on Login**: One-click Windows Task Scheduler registration
+- **Auto-Start on Login**: One-click registration via Windows Registry (`HKCU\...\Run`), no admin privileges required
+- **Scheduled Time Window**: Configure an allowed auto-start time range (e.g., 04:00 ~ 06:00) — auto-start outside this window silently exits; manual launch is unaffected
 - **Shutdown on Completion**: Optionally shut down the PC after all tasks finish
 
 ## Supported Games & Automation Tools
@@ -106,12 +115,12 @@ Download the latest version from the [Releases](https://github.com/SHthemW/MaaaA
 
 ## Configuration
 
-On first launch, an `appsettings.json` config file is generated. Edit it directly or through the program UI:
+On first launch, an `appsettings.Local.json` config file is auto-generated (not tracked in version control). Edit it directly or through the program UI:
 
 - Executable paths and arguments for each tool
 - Game process names to monitor
 - Pre-launch delay
-- Scheduled launch time and polling interval
+- Scheduled time window and polling interval
 
 ## Development
 
@@ -127,11 +136,19 @@ dotnet build
 dotnet run
 ```
 
+### Publish
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained false
+```
+
+After publish, the output is automatically zipped to `bin/Release-Archives/` with the filename format `MaaaAssistantArknightsAssistant-{RID}-{yyyyMMdd-HHmm}.zip`.
+
 ### Project Structure
 
 ```
 ├── Game-Daily-Routine-Launcher.csproj
-├── appsettings.json          # Default configuration
+├── appsettings.Local.json    # Local config (auto-generated, not version-controlled)
 ├── res/
 │   └── icon.png              # Application icon
 └── src/
@@ -140,6 +157,5 @@ dotnet run
     ├── Models/               # Data models (task config, state enum)
     ├── Services/             # Business logic (config, process monitor, task chain, audio, system)
     ├── ViewModels/           # MVVM ViewModels
-    ├── Converters/           # WPF value converters
-    └── batch/                # Original batch scripts (kept for reference)
+    └── Converters/           # WPF value converters
 ```
