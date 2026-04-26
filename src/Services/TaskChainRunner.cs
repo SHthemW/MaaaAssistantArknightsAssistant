@@ -71,7 +71,16 @@ public class TaskChainRunner : IDisposable
         Log($"正在启动 {task.Name}...");
         TaskStateChanged?.Invoke(task.Id, "Running");
 
-        LaunchTool(task);
+        try
+        {
+            LaunchTool(task);
+        }
+        catch (Exception ex)
+        {
+            Log($"启动 {task.Name} 失败：{ex.Message}");
+            TaskStateChanged?.Invoke(task.Id, "Error");
+            return;
+        }
 
         if (!string.IsNullOrEmpty(task.GameProcessName))
         {
@@ -98,7 +107,12 @@ public class TaskChainRunner : IDisposable
         }
         else
         {
-            psi.FileName = task.ToolPath;
+            var fullPath = Path.GetFullPath(task.ToolPath);
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException($"工具路径不存在：{fullPath}", fullPath);
+
+            psi.FileName = fullPath;
+            psi.WorkingDirectory = Path.GetDirectoryName(fullPath);
             psi.Arguments = task.ToolArgs;
             psi.UseShellExecute = true;
         }
