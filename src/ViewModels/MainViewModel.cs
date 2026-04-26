@@ -12,6 +12,7 @@ public partial class MainViewModel : ObservableObject
     private readonly AudioService _audioService;
     private TaskChainRunner? _chainRunner;
     private AppConfig _appConfig;
+    private bool _isLoading;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<string> LogEntries { get; } = [];
@@ -59,6 +60,8 @@ public partial class MainViewModel : ObservableObject
 
     private void LoadConfig()
     {
+        _isLoading = true;
+
         Tasks.Clear();
         foreach (var taskConfig in _appConfig.Tasks)
             Tasks.Add(new GameTaskViewModel(taskConfig));
@@ -72,6 +75,14 @@ public partial class MainViewModel : ObservableObject
         PollIntervalSeconds = _appConfig.PollIntervalSeconds;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
+
+        _isLoading = false;
+
+        if (App.IsAutoRun)
+        {
+            AddLog("检测到 --autorun 参数，自动启动任务链");
+            StartAllCommand.Execute(null);
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanStartAll))]
@@ -178,6 +189,8 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnAutoRunOnStartChanged(bool value)
     {
+        if (_isLoading) return;
+
         var (success, message) = value
             ? SystemService.RegisterAutoRun()
             : SystemService.UnregisterAutoRun();
