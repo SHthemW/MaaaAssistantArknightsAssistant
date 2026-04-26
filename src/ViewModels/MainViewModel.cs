@@ -178,10 +178,14 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnAutoRunOnStartChanged(bool value)
     {
-        if (value)
-            SystemService.RegisterAutoRun();
-        else
-            SystemService.UnregisterAutoRun();
+        var (success, message) = value
+            ? SystemService.RegisterAutoRun()
+            : SystemService.UnregisterAutoRun();
+
+        var action = value ? "注册" : "取消";
+        AddLog(success
+            ? $"开机自启{action}成功：{message}"
+            : $"开机自启{action}失败：{message}");
     }
 
     private void AddLog(string message)

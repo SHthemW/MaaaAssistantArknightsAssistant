@@ -26,41 +26,36 @@ public static class SystemService
         });
     }
 
-    public static void RegisterAutoRun(string taskName = "GameDailyRoutineLauncher")
+    public static (bool success, string message) RegisterAutoRun(string taskName = "GameDailyRoutineLauncher")
     {
         var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
-        if (exePath == null) return;
+        if (exePath == null)
+            return (false, "无法获取当前程序路径");
 
         var args = $"/Create /TN \"{taskName}\" /TR \"\\\"{exePath}\\\" --autorun\" /SC ONLOGON /RL LIMITED /F";
 
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "schtasks.exe",
-            Arguments = args,
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        return RunSchtasks(args);
     }
 
-    public static void UnregisterAutoRun(string taskName = "GameDailyRoutineLauncher")
+    public static (bool success, string message) UnregisterAutoRun(string taskName = "GameDailyRoutineLauncher")
     {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "schtasks.exe",
-            Arguments = $"/Delete /TN \"{taskName}\" /F",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        return RunSchtasks($"/Delete /TN \"{taskName}\" /F");
     }
 
     public static bool IsAutoRunRegistered(string taskName = "GameDailyRoutineLauncher")
+    {
+        var (success, _) = RunSchtasks($"/Query /TN \"{taskName}\"");
+        return success;
+    }
+
+    private static (bool success, string message) RunSchtasks(string arguments)
     {
         try
         {
             var psi = new ProcessStartInfo
             {
                 FileName = "schtasks.exe",
-                Arguments = $"/Query /TN \"{taskName}\"",
+                Arguments = arguments,
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -68,12 +63,19 @@ public static class SystemService
             };
 
             var process = Process.Start(psi);
-            process?.WaitForExit(5000);
-            return process?.ExitCode == 0;
+            if (process == null)
+                return (false, "无法启动 schtasks.exe");
+
+            var stdout = process.StandardOutput.ReadToEnd().Trim();
+            var stderr = process.StandardError.ReadToEnd().Trim();
+            process.WaitForExit(5000);
+
+            var output = !string.IsNullOrEmpty(stdout) ? stdout : stderr;
+            return (process.ExitCode == 0, output);
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return (false, ex.Message);
         }
     }
 }
