@@ -26,4 +26,19 @@
     <Resource Include="res\icon.png" />
   </ItemGroup>
 
+  <!-- publish 后自动压缩 -->
+  <Target Name="ZipAfterPublish" AfterTargets="Publish">
+    <PropertyGroup>
+      <_Timestamp>$([System.DateTime]::Now.ToString('yyyyMMdd-HHmm'))</_Timestamp>
+      <_Rid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</_Rid>
+      <_Rid Condition="'$(RuntimeIdentifier)' == ''">portable</_Rid>
+      <_ZipDir>$(MSBuildProjectDirectory)\bin\release-archives</_ZipDir>
+      <_ZipName>$(AssemblyName)-$(_Rid)-$(_Timestamp).zip</_ZipName>
+    </PropertyGroup>
+    <MakeDir Directories="$(_ZipDir)" />
+    <Delete Files="$(_ZipDir)\$(_ZipName)" Condition="Exists('$(_ZipDir)\$(_ZipName)')" />
+    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(_ZipDir)\$(_ZipName)" />
+    <Message Importance="high" Text="Published zip: $(_ZipDir)\$(_ZipName)" />
+  </Target>
+
 </Project>
