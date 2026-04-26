@@ -40,6 +40,12 @@ public partial class MainViewModel : ObservableObject
     private int _scheduledMinute;
 
     [ObservableProperty]
+    private int _scheduledEndHour;
+
+    [ObservableProperty]
+    private int _scheduledEndMinute;
+
+    [ObservableProperty]
     private int _pollIntervalSeconds;
 
     public MainViewModel()
@@ -61,6 +67,8 @@ public partial class MainViewModel : ObservableObject
         ShutdownOnComplete = _appConfig.ShutdownOnComplete;
         ScheduledHour = _appConfig.ScheduledHour;
         ScheduledMinute = _appConfig.ScheduledMinute;
+        ScheduledEndHour = _appConfig.ScheduledEndHour;
+        ScheduledEndMinute = _appConfig.ScheduledEndMinute;
         PollIntervalSeconds = _appConfig.PollIntervalSeconds;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
@@ -161,6 +169,8 @@ public partial class MainViewModel : ObservableObject
         _appConfig.ShutdownOnComplete = ShutdownOnComplete;
         _appConfig.ScheduledHour = ScheduledHour;
         _appConfig.ScheduledMinute = ScheduledMinute;
+        _appConfig.ScheduledEndHour = ScheduledEndHour;
+        _appConfig.ScheduledEndMinute = ScheduledEndMinute;
         _appConfig.PollIntervalSeconds = PollIntervalSeconds;
         _configService.Save(_appConfig);
         AddLog("配置已保存");

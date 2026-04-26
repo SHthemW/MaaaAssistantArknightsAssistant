@@ -221,13 +221,26 @@
                 <TextBlock Text="定时启动时间:"
                            VerticalAlignment="Center"
                            Margin="0,0,4,0" />
-                <TextBox Text="{Binding ScheduledHour}"
+                <TextBox Text="{Binding ScheduledHour, StringFormat={}{0:D2}}"
                          Width="35" Margin="0,0,2,0"
-                         HorizontalContentAlignment="Center" />
-                <TextBlock Text=":" VerticalAlignment="Center" />
-                <TextBox Text="{Binding ScheduledMinute}"
-                         Width="35" Margin="2,0,16,0"
-                         HorizontalContentAlignment="Center" />
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="时" VerticalAlignment="Center" Margin="0,0,2,0" />
+                <TextBox Text="{Binding ScheduledMinute, StringFormat={}{0:D2}}"
+                         Width="35" Margin="0,0,4,0"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="分  ~" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <TextBox Text="{Binding ScheduledEndHour, StringFormat={}{0:D2}}"
+                         Width="35" Margin="0,0,2,0"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="时" VerticalAlignment="Center" Margin="0,0,2,0" />
+                <TextBox Text="{Binding ScheduledEndMinute, StringFormat={}{0:D2}}"
+                         Width="35" Margin="0,0,16,0"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="分" VerticalAlignment="Center" Margin="0,0,16,0" />
 
                 <TextBlock Text="轮询间隔(秒):"
                            VerticalAlignment="Center"

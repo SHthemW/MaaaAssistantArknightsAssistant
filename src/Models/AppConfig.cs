@@ -7,5 +7,17 @@ public class AppConfig
     public bool ShutdownOnComplete { get; set; }
     public int ScheduledHour { get; set; } = 4;
     public int ScheduledMinute { get; set; }
+    public int ScheduledEndHour { get; set; } = 6;
+    public int ScheduledEndMinute { get; set; }
     public int PollIntervalSeconds { get; set; } = 60;
+
+    public bool IsInScheduledTimeRange(TimeOnly now)
+    {
+        var start = new TimeOnly(ScheduledHour, ScheduledMinute);
+        var end = new TimeOnly(ScheduledEndHour, ScheduledEndMinute);
+
+        return start <= end
+            ? now >= start && now < end
+            : now >= start || now < end;
+    }
 }
