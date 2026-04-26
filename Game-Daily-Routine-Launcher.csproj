@@ -23,6 +23,7 @@
   <ItemGroup>
     <Content Include="appsettings.Local.json" Condition="Exists('appsettings.Local.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
     <Resource Include="res\icon.png" />
   </ItemGroup>
