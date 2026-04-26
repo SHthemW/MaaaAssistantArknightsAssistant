@@ -9,6 +9,7 @@
     <UseWPF>true</UseWPF>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationIcon>res\icon.ico</ApplicationIcon>
+    <AssemblyName>MaaaAssistantArknightsAssistant</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +33,7 @@
       <_Timestamp>$([System.DateTime]::Now.ToString('yyyyMMdd-HHmm'))</_Timestamp>
       <_Rid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</_Rid>
       <_Rid Condition="'$(RuntimeIdentifier)' == ''">portable</_Rid>
-      <_ZipDir>$(MSBuildProjectDirectory)\bin\release-archives</_ZipDir>
+      <_ZipDir>$(MSBuildProjectDirectory)\bin\Release-Archives</_ZipDir>
       <_ZipName>$(AssemblyName)-$(_Rid)-$(_Timestamp).zip</_ZipName>
     </PropertyGroup>
     <MakeDir Directories="$(_ZipDir)" />
