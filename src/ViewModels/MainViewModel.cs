@@ -134,6 +134,10 @@ public partial class MainViewModel : ObservableObject
     private void StopAll()
     {
         _chainRunner?.Stop();
+
+        foreach (var t in Tasks)
+            t.State = TaskState.Idle;
+
         AddLog("正在停止所有任务...");
     }
 
