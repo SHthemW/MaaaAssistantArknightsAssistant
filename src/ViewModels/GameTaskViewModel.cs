@@ -36,9 +36,6 @@ public partial class GameTaskViewModel : ObservableObject
     private TaskState _state = TaskState.Idle;
 
     [ObservableProperty]
-    private string _monitorPhase = string.Empty;
-
-    [ObservableProperty]
     private bool _isConfigExpanded;
 
     [ObservableProperty]
@@ -52,7 +49,8 @@ public partial class GameTaskViewModel : ObservableObject
         TaskState.Idle => "等待中",
         TaskState.Launching => "启动中",
         TaskState.Running => "运行中",
-        TaskState.Monitoring => string.IsNullOrEmpty(MonitorPhase) ? "监控中" : $"监控中·{MonitorPhase}",
+        TaskState.MonitoringWaitStart => "监控中·等待启动",
+        TaskState.MonitoringWaitStop => "监控中·等待关闭",
         TaskState.Completed => "已完成",
         TaskState.Error => "出错",
         _ => "未知"
@@ -73,13 +71,6 @@ public partial class GameTaskViewModel : ObservableObject
     }
 
     partial void OnStateChanged(TaskState value)
-    {
-        if (value != TaskState.Monitoring)
-            MonitorPhase = string.Empty;
-        OnPropertyChanged(nameof(StateText));
-    }
-
-    partial void OnMonitorPhaseChanged(string value)
     {
         OnPropertyChanged(nameof(StateText));
     }

@@ -5,7 +5,8 @@ public enum TaskState
     Idle,
     Launching,
     Running,
-    Monitoring,
+    MonitoringWaitStart,
+    MonitoringWaitStop,
     Completed,
     Error
 }

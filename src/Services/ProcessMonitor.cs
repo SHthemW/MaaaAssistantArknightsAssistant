@@ -11,7 +11,6 @@ public class ProcessMonitor : IDisposable
 
     public event Action? ProcessStarted;
     public event Action? ProcessExited;
-    public event Action<string>? PhaseChanged;
 
     public bool IsActive { get; private set; }
 
@@ -35,7 +34,6 @@ public class ProcessMonitor : IDisposable
     private async Task MonitorLoop(CancellationToken ct)
     {
         var wasRunning = false;
-        PhaseChanged?.Invoke("等待启动");
 
         while (!ct.IsCancellationRequested)
         {
@@ -44,7 +42,6 @@ public class ProcessMonitor : IDisposable
             if (isRunning && !wasRunning)
             {
                 IsActive = true;
-                PhaseChanged?.Invoke("等待关闭");
                 ProcessStarted?.Invoke();
             }
             else if (!isRunning && wasRunning)
