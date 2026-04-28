@@ -114,6 +114,15 @@ public partial class MainViewModel : ObservableObject
                     vm.State = s;
             });
         };
+        _chainRunner.MonitorPhaseChanged += (id, phase) =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var vm = Tasks.FirstOrDefault(t => t.Id == id);
+                if (vm != null)
+                    vm.MonitorPhase = phase;
+            });
+        };
         _chainRunner.ChainCompleted += () =>
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -162,6 +171,13 @@ public partial class MainViewModel : ObservableObject
             {
                 if (Enum.TryParse<TaskState>(state, out var s))
                     taskVm.State = s;
+            });
+        };
+        runner.MonitorPhaseChanged += (id, phase) =>
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                taskVm.MonitorPhase = phase;
             });
         };
 

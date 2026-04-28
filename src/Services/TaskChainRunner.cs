@@ -11,6 +11,7 @@ public class TaskChainRunner : IDisposable
     private ProcessMonitor? _currentMonitor;
 
     public event Action<string, string>? TaskStateChanged;
+    public event Action<string, string>? MonitorPhaseChanged;
     public event Action<string>? LogMessage;
     public event Action? ChainCompleted;
 
@@ -88,7 +89,7 @@ public class TaskChainRunner : IDisposable
             Log($"正在监控 {task.GameProcessName} 进程...");
             TaskStateChanged?.Invoke(task.Id, "Monitoring");
 
-            await WaitForProcessExitAsync(task.GameProcessName, ct);
+            await WaitForProcessExitAsync(task.Id, task.GameProcessName, ct);
 
             Log($"{task.GameProcessName} 进程已退出");
         }
@@ -121,13 +122,18 @@ public class TaskChainRunner : IDisposable
         Process.Start(psi);
     }
 
-    private async Task WaitForProcessExitAsync(string processName, CancellationToken ct)
+    private async Task WaitForProcessExitAsync(string taskId, string processName, CancellationToken ct)
     {
         using var monitor = new ProcessMonitor(processName, _pollIntervalMs);
         _currentMonitor = monitor;
 
         var tcs = new TaskCompletionSource();
 
+        monitor.PhaseChanged += phase =>
+        {
+            Log($"{processName} 进程监控：{phase}");
+            MonitorPhaseChanged?.Invoke(taskId, phase);
+        };
         monitor.ProcessExited += () => tcs.TrySetResult();
 
         using var reg = ct.Register(() => tcs.TrySetCanceled());
