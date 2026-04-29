@@ -3,7 +3,7 @@
 一个基于 WPF 的游戏日常任务自动化启动器，用于统一管理和编排多款游戏的自动化工具。
 
 <p align="center">
-  <img src="res/icon.ico" width="25%" />
+  <img src="res/icon.png" width="25%" />
 </p>
 
 ## 功能
@@ -85,7 +85,7 @@ dotnet publish -c Release -r win-x64 --self-contained false
 A WPF-based game daily routine automation launcher for managing and orchestrating automation tools across multiple games.
 
 <p align="center">
-  <img src="res/icon.ico" width="25%" />
+  <img src="res/icon.png" width="25%" />
 </p>
 
 ## Features
