@@ -159,3 +159,10 @@ After publish, the output is automatically zipped to `bin/Release-Archives/` wit
     ├── ViewModels/           # MVVM ViewModels
     └── Converters/           # WPF value converters
 ```
+
+<br/>
+<br/>
+
+<p align="center">
+  <img src="https://img.shields.io/github/downloads/SHthemW/MaaEnd-Webhook-Retransmitter/total" alt="downloads" />
+</p>
