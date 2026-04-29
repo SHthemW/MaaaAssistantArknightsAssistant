@@ -25,7 +25,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
-    <Resource Include="res\icon.png" />
+    <Resource Include="res\icon.ico" />
   </ItemGroup>
 
   <!-- publish 后自动压缩 -->
