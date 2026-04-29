@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Game_Daily_Routine_Launcher"
         mc:Ignorable="d"
         Title="Maaa Assistant Arknights Assistant"
-        Icon="/res/icon.png"
+        Icon="/res/icon.ico"
         Height="720" Width="720"
         MinHeight="600" MinWidth="520"
         Background="#FAFAFA"
@@ -29,7 +29,7 @@
         <!-- 标题和操作按钮 -->
         <DockPanel Grid.Row="0" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Image Source="/res/icon.png"
+                <Image Source="/res/icon.ico"
                        Width="28" Height="28"
                        Margin="0,0,8,0"
                        RenderOptions.BitmapScalingMode="HighQuality" />
