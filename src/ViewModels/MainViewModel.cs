@@ -78,6 +78,13 @@ public partial class MainViewModel : ObservableObject
 
         _isLoading = false;
 
+        if (MuteOnStart)
+        {
+            _audioService.SetMute(true);
+            IsMuted = true;
+            AddLog("启动时自动静音");
+        }
+
         if (App.IsAutoRun)
         {
             AddLog("检测到 --autorun 参数，自动启动任务链");
