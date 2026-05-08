@@ -85,12 +85,23 @@ public class TaskChainRunner : IDisposable
 
         if (!string.IsNullOrEmpty(task.GameProcessName))
         {
-            Log($"正在监控 {task.GameProcessName} 进程，等待启动...");
+            Log($"正在监控 {task.GameProcessName} 进程，等待启动（超时 {task.TimeoutMinutes} 分钟）...");
             TaskStateChanged?.Invoke(task.Id, "MonitoringWaitStart");
 
-            await WaitForProcessExitAsync(task.Id, task.GameProcessName, ct);
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeoutCts.CancelAfter(TimeSpan.FromMinutes(task.TimeoutMinutes));
 
-            Log($"{task.GameProcessName} 进程已退出");
+            try
+            {
+                await WaitForProcessExitAsync(task.Id, task.GameProcessName, timeoutCts.Token);
+                Log($"{task.GameProcessName} 进程已退出");
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                Log($"{task.Name} 已超时（超过 {task.TimeoutMinutes} 分钟）");
+                TaskStateChanged?.Invoke(task.Id, "TimedOut");
+                return;
+            }
         }
 
         TaskStateChanged?.Invoke(task.Id, "Completed");

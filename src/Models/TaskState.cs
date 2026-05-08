@@ -8,5 +8,6 @@ public enum TaskState
     MonitoringWaitStart,
     MonitoringWaitStop,
     Completed,
+    TimedOut,
     Error
 }

@@ -21,4 +21,5 @@ public class GameTaskConfig
     public LaunchMode LaunchMode { get; set; } = LaunchMode.File;
 
     public int DelayBeforeStartMs { get; set; }
+    public int TimeoutMinutes { get; set; } = 60;
 }

@@ -41,6 +41,9 @@ public partial class GameTaskViewModel : ObservableObject
     private int _delayBeforeStartMs;
 
     [ObservableProperty]
+    private int _timeoutMinutes;
+
+    [ObservableProperty]
     private TaskState _state = TaskState.Idle;
 
     [ObservableProperty]
@@ -60,6 +63,7 @@ public partial class GameTaskViewModel : ObservableObject
         TaskState.MonitoringWaitStart => "监控中·等待启动",
         TaskState.MonitoringWaitStop => "监控中·等待关闭",
         TaskState.Completed => "已完成",
+        TaskState.TimedOut => "已超时",
         TaskState.Error => "出错",
         _ => "未知"
     };
@@ -74,6 +78,7 @@ public partial class GameTaskViewModel : ObservableObject
         _enabled = config.Enabled;
         _launchMode = config.LaunchMode;
         _delayBeforeStartMs = config.DelayBeforeStartMs;
+        _timeoutMinutes = config.TimeoutMinutes;
 
         Validate();
     }
@@ -158,6 +163,7 @@ public partial class GameTaskViewModel : ObservableObject
         _config.Enabled = Enabled;
         _config.LaunchMode = LaunchMode;
         _config.DelayBeforeStartMs = DelayBeforeStartMs;
+        _config.TimeoutMinutes = TimeoutMinutes;
         return _config;
     }
 }
