@@ -35,19 +35,19 @@ public partial class MainWindow : Window
         var scaleX = source?.CompositionTarget?.TransformFromDevice.M11 ?? 1.0;
         var scaleY = source?.CompositionTarget?.TransformFromDevice.M22 ?? 1.0;
 
-        var workTop = info.rcWork.Top * scaleY;
-        var workBottom = info.rcWork.Bottom * scaleY;
-        var workLeft = info.rcWork.Left * scaleX;
-        var workRight = info.rcWork.Right * scaleX;
+        var monitorWidth = (info.rcWork.Right - info.rcWork.Left) * scaleX;
+        var monitorHeight = (info.rcWork.Bottom - info.rcWork.Top) * scaleY;
+        var monitorLeft = info.rcWork.Left * scaleX;
+        var monitorTop = info.rcWork.Top * scaleY;
 
-        if (Top < workTop)
-            Top = workTop;
-        if (Top > workBottom - 40)
-            Top = workBottom - 40;
-        if (Left < workLeft - Width + 100)
-            Left = workLeft;
-        if (Left > workRight - 100)
-            Left = workRight - 100;
+        var maxWidth = monitorWidth * 0.8;
+        var maxHeight = monitorHeight * 0.8;
+
+        if (Width > maxWidth) Width = maxWidth;
+        if (Height > maxHeight) Height = maxHeight;
+
+        Left = monitorLeft + (monitorWidth - Width) / 2;
+        Top = monitorTop + (monitorHeight - Height) / 2;
     }
 
     [DllImport("user32.dll")]

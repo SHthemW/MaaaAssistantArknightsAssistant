@@ -7,12 +7,10 @@
         mc:Ignorable="d"
         Title="Maaa Assistant Arknights Assistant"
         Icon="/res/icon.ico"
-        Width="720"
+        Width="720" Height="720"
         MinHeight="600" MinWidth="520"
-        MaxHeight="900"
-        SizeToContent="Height"
         Background="#FAFAFA"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="Manual">
 
     <Window.DataContext>
         <local:MainViewModel />
@@ -21,7 +19,7 @@
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" MinHeight="200" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="180" />
             <RowDefinition Height="Auto" />
