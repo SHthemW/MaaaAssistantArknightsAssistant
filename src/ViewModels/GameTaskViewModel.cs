@@ -7,7 +7,15 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class GameTaskViewModel : ObservableObject
 {
+    private static readonly HashSet<string> NonConfigProperties =
+    [
+        nameof(State), nameof(StateText), nameof(IsConfigExpanded),
+        nameof(ValidationMessage), nameof(HasValidationError)
+    ];
+
     private readonly GameTaskConfig _config;
+
+    public Action? ConfigChanged { get; set; }
 
     public string Id => _config.Id;
 
@@ -68,6 +76,13 @@ public partial class GameTaskViewModel : ObservableObject
         _delayBeforeStartMs = config.DelayBeforeStartMs;
 
         Validate();
+    }
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (!NonConfigProperties.Contains(e.PropertyName!))
+            ConfigChanged?.Invoke();
     }
 
     partial void OnStateChanged(TaskState value)

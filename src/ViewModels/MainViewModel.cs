@@ -69,7 +69,10 @@ public partial class MainViewModel : ObservableObject
 
         Tasks.Clear();
         foreach (var taskConfig in _appConfig.Tasks)
-            Tasks.Add(new GameTaskViewModel(taskConfig));
+        {
+            var vm = new GameTaskViewModel(taskConfig) { ConfigChanged = SaveConfig };
+            Tasks.Add(vm);
+        }
 
         MuteOnStart = _appConfig.MuteOnStart;
         MuteOnlyOnAutoRun = _appConfig.MuteOnlyOnAutoRun;
@@ -192,18 +195,15 @@ public partial class MainViewModel : ObservableObject
         AddLog(IsMuted ? "系统音量已静音" : "系统音量已恢复");
     }
 
-    private static readonly HashSet<string> ConfigProperties =
+    private static readonly HashSet<string> NonConfigProperties =
     [
-        nameof(MuteOnStart), nameof(MuteOnlyOnAutoRun), nameof(ShutdownOnComplete),
-        nameof(ScheduledHour), nameof(ScheduledMinute),
-        nameof(ScheduledEndHour), nameof(ScheduledEndMinute),
-        nameof(PollIntervalSeconds)
+        nameof(IsRunning), nameof(IsMuted), nameof(AutoRunOnStart)
     ];
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
-        if (!_isLoading && ConfigProperties.Contains(e.PropertyName!))
+        if (!_isLoading && !NonConfigProperties.Contains(e.PropertyName!))
             SaveConfig();
     }
 
