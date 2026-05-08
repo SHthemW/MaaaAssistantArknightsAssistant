@@ -289,7 +289,8 @@
                         Style="{StaticResource SmallButton}"
                         Command="{Binding TestWebhookCommand}"
                         HorizontalAlignment="Left"
-                        Margin="0,8,0,0" />
+                        Margin="0,8,0,0"
+                        Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
         </GroupBox>
 
