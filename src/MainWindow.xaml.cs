@@ -17,6 +17,8 @@ public partial class MainWindow : Window
             if (LogListBox.Items.Count > 0)
                 LogListBox.ScrollIntoView(LogListBox.Items[^1]);
         };
+
+        Closing += (_, _) => (DataContext as MainViewModel)?.Cleanup();
     }
 }
 

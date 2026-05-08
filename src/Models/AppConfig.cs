@@ -4,6 +4,7 @@ public class AppConfig
 {
     public List<GameTaskConfig> Tasks { get; set; } = [];
     public bool MuteOnStart { get; set; } = true;
+    public bool MuteOnlyOnAutoRun { get; set; }
     public bool ShutdownOnComplete { get; set; }
     public int ScheduledHour { get; set; } = 4;
     public int ScheduledMinute { get; set; }

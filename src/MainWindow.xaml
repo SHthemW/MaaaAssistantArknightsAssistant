@@ -220,7 +220,12 @@
                       Margin="0,0,16,0" />
             <CheckBox Content="启动时静音"
                       IsChecked="{Binding MuteOnStart}"
-                      VerticalAlignment="Center" />
+                      VerticalAlignment="Center"
+                      Margin="0,0,16,0" />
+            <CheckBox Content="仅在自动启动时生效"
+                      IsChecked="{Binding MuteOnlyOnAutoRun}"
+                      VerticalAlignment="Center"
+                      Visibility="{Binding MuteOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </StackPanel>
 
         <!-- 设置 -->

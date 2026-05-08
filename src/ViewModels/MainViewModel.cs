@@ -13,6 +13,8 @@ public partial class MainViewModel : ObservableObject
     private TaskChainRunner? _chainRunner;
     private AppConfig _appConfig;
     private bool _isLoading;
+    private bool _didAutoMute;
+    private bool _originalMuteState;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<string> LogEntries { get; } = [];
@@ -27,6 +29,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _muteOnStart;
+
+    [ObservableProperty]
+    private bool _muteOnlyOnAutoRun;
 
     [ObservableProperty]
     private bool _shutdownOnComplete;
@@ -67,6 +72,7 @@ public partial class MainViewModel : ObservableObject
             Tasks.Add(new GameTaskViewModel(taskConfig));
 
         MuteOnStart = _appConfig.MuteOnStart;
+        MuteOnlyOnAutoRun = _appConfig.MuteOnlyOnAutoRun;
         ShutdownOnComplete = _appConfig.ShutdownOnComplete;
         ScheduledHour = _appConfig.ScheduledHour;
         ScheduledMinute = _appConfig.ScheduledMinute;
@@ -78,10 +84,12 @@ public partial class MainViewModel : ObservableObject
 
         _isLoading = false;
 
-        if (MuteOnStart)
+        if (MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun))
         {
+            _originalMuteState = _audioService.IsMuted;
             _audioService.SetMute(true);
             IsMuted = true;
+            _didAutoMute = true;
             AddLog("启动时自动静音");
         }
 
@@ -180,6 +188,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsMuted = !IsMuted;
         _audioService.SetMute(IsMuted);
+        _didAutoMute = false;
         AddLog(IsMuted ? "系统音量已静音" : "系统音量已恢复");
     }
 
@@ -188,6 +197,7 @@ public partial class MainViewModel : ObservableObject
     {
         _appConfig.Tasks = Tasks.Select(t => t.ToConfig()).ToList();
         _appConfig.MuteOnStart = MuteOnStart;
+        _appConfig.MuteOnlyOnAutoRun = MuteOnlyOnAutoRun;
         _appConfig.ShutdownOnComplete = ShutdownOnComplete;
         _appConfig.ScheduledHour = ScheduledHour;
         _appConfig.ScheduledMinute = ScheduledMinute;
@@ -210,6 +220,15 @@ public partial class MainViewModel : ObservableObject
         AddLog(success
             ? $"开机自启{action}成功：{message}"
             : $"开机自启{action}失败：{message}");
+    }
+
+    public void Cleanup()
+    {
+        if (_didAutoMute && _audioService.IsMuted)
+        {
+            _audioService.SetMute(_originalMuteState);
+            AddLog("退出时恢复原始静音状态");
+        }
     }
 
     private void AddLog(string message)
