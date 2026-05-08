@@ -11,6 +11,9 @@ public class AppConfig
     public int ScheduledEndHour { get; set; } = 6;
     public int ScheduledEndMinute { get; set; }
     public int PollIntervalSeconds { get; set; } = 60;
+    public bool WebhookEnabled { get; set; }
+    public string WebhookUrl { get; set; } = string.Empty;
+    public string WebhookBody { get; set; } = "{\"time\":\"__TIME__\",\"content\":\"__CONTENT__\"}";
 
     public bool IsInScheduledTimeRange(TimeOnly now)
     {

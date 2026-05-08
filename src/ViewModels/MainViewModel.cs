@@ -60,6 +60,15 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isSchedulePolling;
 
+    [ObservableProperty]
+    private bool _webhookEnabled;
+
+    [ObservableProperty]
+    private string _webhookUrl = string.Empty;
+
+    [ObservableProperty]
+    private string _webhookBody = string.Empty;
+
     public MainViewModel()
     {
         _configService = new ConfigService();
@@ -91,6 +100,9 @@ public partial class MainViewModel : ObservableObject
         ScheduledEndHour = _appConfig.ScheduledEndHour;
         ScheduledEndMinute = _appConfig.ScheduledEndMinute;
         PollIntervalSeconds = _appConfig.PollIntervalSeconds;
+        WebhookEnabled = _appConfig.WebhookEnabled;
+        WebhookUrl = _appConfig.WebhookUrl;
+        WebhookBody = _appConfig.WebhookBody;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
 
@@ -229,7 +241,7 @@ public partial class MainViewModel : ObservableObject
 
     private static readonly HashSet<string> NonConfigProperties =
     [
-        nameof(IsRunning), nameof(IsMuted), nameof(AutoRunOnStart)
+        nameof(IsRunning), nameof(IsMuted), nameof(AutoRunOnStart), nameof(IsSchedulePolling)
     ];
 
     protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
@@ -250,6 +262,9 @@ public partial class MainViewModel : ObservableObject
         _appConfig.ScheduledEndHour = ScheduledEndHour;
         _appConfig.ScheduledEndMinute = ScheduledEndMinute;
         _appConfig.PollIntervalSeconds = PollIntervalSeconds;
+        _appConfig.WebhookEnabled = WebhookEnabled;
+        _appConfig.WebhookUrl = WebhookUrl;
+        _appConfig.WebhookBody = WebhookBody;
         _configService.Save(_appConfig);
     }
 
@@ -286,7 +301,11 @@ public partial class MainViewModel : ObservableObject
 
     private void AddLog(string message)
     {
-        var entry = $"[{DateTime.Now:HH:mm:ss}] {message}";
+        var time = DateTime.Now.ToString("HH:mm:ss");
+        var entry = $"[{time}] {message}";
         LogEntries.Add(entry);
+
+        if (WebhookEnabled && !string.IsNullOrWhiteSpace(WebhookUrl))
+            WebhookService.Send(WebhookUrl, WebhookBody, time, message);
     }
 }

@@ -24,6 +24,7 @@
             <RowDefinition Height="180" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- 标题和操作按钮 -->
@@ -245,8 +246,48 @@
             </Border>
         </StackPanel>
 
+        <!-- Webhook 推送 -->
+        <GroupBox Grid.Row="5" Header="Webhook 推送" Padding="8" Margin="0,8,0,0">
+            <StackPanel>
+                <CheckBox Content="启用 Webhook 推送"
+                          IsChecked="{Binding WebhookEnabled}"
+                          Margin="0,0,0,8" />
+                <Grid Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="推送 URL:"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,4" />
+                    <TextBox Grid.Row="0" Grid.Column="1"
+                             Text="{Binding WebhookUrl, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalContentAlignment="Center"
+                             Margin="0,0,0,4" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="推送 Body:"
+                               VerticalAlignment="Top"
+                               Margin="0,4,0,0" />
+                    <TextBox Grid.Row="1" Grid.Column="1"
+                             Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Height="60"
+                             VerticalScrollBarVisibility="Auto"
+                             Margin="0,0,0,0" />
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
         <!-- 设置 -->
-        <GroupBox Grid.Row="5" Header="设置" Padding="8" Margin="0,8,0,0">
+        <GroupBox Grid.Row="6" Header="设置" Padding="8" Margin="0,8,0,0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="定时启动时间:"
                            VerticalAlignment="Center"
