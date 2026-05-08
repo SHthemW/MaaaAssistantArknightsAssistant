@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,11 +11,13 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly ConfigService _configService;
     private readonly AudioService _audioService;
+    private readonly DispatcherTimer _scheduleTimer;
     private TaskChainRunner? _chainRunner;
     private AppConfig _appConfig;
     private bool _isLoading;
     private bool _didAutoMute;
     private bool _originalMuteState;
+    private bool _hasRunInCurrentWindow;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<string> LogEntries { get; } = [];
@@ -60,6 +63,9 @@ public partial class MainViewModel : ObservableObject
         _audioService = new AudioService();
         _appConfig = _configService.Load();
 
+        _scheduleTimer = new DispatcherTimer();
+        _scheduleTimer.Tick += OnScheduleTimerTick;
+
         LoadConfig();
     }
 
@@ -99,6 +105,28 @@ public partial class MainViewModel : ObservableObject
         if (App.IsAutoRun)
         {
             AddLog("检测到 --autorun 参数，自动启动任务链");
+            _hasRunInCurrentWindow = true;
+            StartAllCommand.Execute(null);
+        }
+
+        _scheduleTimer.Interval = TimeSpan.FromSeconds(Math.Max(PollIntervalSeconds, 1));
+        _scheduleTimer.Start();
+    }
+
+    private void OnScheduleTimerTick(object? sender, EventArgs e)
+    {
+        var inRange = _appConfig.IsInScheduledTimeRange(TimeOnly.FromDateTime(DateTime.Now));
+
+        if (!inRange)
+        {
+            _hasRunInCurrentWindow = false;
+            return;
+        }
+
+        if (!IsRunning && !_hasRunInCurrentWindow)
+        {
+            _hasRunInCurrentWindow = true;
+            AddLog("检测到当前时间在自动运行范围内，自动启动任务链");
             StartAllCommand.Execute(null);
         }
     }
@@ -221,6 +249,11 @@ public partial class MainViewModel : ObservableObject
         _configService.Save(_appConfig);
     }
 
+    partial void OnPollIntervalSecondsChanged(int value)
+    {
+        _scheduleTimer.Interval = TimeSpan.FromSeconds(Math.Max(value, 1));
+    }
+
     partial void OnAutoRunOnStartChanged(bool value)
     {
         if (_isLoading) return;
@@ -237,6 +270,8 @@ public partial class MainViewModel : ObservableObject
 
     public void Cleanup()
     {
+        _scheduleTimer.Stop();
+
         if (_didAutoMute && _audioService.IsMuted)
         {
             _audioService.SetMute(_originalMuteState);
