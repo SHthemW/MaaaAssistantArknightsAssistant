@@ -285,6 +285,11 @@
                              VerticalScrollBarVisibility="Auto"
                              Margin="0,0,0,0" />
                 </Grid>
+                <Button Content="测试"
+                        Style="{StaticResource SmallButton}"
+                        Command="{Binding TestWebhookCommand}"
+                        HorizontalAlignment="Left"
+                        Margin="0,8,0,0" />
             </StackPanel>
         </GroupBox>
 

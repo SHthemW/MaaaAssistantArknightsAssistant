@@ -239,6 +239,12 @@ public partial class MainViewModel : ObservableObject
         AddLog(IsMuted ? "系统音量已静音" : "系统音量已恢复");
     }
 
+    [RelayCommand]
+    private void TestWebhook()
+    {
+        AddLog("这是一条来自MAAA的测试消息");
+    }
+
     private static readonly HashSet<string> NonConfigProperties =
     [
         nameof(IsRunning), nameof(IsMuted), nameof(AutoRunOnStart), nameof(IsSchedulePolling)
