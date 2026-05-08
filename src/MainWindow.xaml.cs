@@ -19,6 +19,21 @@ public partial class MainWindow : Window
         };
 
         Closing += (_, _) => (DataContext as MainViewModel)?.Cleanup();
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var workArea = SystemParameters.WorkArea;
+
+        if (Top < workArea.Top)
+            Top = workArea.Top;
+        if (Top > workArea.Bottom - 40)
+            Top = workArea.Bottom - 40;
+        if (Left < workArea.Left - Width + 100)
+            Left = workArea.Left;
+        if (Left > workArea.Right - 100)
+            Left = workArea.Right - 100;
     }
 }
 
