@@ -57,6 +57,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _pollIntervalSeconds;
 
+    [ObservableProperty]
+    private bool _isSchedulePolling;
+
     public MainViewModel()
     {
         _configService = new ConfigService();
@@ -111,6 +114,7 @@ public partial class MainViewModel : ObservableObject
 
         _scheduleTimer.Interval = TimeSpan.FromSeconds(Math.Max(PollIntervalSeconds, 1));
         _scheduleTimer.Start();
+        IsSchedulePolling = true;
     }
 
     private void OnScheduleTimerTick(object? sender, EventArgs e)
@@ -271,6 +275,7 @@ public partial class MainViewModel : ObservableObject
     public void Cleanup()
     {
         _scheduleTimer.Stop();
+        IsSchedulePolling = false;
 
         if (_didAutoMute && _audioService.IsMuted)
         {

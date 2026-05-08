@@ -39,6 +39,38 @@
                            VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <!-- 轮询状态指示器 -->
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,0"
+                            Visibility="{Binding IsSchedulePolling, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Ellipse Width="8" Height="8"
+                             Fill="#FF9800"
+                             Margin="0,0,6,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSchedulePolling}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                     From="1.0" To="0.2" Duration="0:0:1"
+                                                                     AutoReverse="True" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Text="等待中"
+                               FontSize="12"
+                               Foreground="#757575"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
                 <Button Content="启动全部"
                         Style="{StaticResource ActionButton}"
                         Command="{Binding StartAllCommand}"
