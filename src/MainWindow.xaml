@@ -7,8 +7,10 @@
         mc:Ignorable="d"
         Title="Maaa Assistant Arknights Assistant"
         Icon="/res/icon.ico"
-        Height="720" Width="720"
+        Width="720"
         MinHeight="600" MinWidth="520"
+        MaxHeight="900"
+        SizeToContent="Height"
         Background="#FAFAFA"
         WindowStartupLocation="CenterScreen">
 
@@ -19,7 +21,7 @@
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="200" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="180" />
             <RowDefinition Height="Auto" />
@@ -246,8 +248,8 @@
             </Border>
         </StackPanel>
 
-        <!-- Webhook 推送 -->
-        <GroupBox Grid.Row="5" Header="Webhook 推送" Padding="8" Margin="0,8,0,0">
+        <!-- 推送 -->
+        <GroupBox Grid.Row="5" Header="推送" Padding="8" Margin="0,8,0,0">
             <StackPanel>
                 <CheckBox Content="启用 Webhook 推送"
                           IsChecked="{Binding WebhookEnabled}"
