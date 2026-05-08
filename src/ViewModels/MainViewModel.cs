@@ -192,7 +192,21 @@ public partial class MainViewModel : ObservableObject
         AddLog(IsMuted ? "系统音量已静音" : "系统音量已恢复");
     }
 
-    [RelayCommand]
+    private static readonly HashSet<string> ConfigProperties =
+    [
+        nameof(MuteOnStart), nameof(MuteOnlyOnAutoRun), nameof(ShutdownOnComplete),
+        nameof(ScheduledHour), nameof(ScheduledMinute),
+        nameof(ScheduledEndHour), nameof(ScheduledEndMinute),
+        nameof(PollIntervalSeconds)
+    ];
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (!_isLoading && ConfigProperties.Contains(e.PropertyName!))
+            SaveConfig();
+    }
+
     private void SaveConfig()
     {
         _appConfig.Tasks = Tasks.Select(t => t.ToConfig()).ToList();
@@ -205,7 +219,6 @@ public partial class MainViewModel : ObservableObject
         _appConfig.ScheduledEndMinute = ScheduledEndMinute;
         _appConfig.PollIntervalSeconds = PollIntervalSeconds;
         _configService.Save(_appConfig);
-        AddLog("配置已保存");
     }
 
     partial void OnAutoRunOnStartChanged(bool value)
