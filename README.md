@@ -28,7 +28,9 @@
 
 - **Webhook 推送**：每条日志触发时可通过 HTTP POST 推送到指定 URL，支持自定义 Body 模板（`__TIME__`、`__CONTENT__` 占位符），内置测试按钮
 
-  <img src="res/mainui.png" style="zoom:38%;" />
+<p align="center">
+  <img src="res/mainui.png" width="50%" />
+</p>
 
 ## 支持的游戏及自动化工具
 
