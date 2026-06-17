@@ -108,18 +108,19 @@ public partial class MainViewModel : ObservableObject
 
         _isLoading = false;
 
-        if (MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun))
+        var shouldStartForAutoRun = App.IsAutoRun && IsInScheduledTimeRange();
+        var shouldAutoMute = MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun) && (!App.IsAutoRun || shouldStartForAutoRun);
+
+        if (shouldAutoMute)
         {
             _originalMuteState = _audioService.IsMuted;
             _audioService.SetMute(true);
             IsMuted = true;
             _didAutoMute = true;
-            AddLog("启动时自动静音");
         }
 
-        if (App.IsAutoRun)
+        if (shouldStartForAutoRun)
         {
-            AddLog("检测到 --autorun 参数，自动启动任务链");
             _hasRunInCurrentWindow = true;
             StartAllCommand.Execute(null);
         }
@@ -131,7 +132,7 @@ public partial class MainViewModel : ObservableObject
 
     private void OnScheduleTimerTick(object? sender, EventArgs e)
     {
-        var inRange = _appConfig.IsInScheduledTimeRange(TimeOnly.FromDateTime(DateTime.Now));
+        var inRange = IsInScheduledTimeRange();
 
         if (!inRange)
         {
@@ -142,9 +143,13 @@ public partial class MainViewModel : ObservableObject
         if (!IsRunning && !_hasRunInCurrentWindow)
         {
             _hasRunInCurrentWindow = true;
-            AddLog("检测到当前时间在自动运行范围内，自动启动任务链");
             StartAllCommand.Execute(null);
         }
+    }
+
+    private bool IsInScheduledTimeRange()
+    {
+        return _appConfig.IsInScheduledTimeRange(TimeOnly.FromDateTime(DateTime.Now));
     }
 
     [RelayCommand(CanExecute = nameof(CanStartAll))]
