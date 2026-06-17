@@ -24,7 +24,7 @@ public partial class App : Application
             var config = new ConfigService().Load();
             var now = TimeOnly.FromDateTime(DateTime.Now);
 
-            if (!config.IsInScheduledTimeRange(now))
+            if (!config.RandomStartEnabled && !config.IsInScheduledTimeRange(now))
             {
                 Shutdown();
                 return;

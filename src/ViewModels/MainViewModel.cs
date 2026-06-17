@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     private bool _didAutoMute;
     private bool _originalMuteState;
     private bool _hasRunInCurrentWindow;
+    private DateTime? _randomAutoStartTime;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<string> LogEntries { get; } = [];
@@ -38,6 +39,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _shutdownOnComplete;
+
+    [ObservableProperty]
+    private bool _randomStartEnabled;
 
     [ObservableProperty]
     private bool _autoRunOnStart;
@@ -95,6 +99,7 @@ public partial class MainViewModel : ObservableObject
         MuteOnStart = _appConfig.MuteOnStart;
         MuteOnlyOnAutoRun = _appConfig.MuteOnlyOnAutoRun;
         ShutdownOnComplete = _appConfig.ShutdownOnComplete;
+        RandomStartEnabled = _appConfig.RandomStartEnabled;
         ScheduledHour = _appConfig.ScheduledHour;
         ScheduledMinute = _appConfig.ScheduledMinute;
         ScheduledEndHour = _appConfig.ScheduledEndHour;
@@ -108,7 +113,10 @@ public partial class MainViewModel : ObservableObject
 
         _isLoading = false;
 
-        var shouldStartForAutoRun = App.IsAutoRun && IsInScheduledTimeRange();
+        if (App.IsAutoRun && RandomStartEnabled)
+            _randomAutoStartTime = _appConfig.GetRandomScheduledStartTime(DateTime.Now, Random.Shared);
+
+        var shouldStartForAutoRun = App.IsAutoRun && ShouldStartForAutoRun(DateTime.Now);
         var shouldAutoMute = MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun) && (!App.IsAutoRun || shouldStartForAutoRun);
 
         if (shouldAutoMute)
@@ -132,24 +140,43 @@ public partial class MainViewModel : ObservableObject
 
     private void OnScheduleTimerTick(object? sender, EventArgs e)
     {
-        var inRange = IsInScheduledTimeRange();
+        var now = DateTime.Now;
+        var inRange = IsInScheduledTimeRange(now);
 
         if (!inRange)
         {
             _hasRunInCurrentWindow = false;
+            RefreshRandomAutoStartTimeIfNeeded(now);
             return;
         }
 
-        if (!IsRunning && !_hasRunInCurrentWindow)
+        if (!IsRunning && !_hasRunInCurrentWindow && ShouldStartForAutoRun(now))
         {
             _hasRunInCurrentWindow = true;
             StartAllCommand.Execute(null);
         }
     }
 
-    private bool IsInScheduledTimeRange()
+    private bool ShouldStartForAutoRun(DateTime now)
     {
-        return _appConfig.IsInScheduledTimeRange(TimeOnly.FromDateTime(DateTime.Now));
+        if (!IsInScheduledTimeRange(now))
+            return false;
+
+        return !RandomStartEnabled || _randomAutoStartTime is null || now >= _randomAutoStartTime.Value;
+    }
+
+    private void RefreshRandomAutoStartTimeIfNeeded(DateTime now)
+    {
+        if (!App.IsAutoRun || !RandomStartEnabled)
+            return;
+
+        if (_randomAutoStartTime is null || now >= _randomAutoStartTime.Value)
+            _randomAutoStartTime = _appConfig.GetRandomScheduledStartTime(now, Random.Shared);
+    }
+
+    private bool IsInScheduledTimeRange(DateTime now)
+    {
+        return _appConfig.IsInScheduledTimeRange(TimeOnly.FromDateTime(now));
     }
 
     [RelayCommand(CanExecute = nameof(CanStartAll))]
@@ -268,6 +295,7 @@ public partial class MainViewModel : ObservableObject
         _appConfig.MuteOnStart = MuteOnStart;
         _appConfig.MuteOnlyOnAutoRun = MuteOnlyOnAutoRun;
         _appConfig.ShutdownOnComplete = ShutdownOnComplete;
+        _appConfig.RandomStartEnabled = RandomStartEnabled;
         _appConfig.ScheduledHour = ScheduledHour;
         _appConfig.ScheduledMinute = ScheduledMinute;
         _appConfig.ScheduledEndHour = ScheduledEndHour;

@@ -6,6 +6,7 @@ public class AppConfig
     public bool MuteOnStart { get; set; } = true;
     public bool MuteOnlyOnAutoRun { get; set; }
     public bool ShutdownOnComplete { get; set; }
+    public bool RandomStartEnabled { get; set; }
     public int ScheduledHour { get; set; } = 4;
     public int ScheduledMinute { get; set; }
     public int ScheduledEndHour { get; set; } = 6;
@@ -23,5 +24,44 @@ public class AppConfig
         return start <= end
             ? now >= start && now < end
             : now >= start || now < end;
+    }
+
+    public DateTime GetRandomScheduledStartTime(DateTime now, Random random)
+    {
+        var range = GetCurrentOrNextScheduledRange(now);
+        var earliest = now > range.Start ? now : range.Start;
+        var availableSeconds = Math.Max(0, (int)(range.End - earliest).TotalSeconds);
+
+        if (availableSeconds == 0)
+            return earliest;
+
+        return earliest.AddSeconds(random.Next(availableSeconds + 1));
+    }
+
+    private (DateTime Start, DateTime End) GetCurrentOrNextScheduledRange(DateTime now)
+    {
+        var today = DateOnly.FromDateTime(now);
+        var startTime = new TimeOnly(ScheduledHour, ScheduledMinute);
+        var endTime = new TimeOnly(ScheduledEndHour, ScheduledEndMinute);
+
+        if (startTime <= endTime)
+        {
+            var start = today.ToDateTime(startTime);
+            var end = today.ToDateTime(endTime);
+
+            if (now < end)
+                return (start, end);
+
+            return (start.AddDays(1), end.AddDays(1));
+        }
+
+        var todayStart = today.ToDateTime(startTime);
+        var todayEnd = today.ToDateTime(endTime);
+
+        if (now < todayEnd)
+            return (todayStart.AddDays(-1), todayEnd);
+
+        var endForTodayStart = todayEnd.AddDays(1);
+        return (todayStart, endForTodayStart);
     }
 }

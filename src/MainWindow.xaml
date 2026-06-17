@@ -294,7 +294,7 @@
 
         <!-- 设置 -->
         <GroupBox Grid.Row="6" Header="设置" Padding="8" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal">
+            <WrapPanel VerticalAlignment="Center">
                 <TextBlock Text="定时启动时间:"
                            VerticalAlignment="Center"
                            Margin="0,0,4,0" />
@@ -318,6 +318,11 @@
                          HorizontalContentAlignment="Center"
                          VerticalContentAlignment="Center" />
                 <TextBlock Text="分" VerticalAlignment="Center" Margin="0,0,16,0" />
+
+                <CheckBox Content="随机时间启动"
+                          IsChecked="{Binding RandomStartEnabled}"
+                          VerticalAlignment="Center"
+                          Margin="0,0,16,0" />
 
                 <!-- 轮询状态指示器 -->
                 <StackPanel Orientation="Horizontal"
@@ -358,7 +363,7 @@
                          Width="50"
                          HorizontalContentAlignment="Center"
                          VerticalContentAlignment="Center" />
-            </StackPanel>
+            </WrapPanel>
         </GroupBox>
     </Grid>
 </Window>
