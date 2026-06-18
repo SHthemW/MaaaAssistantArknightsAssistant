@@ -12,6 +12,7 @@ public partial class MainViewModel : ObservableObject
     private readonly ConfigService _configService;
     private readonly AudioService _audioService;
     private readonly DispatcherTimer _scheduleTimer;
+    private readonly DispatcherTimer _startupMuteTimer;
     private TaskChainRunner? _chainRunner;
     private AppConfig _appConfig;
     private bool _isLoading;
@@ -19,6 +20,7 @@ public partial class MainViewModel : ObservableObject
     private bool _originalMuteState;
     private bool _hasRunInCurrentWindow;
     private DateTime? _randomAutoStartTime;
+    private int _startupMuteSuccessStreak;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<string> LogEntries { get; } = [];
@@ -81,6 +83,11 @@ public partial class MainViewModel : ObservableObject
 
         _scheduleTimer = new DispatcherTimer();
         _scheduleTimer.Tick += OnScheduleTimerTick;
+        _startupMuteTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _startupMuteTimer.Tick += OnStartupMuteTimerTick;
 
         LoadConfig();
     }
@@ -117,15 +124,10 @@ public partial class MainViewModel : ObservableObject
             _randomAutoStartTime = _appConfig.GetRandomScheduledStartTime(DateTime.Now, Random.Shared);
 
         var shouldStartForAutoRun = App.IsAutoRun && ShouldStartForAutoRun(DateTime.Now);
-        var shouldAutoMute = MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun) && (!App.IsAutoRun || shouldStartForAutoRun);
+        var shouldAutoMute = MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun);
 
         if (shouldAutoMute)
-        {
-            _originalMuteState = _audioService.IsMuted;
-            _audioService.SetMute(true);
-            IsMuted = true;
-            _didAutoMute = true;
-        }
+            StartStartupMuteEnforcement();
 
         if (shouldStartForAutoRun)
         {
@@ -172,6 +174,46 @@ public partial class MainViewModel : ObservableObject
 
         if (_randomAutoStartTime is null || now >= _randomAutoStartTime.Value)
             _randomAutoStartTime = _appConfig.GetRandomScheduledStartTime(now, Random.Shared);
+    }
+
+    private void StartStartupMuteEnforcement()
+    {
+        _originalMuteState = _audioService.IsMuted;
+        _didAutoMute = true;
+        _startupMuteSuccessStreak = 0;
+
+        _startupMuteTimer.Start();
+        EnforceStartupMuteOnce();
+    }
+
+    private void OnStartupMuteTimerTick(object? sender, EventArgs e)
+    {
+        EnforceStartupMuteOnce();
+    }
+
+    private void EnforceStartupMuteOnce()
+    {
+        if (_audioService.IsMuted)
+        {
+            IsMuted = true;
+            if (++_startupMuteSuccessStreak >= 3)
+                _startupMuteTimer.Stop();
+
+            return;
+        }
+
+        _audioService.SetMute(true);
+        IsMuted = _audioService.IsMuted;
+
+        if (IsMuted)
+        {
+            if (++_startupMuteSuccessStreak >= 3)
+                _startupMuteTimer.Stop();
+        }
+        else
+        {
+            _startupMuteSuccessStreak = 0;
+        }
     }
 
     private bool IsInScheduledTimeRange(DateTime now)
@@ -329,6 +371,7 @@ public partial class MainViewModel : ObservableObject
     public void Cleanup()
     {
         _scheduleTimer.Stop();
+        _startupMuteTimer.Stop();
         IsSchedulePolling = false;
 
         if (_didAutoMute && _audioService.IsMuted)
