@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
@@ -10,23 +10,29 @@ public partial class MainViewModel : ObservableObject
 {
     private static readonly HashSet<string> NonConfigProperties =
     [
-        nameof(IsRunning), nameof(IsMuted), nameof(AutoRunOnStart), nameof(IsSchedulePolling)
+        nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
+        nameof(AutoRunOnStart), nameof(IsSchedulePolling)
     ];
 
     private readonly ConfigService _configService;
     private readonly AudioService _audioService;
     private readonly AiSummaryService _aiSummaryService;
+    private readonly TwinkleTrayService _twinkleTrayService;
     private readonly DispatcherTimer _scheduleTimer;
     private readonly DispatcherTimer _startupMuteTimer;
+    private readonly DispatcherTimer _startupTwinkleTrayTimer;
     private AppConfig _appConfig;
     private TaskChainRunner? _chainRunner;
     private bool _isLoading;
     private bool _didAutoMute;
     private bool _originalMuteState;
+    private bool _didDimTwinkleTray;
+    private IReadOnlyList<TwinkleTrayMonitorState> _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _hasRunInCurrentWindow;
     private bool _autoSummaryRequested;
     private DateTime? _randomAutoStartTime;
     private int _startupMuteSuccessStreak;
+    private int _startupTwinkleTraySuccessStreak;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<LogEntryRecord> LogEntries { get; } = [];
@@ -56,6 +62,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _webhookEnabled;
     [ObservableProperty] private string _webhookUrl = string.Empty;
     [ObservableProperty] private string _webhookBody = string.Empty;
+    [ObservableProperty] private bool _twinkleTrayOnStart;
+    [ObservableProperty] private bool _twinkleTrayOnlyOnAutoRun;
+    [ObservableProperty] private bool _twinkleTrayIsAvailable;
+    [ObservableProperty] private string _twinkleTrayAvailabilityMessage = string.Empty;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -69,6 +79,7 @@ public partial class MainViewModel : ObservableObject
         _configService = new ConfigService();
         _audioService = new AudioService();
         _aiSummaryService = new AiSummaryService();
+        _twinkleTrayService = new TwinkleTrayService();
         _appConfig = _configService.Load();
 
         _scheduleTimer = new DispatcherTimer();
@@ -76,6 +87,9 @@ public partial class MainViewModel : ObservableObject
 
         _startupMuteTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _startupMuteTimer.Tick += OnStartupMuteTimerTick;
+
+        _startupTwinkleTrayTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _startupTwinkleTrayTimer.Tick += OnStartupTwinkleTrayTimerTick;
 
         LoadConfig();
     }
@@ -100,6 +114,8 @@ public partial class MainViewModel : ObservableObject
         ScheduledEndHour = _appConfig.ScheduledEndHour;
         ScheduledEndMinute = _appConfig.ScheduledEndMinute;
         PollIntervalSeconds = _appConfig.PollIntervalSeconds;
+        TwinkleTrayOnStart = _appConfig.TwinkleTrayOnStart;
+        TwinkleTrayOnlyOnAutoRun = _appConfig.TwinkleTrayOnlyOnAutoRun;
         WebhookEnabled = _appConfig.WebhookEnabled;
         WebhookUrl = _appConfig.WebhookUrl;
         WebhookBody = _appConfig.WebhookBody;
@@ -112,6 +128,7 @@ public partial class MainViewModel : ObservableObject
         ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
+        RefreshTwinkleTrayAvailability();
 
         _isLoading = false;
 
@@ -123,6 +140,9 @@ public partial class MainViewModel : ObservableObject
 
         if (MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun))
             StartStartupMuteEnforcement();
+
+        if (TwinkleTrayOnStart && (!TwinkleTrayOnlyOnAutoRun || App.IsAutoRun) && TwinkleTrayIsAvailable)
+            StartStartupTwinkleTrayEnforcement();
 
         _scheduleTimer.Interval = TimeSpan.FromSeconds(Math.Max(PollIntervalSeconds, 1));
         _scheduleTimer.Start();
@@ -180,7 +200,19 @@ public partial class MainViewModel : ObservableObject
         EnforceStartupMuteOnce();
     }
 
+    private void StartStartupTwinkleTrayEnforcement()
+    {
+        _originalTwinkleTrayStates = _twinkleTrayService.CaptureCurrentStates();
+        _didDimTwinkleTray = true;
+        _startupTwinkleTraySuccessStreak = 0;
+
+        _startupTwinkleTrayTimer.Start();
+        EnforceStartupTwinkleTrayOnce();
+    }
+
     private void OnStartupMuteTimerTick(object? sender, EventArgs e) => EnforceStartupMuteOnce();
+
+    private void OnStartupTwinkleTrayTimerTick(object? sender, EventArgs e) => EnforceStartupTwinkleTrayOnce();
 
     private void EnforceStartupMuteOnce()
     {
@@ -204,6 +236,36 @@ public partial class MainViewModel : ObservableObject
         else
         {
             _startupMuteSuccessStreak = 0;
+        }
+    }
+
+    private void EnforceStartupTwinkleTrayOnce()
+    {
+        if (!TwinkleTrayIsAvailable)
+            return;
+
+        var result = _twinkleTrayService.DetectAvailability();
+        if (!result.IsAvailable)
+        {
+            TwinkleTrayIsAvailable = false;
+            TwinkleTrayAvailabilityMessage = result.Message;
+            _startupTwinkleTrayTimer.Stop();
+            return;
+        }
+
+        if (_originalTwinkleTrayStates.Count == 0)
+            _originalTwinkleTrayStates = _twinkleTrayService.CaptureCurrentStates();
+
+        var dimResult = _twinkleTrayService.SetAllLowestAsync(result).GetAwaiter().GetResult();
+        if (dimResult.Success)
+        {
+            if (++_startupTwinkleTraySuccessStreak >= 3)
+                _startupTwinkleTrayTimer.Stop();
+        }
+        else
+        {
+            _startupTwinkleTraySuccessStreak = 0;
+            TwinkleTrayAvailabilityMessage = dimResult.Message;
         }
     }
 
@@ -233,6 +295,8 @@ public partial class MainViewModel : ObservableObject
         _appConfig.ScheduledEndHour = ScheduledEndHour;
         _appConfig.ScheduledEndMinute = ScheduledEndMinute;
         _appConfig.PollIntervalSeconds = PollIntervalSeconds;
+        _appConfig.TwinkleTrayOnStart = TwinkleTrayOnStart;
+        _appConfig.TwinkleTrayOnlyOnAutoRun = TwinkleTrayOnlyOnAutoRun;
         _appConfig.WebhookEnabled = WebhookEnabled;
         _appConfig.WebhookUrl = WebhookUrl;
         _appConfig.WebhookBody = WebhookBody;
@@ -263,12 +327,20 @@ public partial class MainViewModel : ObservableObject
     {
         _scheduleTimer.Stop();
         _startupMuteTimer.Stop();
+        _startupTwinkleTrayTimer.Stop();
         IsSchedulePolling = false;
 
         if (_didAutoMute && _audioService.IsMuted)
         {
             _audioService.SetMute(_originalMuteState);
             AddLog("退出时已恢复原始静音状态。");
+        }
+
+        if (_didDimTwinkleTray && TwinkleTrayIsAvailable && _originalTwinkleTrayStates.Count > 0)
+        {
+            var result = _twinkleTrayService.DetectAvailability();
+            if (result.IsAvailable)
+                _ = _twinkleTrayService.RestoreAsync(result, _originalTwinkleTrayStates);
         }
     }
 
@@ -303,4 +375,32 @@ public partial class MainViewModel : ObservableObject
         if (!NonConfigProperties.Contains(propertyName))
             SaveConfig();
     }
+
+    partial void OnTwinkleTrayOnStartChanged(bool value)
+    {
+        if (_isLoading)
+            return;
+
+        if (value && !TwinkleTrayIsAvailable)
+        {
+            TwinkleTrayOnStart = false;
+            AddLog($"Twinkle Tray 不可用：{TwinkleTrayAvailabilityMessage}");
+        }
+    }
+
+    private void RefreshTwinkleTrayAvailability()
+    {
+        var availability = _twinkleTrayService.DetectAvailability();
+        TwinkleTrayIsAvailable = availability.IsAvailable;
+        TwinkleTrayAvailabilityMessage = availability.Message;
+
+        if (!availability.IsAvailable)
+        {
+            TwinkleTrayOnStart = false;
+            TwinkleTrayOnlyOnAutoRun = false;
+            if (!_isLoading)
+                AddLog($"Twinkle Tray 不可用：{availability.Message}");
+        }
+    }
 }
+

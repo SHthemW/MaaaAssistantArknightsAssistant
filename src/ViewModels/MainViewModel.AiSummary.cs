@@ -21,9 +21,9 @@ public partial class MainViewModel
 
         try
         {
-            var prompt = "请用一句话确认当前AI总结接口配置是否可用。";
+            var prompt = "请用一句话确认当前 AI 总结接口配置是否可用。";
             var requestBody = _aiSummaryService.BuildRequestBodyJson(config, prompt);
-            AddLog($"测试内容已发送: {prompt}");
+            AddLog($"测试内容已发送：{prompt}");
 
             var summary = await _aiSummaryService.GenerateAsync(config, prompt, CancellationToken.None);
             AddLog($"AI 测试请求发送成功，完整请求体如下：\n{requestBody}");

@@ -1,4 +1,4 @@
-namespace Game_Daily_Routine_Launcher;
+﻿namespace Game_Daily_Routine_Launcher;
 
 public class AiSummaryConfig
 {
@@ -21,3 +21,4 @@ public class ZhipuAiSummaryConfig
 
     public bool Stream { get; set; } = true;
 }
+
