@@ -5,4 +5,6 @@ public sealed record LogEntryRecord(DateTime Timestamp, string Message)
     public string DisplayText => $"[{Timestamp:HH:mm:ss}] {Message}";
 
     public string? RawBody { get; init; }
+
+    public WebhookPushContentCategory Category { get; init; } = WebhookPushContentCategory.Other;
 }

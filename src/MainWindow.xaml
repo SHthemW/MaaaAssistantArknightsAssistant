@@ -193,6 +193,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="70" />
@@ -203,7 +204,34 @@
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="内容:" VerticalAlignment="Top" Margin="0,4,0,0" />
                                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
                             </Grid>
-                            <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" Margin="70,8,0,0" />
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" />
+                            </Grid>
+                            <CheckBox Content="自定义要转发的内容"
+                                      IsChecked="{Binding WebhookCustomPushContentEnabled}"
+                                      VerticalAlignment="Center"
+                                      Margin="0,12,0,0" />
+                            <StackPanel Margin="24,8,0,0" Visibility="{Binding WebhookCustomPushContentEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ItemsControl ItemsSource="{Binding WebhookPushContentOptions}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="3" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding DisplayName}"
+                                                      IsChecked="{Binding IsEnabled}"
+                                                      HorizontalAlignment="Left"
+                                                      Margin="0,0,16,8" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

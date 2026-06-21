@@ -12,7 +12,7 @@ public partial class MainViewModel : ObservableObject
     [
         nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
         nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage),
-        nameof(WebhookEnabledExpanded), nameof(WebhookRelayExpanded), nameof(AiSummaryExpanded)
+        nameof(WebhookEnabledExpanded), nameof(WebhookRelayExpanded), nameof(WebhookCustomPushContentExpanded), nameof(AiSummaryExpanded)
     ];
 
     private readonly ConfigService _configService;
@@ -43,6 +43,7 @@ public partial class MainViewModel : ObservableObject
     [
         new(AiSummaryProviderType.ZhipuAi, "智谱AI")
     ];
+    public ObservableCollection<WebhookPushContentCategoryOptionViewModel> WebhookPushContentOptions { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(StartAllCommand))]
@@ -67,6 +68,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _webhookRelayEnabled;
     [ObservableProperty] private int _webhookRelayPort = 5058;
     [ObservableProperty] private bool _webhookOnlyPushAiSummary;
+    [ObservableProperty] private bool _webhookCustomPushContentEnabled;
+    [ObservableProperty] private bool _webhookCustomPushContentExpanded = true;
     [ObservableProperty] private bool _webhookRelayIsRunning;
     [ObservableProperty] private string _webhookRelayStatusMessage = string.Empty;
     [ObservableProperty] private bool _webhookEnabledExpanded = true;
@@ -139,6 +142,7 @@ public partial class MainViewModel : ObservableObject
         WebhookRelayEnabled = _appConfig.WebhookRelayEnabled;
         WebhookRelayPort = _appConfig.WebhookRelayPort;
         WebhookOnlyPushAiSummary = _appConfig.WebhookOnlyPushAiSummary;
+        WebhookCustomPushContentEnabled = _appConfig.WebhookCustomPushContentEnabled;
         SelectedAiSummaryProvider = _appConfig.AiSummary.Provider == AiSummaryProviderType.Off
             ? AiSummaryProviderType.ZhipuAi
             : _appConfig.AiSummary.Provider;
@@ -150,6 +154,7 @@ public partial class MainViewModel : ObservableObject
         ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
+        LoadWebhookPushContentOptions();
         RefreshTwinkleTrayAvailability();
 
         _isLoading = false;
@@ -336,6 +341,11 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookRelayEnabled = WebhookRelayEnabled;
         _appConfig.WebhookRelayPort = WebhookRelayPort;
         _appConfig.WebhookOnlyPushAiSummary = WebhookOnlyPushAiSummary;
+        _appConfig.WebhookCustomPushContentEnabled = WebhookCustomPushContentEnabled;
+        _appConfig.WebhookPushCategories = WebhookPushContentOptions
+            .Where(x => x.IsEnabled)
+            .Select(x => x.Category)
+            .ToList();
         _appConfig.AiSummaryOnlyOnAutoRun = AiSummaryOnlyOnAutoRun;
         _appConfig.AiSummary = BuildAiSummaryConfig();
         _configService.Save(_appConfig);
@@ -384,9 +394,60 @@ public partial class MainViewModel : ObservableObject
 
     private void AddLog(string message, string? rawBody = null)
     {
-        var entry = new LogEntryRecord(DateTime.Now, message) { RawBody = rawBody };
+        var entry = new LogEntryRecord(DateTime.Now, message)
+        {
+            RawBody = rawBody,
+            Category = InferWebhookPushCategory(message, rawBody)
+        };
         ExecuteOnUiThread(() => AppendLog(entry));
     }
+
+    private static WebhookPushContentCategory InferWebhookPushCategory(string message, string? rawBody)
+    {
+        if (message.Contains("AI总结：", StringComparison.Ordinal) || message.Contains("AI 智能总结", StringComparison.Ordinal))
+            return WebhookPushContentCategory.AiSummary;
+
+        if (message.Contains("Webhook", StringComparison.Ordinal) || message.Contains("中转", StringComparison.Ordinal))
+            return WebhookPushContentCategory.Webhook;
+
+        if (message.Contains("静音", StringComparison.Ordinal) || message.Contains("音量", StringComparison.Ordinal))
+            return WebhookPushContentCategory.Audio;
+
+        if (message.Contains("亮度", StringComparison.Ordinal) || message.Contains("Twinkle Tray", StringComparison.Ordinal))
+            return WebhookPushContentCategory.Brightness;
+
+        if (message.Contains("开机自启", StringComparison.Ordinal) || message.Contains("关机", StringComparison.Ordinal) || message.Contains("设置", StringComparison.Ordinal))
+            return WebhookPushContentCategory.System;
+
+        if (message.Contains("任务链", StringComparison.Ordinal) || message.Contains("任务", StringComparison.Ordinal) || message.Contains("启动", StringComparison.Ordinal) || message.Contains("完成", StringComparison.Ordinal) || message.Contains("停止", StringComparison.Ordinal))
+            return WebhookPushContentCategory.TaskExecution;
+
+        if (message.Contains("监控", StringComparison.Ordinal) || message.Contains("等待", StringComparison.Ordinal) || message.Contains("超时", StringComparison.Ordinal) || message.Contains("进程", StringComparison.Ordinal))
+            return WebhookPushContentCategory.TaskMonitoring;
+
+        return WebhookPushContentCategory.Other;
+    }
+
+    private void LoadWebhookPushContentOptions()
+    {
+        var enabled = new HashSet<WebhookPushContentCategory>(_appConfig.WebhookPushCategories);
+        WebhookPushContentOptions.Clear();
+
+        foreach (var option in CreateDefaultWebhookPushContentOptions())
+            WebhookPushContentOptions.Add(new WebhookPushContentCategoryOptionViewModel(option.Category, option.DisplayName, enabled.Count == 0 || enabled.Contains(option.Category), SaveConfig));
+    }
+
+    private static IReadOnlyList<(WebhookPushContentCategory Category, string DisplayName)> CreateDefaultWebhookPushContentOptions() =>
+    [
+        (WebhookPushContentCategory.TaskExecution, "任务启动/完成"),
+        (WebhookPushContentCategory.TaskMonitoring, "进程监控"),
+        (WebhookPushContentCategory.Audio, "静音/音量"),
+        (WebhookPushContentCategory.Brightness, "亮度调节"),
+        (WebhookPushContentCategory.Webhook, "Webhook 推送"),
+        (WebhookPushContentCategory.AiSummary, "AI 总结"),
+        (WebhookPushContentCategory.System, "系统设置"),
+        (WebhookPushContentCategory.Other, "其他日志")
+    ];
 
     private void AppendLog(LogEntryRecord entry)
     {
@@ -407,6 +468,9 @@ public partial class MainViewModel : ObservableObject
 
         if (WebhookOnlyPushAiSummary)
             return entry.Message.StartsWith("AI总结：", StringComparison.Ordinal);
+
+        if (WebhookCustomPushContentEnabled)
+            return WebhookPushContentOptions.Any(x => x.IsEnabled && x.Category == entry.Category);
 
         return true;
     }
