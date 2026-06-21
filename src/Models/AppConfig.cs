@@ -3,6 +3,7 @@ namespace Game_Daily_Routine_Launcher;
 public class AppConfig
 {
     public List<GameTaskConfig> Tasks { get; set; } = [];
+    public AiSummaryConfig AiSummary { get; set; } = new();
     public bool MuteOnStart { get; set; } = true;
     public bool MuteOnlyOnAutoRun { get; set; }
     public bool ShutdownOnComplete { get; set; }

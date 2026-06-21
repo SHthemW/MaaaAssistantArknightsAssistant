@@ -8,7 +8,7 @@ public static class WebhookService
 {
     private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(10) };
 
-    public static async void Send(string url, string bodyTemplate, string time, string content)
+    public static async Task SendAsync(string url, string bodyTemplate, string time, string content)
     {
         try
         {

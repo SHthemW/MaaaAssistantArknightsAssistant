@@ -6,6 +6,7 @@
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <local:TaskStateToColorConverter x:Key="TaskStateToColor" />
+        <local:EnumEqualsToVisibilityConverter x:Key="EnumEqualsToVisibility" />
 
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Padding" Value="16,8" />
