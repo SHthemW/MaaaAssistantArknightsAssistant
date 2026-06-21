@@ -202,48 +202,47 @@
                     <Grid Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <ComboBox Grid.Row="0" Grid.Column="1" Width="180" HorizontalAlignment="Left"
+
+                        <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                  Content="仅在自动运行时生效"
+                                  IsChecked="{Binding AiSummaryOnlyOnAutoRun}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,12,0" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <ComboBox Grid.Row="1" Grid.Column="1" Width="180" HorizontalAlignment="Left"
                                   ItemsSource="{Binding AiSummaryProviderOptions}"
                                   SelectedValuePath="Value"
                                   DisplayMemberPath="DisplayName"
                                   SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" />
-                    </Grid>
 
-                    <Grid Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ZhipuApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ZhipuApiUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="模型:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZhipuModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <CheckBox Grid.Row="5" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <Button Grid.Row="6" Grid.Column="1" Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" HorizontalAlignment="Left" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZhipuApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ZhipuApiUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="模型:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ZhipuModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <CheckBox Grid.Row="7" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
                     </Grid>
+                    <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" HorizontalAlignment="Left" Margin="70,8,0,0"
+                            Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </StackPanel>
             </StackPanel>
         </GroupBox>

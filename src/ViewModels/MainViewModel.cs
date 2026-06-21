@@ -73,6 +73,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _twinkleTrayAvailabilityMessage = string.Empty;
     [ObservableProperty] private bool _shutdownOnlyOnAutoRun;
     [ObservableProperty] private bool _aiSummaryEnabled;
+    [ObservableProperty] private bool _aiSummaryOnlyOnAutoRun;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -126,6 +127,7 @@ public partial class MainViewModel : ObservableObject
         TwinkleTrayOnlyOnAutoRun = _appConfig.TwinkleTrayOnlyOnAutoRun;
         ShutdownOnlyOnAutoRun = _appConfig.ShutdownOnlyOnAutoRun;
         AiSummaryEnabled = _appConfig.AiSummary.Provider != AiSummaryProviderType.Off;
+        AiSummaryOnlyOnAutoRun = _appConfig.AiSummaryOnlyOnAutoRun;
         WebhookEnabled = _appConfig.WebhookEnabled;
         WebhookUrl = _appConfig.WebhookUrl;
         WebhookBody = _appConfig.WebhookBody;
@@ -327,6 +329,7 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookBody = WebhookBody;
         _appConfig.WebhookRelayEnabled = WebhookRelayEnabled;
         _appConfig.WebhookRelayPort = WebhookRelayPort;
+        _appConfig.AiSummaryOnlyOnAutoRun = AiSummaryOnlyOnAutoRun;
         _appConfig.AiSummary = BuildAiSummaryConfig();
         _configService.Save(_appConfig);
     }
@@ -486,6 +489,15 @@ public partial class MainViewModel : ObservableObject
             SelectedAiSummaryProvider = AiSummaryProviderType.ZhipuAi;
         else if (!value)
             SelectedAiSummaryProvider = AiSummaryProviderType.ZhipuAi;
+    }
+
+    partial void OnAiSummaryOnlyOnAutoRunChanged(bool value)
+    {
+        if (_isLoading)
+            return;
+
+        if (!value && App.IsAutoRun)
+            AddLog("AI 智能总结已设置为始终生效。");
     }
 }
 

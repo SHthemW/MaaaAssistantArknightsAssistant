@@ -13,8 +13,7 @@ public partial class MainViewModel
 
     private async Task TestAiSummaryAsync()
     {
-        var config = BuildAiSummaryConfig();
-        if (!_aiSummaryService.CanGenerate(config))
+        if (!ShouldGenerateAiSummary(respectOnlyOnAutoRun: false))
         {
             AddLog("AI 智能总结未启用或当前平台不受支持。");
             return;
@@ -22,6 +21,7 @@ public partial class MainViewModel
 
         try
         {
+            var config = BuildAiSummaryConfig();
             var prompt = "请用一句话确认当前 AI 总结接口是否可用。";
             var requestBody = _aiSummaryService.BuildRequestBodyJson(config, prompt);
             AddLog($"测试内容已发送: {prompt}");
@@ -40,10 +40,10 @@ public partial class MainViewModel
 
     private async Task GenerateAndLogAiSummaryAsync()
     {
-        var config = BuildAiSummaryConfig();
-        if (!_aiSummaryService.CanGenerate(config))
+        if (!ShouldGenerateAiSummary())
             return;
 
+        var config = BuildAiSummaryConfig();
         var prompt = BuildSummaryPrompt();
         if (string.IsNullOrWhiteSpace(prompt))
             return;
@@ -80,6 +80,17 @@ public partial class MainViewModel
                 Stream = ZhipuStream
             }
         };
+    }
+
+    private bool ShouldGenerateAiSummary(bool respectOnlyOnAutoRun = true)
+    {
+        if (!AiSummaryEnabled)
+            return false;
+
+        if (respectOnlyOnAutoRun && AiSummaryOnlyOnAutoRun && !App.IsAutoRun)
+            return false;
+
+        return _aiSummaryService.CanGenerate(BuildAiSummaryConfig());
     }
 
     private string BuildSummaryPrompt()
