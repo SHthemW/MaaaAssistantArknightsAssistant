@@ -211,7 +211,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Button Grid.Column="0" Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" />
                             </Grid>
-                            <CheckBox Content="自定义要转发的内容"
+                            <CheckBox Content="自定义要推送的内容"
                                       IsChecked="{Binding WebhookCustomPushContentEnabled}"
                                       VerticalAlignment="Center"
                                       Margin="0,12,0,0" />
@@ -241,38 +241,37 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="8" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <CheckBox Grid.Column="0" Content="启用Webhook中转" IsChecked="{Binding WebhookRelayEnabled}" VerticalAlignment="Center" />
-                        <Button Grid.Column="1"
-                                ToolTip="帮助"
-                                Width="16"
-                                Height="16"
-                                Padding="0"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                Click="OnWebhookRelayHelpClicked"
-                                Background="#F5F5F5"
-                                BorderBrush="#D0D0D0"
-                                Foreground="#757575">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="8">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"
-                                                          RecognizesAccessKey="True" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <Button.Content>
-                                <TextBlock Text="?" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Button.Content>
-                        </Button>
-                        <ToggleButton Grid.Column="3"
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <CheckBox Content="启用 Webhook 中转" IsChecked="{Binding WebhookRelayEnabled}" VerticalAlignment="Center" />
+                            <Button ToolTip="帮助"
+                                    Width="16"
+                                    Height="16"
+                                    Padding="0"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Click="OnWebhookRelayHelpClicked"
+                                    Background="#F5F5F5"
+                                    BorderBrush="#D0D0D0"
+                                    Foreground="#757575">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              RecognizesAccessKey="True" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <Button.Content>
+                                    <TextBlock Text="?" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Button.Content>
+                            </Button>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1"
                                       Style="{StaticResource CollapseToggleButtonStyle}"
                                       IsChecked="{Binding WebhookRelayExpanded}"
                                       VerticalAlignment="Center"
