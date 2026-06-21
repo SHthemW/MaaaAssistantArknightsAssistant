@@ -2,9 +2,9 @@ using System.Net.Http;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace Game_Daily_Routine_Launcher;
@@ -31,8 +31,10 @@ public sealed class WebhookRelayService : IDisposable
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel();
-                    webBuilder.UseUrls($"http://127.0.0.1:{port}", $"http://localhost:{port}");
+                    webBuilder.ConfigureKestrel(options =>
+                    {
+                        options.ListenAnyIP(port);
+                    });
                     webBuilder.Configure(app =>
                     {
                         app.Run(context => HandleRequestAsync(context, logAsync ?? ((_, _) => Task.CompletedTask)));
