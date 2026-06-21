@@ -1,4 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
+using System.IO;
+using System.Text;
 
 namespace Game_Daily_Routine_Launcher;
 
@@ -112,6 +114,30 @@ public partial class MainViewModel
         _audioService.SetMute(IsMuted);
         _didAutoMute = false;
         AddLog(IsMuted ? "系统音量已静音。" : "系统音量已恢复。");
+    }
+
+    [RelayCommand]
+    private void ClearLogs()
+    {
+        LogEntries.Clear();
+    }
+
+    [RelayCommand]
+    private async Task ExportLogsAsync()
+    {
+        if (LogEntries.Count == 0)
+        {
+            AddLog("没有可导出的日志。");
+            return;
+        }
+
+        var logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        Directory.CreateDirectory(logDir);
+
+        var path = Path.Combine(logDir, $"runtime-{DateTime.Now:yyyyMMdd-HHmmss}.log");
+        var content = string.Join(Environment.NewLine, LogEntries.Select(x => x.DisplayText));
+        await File.WriteAllTextAsync(path, content, Encoding.UTF8);
+        AddLog($"运行日志已导出：{path}");
     }
 
     [RelayCommand]

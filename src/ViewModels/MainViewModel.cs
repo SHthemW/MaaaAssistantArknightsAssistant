@@ -11,7 +11,8 @@ public partial class MainViewModel : ObservableObject
     private static readonly HashSet<string> NonConfigProperties =
     [
         nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
-        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage)
+        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage),
+        nameof(AutoScrollLogs)
     ];
 
     private readonly ConfigService _configService;
@@ -90,6 +91,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _zhipuSystemPrompt = string.Empty;
     [ObservableProperty] private double _zhipuTemperature = 1.0;
     [ObservableProperty] private bool _zhipuStream = true;
+    [ObservableProperty] private bool _autoScrollLogs = true;
 
     public MainViewModel()
     {

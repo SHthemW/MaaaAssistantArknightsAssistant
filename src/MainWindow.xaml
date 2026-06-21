@@ -51,10 +51,11 @@
             </Setter>
         </Style>
     </Window.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" MinHeight="78" />
             <RowDefinition Height="Auto" />
@@ -76,7 +77,6 @@
         </DockPanel>
 
         <GroupBox Grid.Row="1" Header="任务列表" Padding="8">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Tasks}" MinHeight="124">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -133,19 +133,35 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </ScrollViewer>
         </GroupBox>
 
         <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" Background="Transparent" />
 
         <GroupBox Grid.Row="3" Header="运行日志" Padding="8" Margin="0,4,0,0">
-            <ListBox ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="22" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ListBox Grid.Row="0" ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="84" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" Content="自动滚动日志" IsChecked="{Binding AutoScrollLogs}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="导出" Style="{StaticResource SmallButton}" Command="{Binding ExportLogsCommand}" Margin="0,0,8,0" />
+                        <Button Content="清除" Style="{StaticResource SmallButton}" Command="{Binding ClearLogsCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </GroupBox>
 
         <GroupBox Grid.Row="4" Header="防打扰" Padding="8" Margin="0,8,0,0">
@@ -375,4 +391,5 @@
             </WrapPanel>
         </GroupBox>
     </Grid>
+    </ScrollViewer>
 </Window>

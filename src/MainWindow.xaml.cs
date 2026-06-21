@@ -16,7 +16,7 @@ public partial class MainWindow : Window
 
         ((INotifyCollectionChanged)LogListBox.Items).CollectionChanged += (_, _) =>
         {
-            if (LogListBox.Items.Count > 0)
+            if (LogListBox.Items.Count > 0 && (DataContext as MainViewModel)?.AutoScrollLogs == true)
                 LogListBox.ScrollIntoView(LogListBox.Items[^1]);
         };
 

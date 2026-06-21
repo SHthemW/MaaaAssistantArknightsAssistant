@@ -13,7 +13,7 @@ public class ZhipuAiSummaryConfig
 
     public string ApiUrl { get; set; } = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
 
-    public string Model { get; set; } = "glm-5.2";
+    public string Model { get; set; } = "glm-4.7-flash";
 
     public string SystemPrompt { get; set; } = "你是一个有用的AI助手。";
 
