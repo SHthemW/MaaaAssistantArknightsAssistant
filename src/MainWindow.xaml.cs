@@ -56,7 +56,8 @@ public partial class MainWindow : Window
     {
         var helpWindow = new WebhookRelayHelpWindow
         {
-            Owner = this
+            Owner = this,
+            DataContext = new WebhookRelayHelpViewModel((DataContext as MainViewModel)?.WebhookRelayPort ?? 5058)
         };
         helpWindow.ShowDialog();
     }
