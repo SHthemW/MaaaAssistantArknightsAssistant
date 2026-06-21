@@ -140,16 +140,10 @@
             </ListBox>
         </GroupBox>
 
-        <StackPanel Grid.Row="4" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal">
-                <CheckBox Content="全部完成后关机" IsChecked="{Binding ShutdownOnComplete}" VerticalAlignment="Center" Margin="0,0,16,0" />
-                <CheckBox Content="注册开机自启" IsChecked="{Binding AutoRunOnStart}" VerticalAlignment="Center" />
-            </StackPanel>
-        </StackPanel>
-
         <GroupBox Grid.Row="5" Header="防打扰选项" Padding="8" Margin="0,8,0,0">
             <Grid Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -189,6 +183,18 @@
                            VerticalAlignment="Center"
                            Foreground="#757575"
                            TextWrapping="Wrap" />
+
+                <CheckBox Grid.Row="2" Grid.Column="0"
+                          Content="全部完成后关机"
+                          IsChecked="{Binding ShutdownOnComplete}"
+                          VerticalAlignment="Center"
+                          Margin="0,4,12,0" />
+                <CheckBox Grid.Row="2" Grid.Column="1"
+                          Content="仅在自动运行时生效"
+                          IsChecked="{Binding ShutdownOnlyOnAutoRun}"
+                          VerticalAlignment="Center"
+                          Margin="0,4,12,0" />
+                <TextBlock Grid.Row="2" Grid.Column="2" />
             </Grid>
         </GroupBox>
 

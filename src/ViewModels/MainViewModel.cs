@@ -67,6 +67,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _twinkleTrayOnlyOnAutoRun;
     [ObservableProperty] private bool _twinkleTrayIsAvailable;
     [ObservableProperty] private string _twinkleTrayAvailabilityMessage = string.Empty;
+    [ObservableProperty] private bool _shutdownOnlyOnAutoRun;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -117,6 +118,7 @@ public partial class MainViewModel : ObservableObject
         PollIntervalSeconds = _appConfig.PollIntervalSeconds;
         TwinkleTrayOnStart = _appConfig.TwinkleTrayOnStart;
         TwinkleTrayOnlyOnAutoRun = _appConfig.TwinkleTrayOnlyOnAutoRun;
+        ShutdownOnlyOnAutoRun = _appConfig.ShutdownOnlyOnAutoRun;
         WebhookEnabled = _appConfig.WebhookEnabled;
         WebhookUrl = _appConfig.WebhookUrl;
         WebhookBody = _appConfig.WebhookBody;
@@ -306,6 +308,7 @@ public partial class MainViewModel : ObservableObject
         _appConfig.PollIntervalSeconds = PollIntervalSeconds;
         _appConfig.TwinkleTrayOnStart = TwinkleTrayOnStart;
         _appConfig.TwinkleTrayOnlyOnAutoRun = TwinkleTrayOnlyOnAutoRun;
+        _appConfig.ShutdownOnlyOnAutoRun = ShutdownOnlyOnAutoRun;
         _appConfig.WebhookEnabled = WebhookEnabled;
         _appConfig.WebhookUrl = WebhookUrl;
         _appConfig.WebhookBody = WebhookBody;

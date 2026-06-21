@@ -54,7 +54,7 @@ public partial class MainViewModel
         if (completed && autoSummaryRequested)
             await GenerateAndLogAiSummaryAsync();
 
-        if (completed && ShutdownOnComplete)
+        if (completed && ShutdownOnComplete && (!ShutdownOnlyOnAutoRun || autoSummaryRequested))
         {
             AddLog("所有任务已完成，10秒后关机。");
             SystemService.Shutdown();

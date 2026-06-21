@@ -15,6 +15,7 @@ public class AppConfig
     public int PollIntervalSeconds { get; set; } = 60;
     public bool TwinkleTrayOnStart { get; set; }
     public bool TwinkleTrayOnlyOnAutoRun { get; set; }
+    public bool ShutdownOnlyOnAutoRun { get; set; }
     public bool WebhookEnabled { get; set; }
     public string WebhookUrl { get; set; } = string.Empty;
     public string WebhookBody { get; set; } = "{\"time\":\"__TIME__\",\"content\":\"__CONTENT__\"}";
