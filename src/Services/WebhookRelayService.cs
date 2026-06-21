@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +12,9 @@ namespace Game_Daily_Routine_Launcher;
 
 public sealed class WebhookRelayService : IDisposable
 {
+    private const string WeComWebhookHost = "https://qyapi.weixin.qq.com";
+    private const string WeComWebhookPath = "/cgi-bin/webhook/send";
+
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
     private readonly SemaphoreSlim _gate = new(1, 1);
     private IHost? _host;
@@ -103,45 +107,27 @@ public sealed class WebhookRelayService : IDisposable
                 return;
             }
 
+            var compatibleRequest = IsWeComCompatibleRequest(context.Request);
             string url;
-            JsonElement body;
+            string forwardedBody;
+            string? parseLog = null;
 
-            try
+            if (compatibleRequest)
             {
-                using var document = await JsonDocument.ParseAsync(context.Request.Body);
-                var root = document.RootElement;
-
-                if (!root.TryGetProperty("url", out var urlElement) || urlElement.ValueKind != JsonValueKind.String)
-                {
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsync("Missing url.");
-                    return;
-                }
-
-                if (!root.TryGetProperty("body", out var bodyElement))
-                {
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsync("Missing body.");
-                    return;
-                }
-
-                url = urlElement.GetString() ?? string.Empty;
-                body = bodyElement.Clone();
+                url = BuildWeComForwardUrl(context.Request);
+                using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
+                forwardedBody = await reader.ReadToEndAsync();
+                parseLog = "Webhook 中转使用企业微信兼容模式，已原样转发请求 Body。";
             }
-            catch (Exception ex)
+            else
             {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync($"Invalid request: {ex.Message}");
-                return;
-            }
+                var wrappedRequest = await ReadWrappedRequestAsync(context, logAsync);
+                if (!wrappedRequest.Success)
+                    return;
 
-            if (!TryResolveForwardedBody(body, out var forwardedBody, out var parseLog, out var parseError))
-            {
-                var errorMessage = $"Webhook 中转转发失败：body 字符串不是有效 JSON，原因：{parseError}";
-                await logAsync(errorMessage, body.GetRawText());
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync("Invalid body JSON.");
-                return;
+                url = wrappedRequest.Url;
+                forwardedBody = wrappedRequest.Body;
+                parseLog = wrappedRequest.ParseLog;
             }
 
             await logAsync($"Webhook 中转接收：url={url}", forwardedBody);
@@ -169,6 +155,68 @@ public sealed class WebhookRelayService : IDisposable
                 await context.Response.WriteAsync(ex.Message);
             }
         }
+    }
+
+    private static bool IsWeComCompatibleRequest(HttpRequest request)
+        => request.Path.Equals(WeComWebhookPath, StringComparison.OrdinalIgnoreCase) &&
+           request.Query.ContainsKey("key");
+
+    private static string BuildWeComForwardUrl(HttpRequest request)
+        => $"{WeComWebhookHost}{request.Path}{request.QueryString}";
+
+    private static async Task<RelayRequestReadResult> ReadWrappedRequestAsync(
+        HttpContext context,
+        Func<string, string?, Task> logAsync)
+    {
+        string url;
+        JsonElement body;
+
+        try
+        {
+            using var document = await JsonDocument.ParseAsync(context.Request.Body);
+            var root = document.RootElement;
+
+            if (!root.TryGetProperty("url", out var urlElement) || urlElement.ValueKind != JsonValueKind.String)
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Missing url.");
+                return RelayRequestReadResult.Failed();
+            }
+
+            if (!root.TryGetProperty("body", out var bodyElement))
+            {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Missing body.");
+                return RelayRequestReadResult.Failed();
+            }
+
+            url = urlElement.GetString() ?? string.Empty;
+            body = bodyElement.Clone();
+        }
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync($"Invalid request: {ex.Message}");
+            return RelayRequestReadResult.Failed();
+        }
+
+        if (TryResolveForwardedBody(body, out var forwardedBody, out var parseLog, out var parseError))
+            return RelayRequestReadResult.Succeeded(url, forwardedBody, parseLog);
+
+        var errorMessage = $"Webhook 中转转发失败：body 字符串不是有效 JSON，原因：{parseError}";
+        await logAsync(errorMessage, body.GetRawText());
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        await context.Response.WriteAsync("Invalid body JSON.");
+        return RelayRequestReadResult.Failed();
+    }
+
+    private sealed record RelayRequestReadResult(bool Success, string Url, string Body, string? ParseLog)
+    {
+        public static RelayRequestReadResult Succeeded(string url, string body, string? parseLog)
+            => new(true, url, body, parseLog);
+
+        public static RelayRequestReadResult Failed()
+            => new(false, string.Empty, string.Empty, null);
     }
 
     private static bool TryResolveForwardedBody(

@@ -120,8 +120,18 @@ public sealed class WebhookRelayHelpViewModel : INotifyPropertyChanged
 
     private void RefreshPreview()
     {
-        ForwardUrl = $"http://127.0.0.1:{_port}/";
+        ForwardUrl = BuildForwardUrl(SourceUrl, _port);
         ForwardBody = BuildRelayBodyPreview(SourceUrl, SourceBody);
+    }
+
+    private static string BuildForwardUrl(string sourceUrl, int port)
+    {
+        if (Uri.TryCreate(sourceUrl, UriKind.Absolute, out var uri) &&
+            uri.Host.Equals("qyapi.weixin.qq.com", StringComparison.OrdinalIgnoreCase) &&
+            uri.AbsolutePath.Equals("/cgi-bin/webhook/send", StringComparison.OrdinalIgnoreCase))
+            return $"http://127.0.0.1:{port}{uri.PathAndQuery}";
+
+        return $"http://127.0.0.1:{port}/";
     }
 
     private static string BuildRelayBodyPreview(string url, string body)
