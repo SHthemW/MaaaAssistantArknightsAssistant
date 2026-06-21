@@ -41,13 +41,15 @@ public partial class MainWindow : Window
         var monitorTop = info.rcWork.Top * scaleY;
 
         var maxWidth = monitorWidth * 0.85;
-        var maxHeight = monitorHeight * 0.85;
+        var maxHeight = monitorHeight * 0.80;
 
         if (Width > maxWidth) Width = maxWidth;
         if (Height > maxHeight) Height = maxHeight;
 
         Left = monitorLeft + (monitorWidth - Width) / 2;
         Top = monitorTop + (monitorHeight - Height) / 2;
+
+        SizeToContent = SizeToContent.Manual;
     }
 
     [DllImport("user32.dll")]
