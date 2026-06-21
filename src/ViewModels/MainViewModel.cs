@@ -11,8 +11,7 @@ public partial class MainViewModel : ObservableObject
     private static readonly HashSet<string> NonConfigProperties =
     [
         nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
-        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage),
-        nameof(WebhookEnabledExpanded), nameof(WebhookRelayExpanded), nameof(WebhookCustomPushContentExpanded), nameof(AiSummaryExpanded)
+        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage)
     ];
 
     private readonly ConfigService _configService;
@@ -145,6 +144,10 @@ public partial class MainViewModel : ObservableObject
         WebhookRelayPort = _appConfig.WebhookRelayPort;
         WebhookOnlyPushAiSummary = _appConfig.WebhookOnlyPushAiSummary;
         WebhookCustomPushContentEnabled = _appConfig.WebhookCustomPushContentEnabled;
+        WebhookEnabledExpanded = _appConfig.WebhookEnabledExpanded;
+        WebhookRelayExpanded = _appConfig.WebhookRelayExpanded;
+        WebhookCustomPushContentExpanded = _appConfig.WebhookCustomPushContentExpanded;
+        AiSummaryExpanded = _appConfig.AiSummaryExpanded;
         SelectedAiSummaryProvider = _appConfig.AiSummary.Provider == AiSummaryProviderType.Off
             ? AiSummaryProviderType.ZhipuAi
             : _appConfig.AiSummary.Provider;
@@ -344,6 +347,10 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookRelayPort = WebhookRelayPort;
         _appConfig.WebhookOnlyPushAiSummary = WebhookOnlyPushAiSummary;
         _appConfig.WebhookCustomPushContentEnabled = WebhookCustomPushContentEnabled;
+        _appConfig.WebhookEnabledExpanded = WebhookEnabledExpanded;
+        _appConfig.WebhookRelayExpanded = WebhookRelayExpanded;
+        _appConfig.WebhookCustomPushContentExpanded = WebhookCustomPushContentExpanded;
+        _appConfig.AiSummaryExpanded = AiSummaryExpanded;
         _appConfig.WebhookPushCategories = WebhookPushContentOptions
             .Where(x => x.IsEnabled)
             .Select(x => x.Category)

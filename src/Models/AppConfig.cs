@@ -25,6 +25,10 @@ public class AppConfig
     public bool WebhookCustomPushContentEnabled { get; set; }
     public List<WebhookPushContentCategory> WebhookPushCategories { get; set; } = [];
     public bool AiSummaryOnlyOnAutoRun { get; set; }
+    public bool WebhookEnabledExpanded { get; set; } = true;
+    public bool WebhookRelayExpanded { get; set; } = true;
+    public bool WebhookCustomPushContentExpanded { get; set; } = true;
+    public bool AiSummaryExpanded { get; set; } = true;
 
     public bool IsInScheduledTimeRange(TimeOnly now)
     {
