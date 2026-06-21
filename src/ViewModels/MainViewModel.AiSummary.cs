@@ -69,7 +69,7 @@ public partial class MainViewModel
     {
         return new AiSummaryConfig
         {
-            Provider = SelectedAiSummaryProvider,
+            Provider = AiSummaryEnabled ? SelectedAiSummaryProvider : AiSummaryProviderType.Off,
             ZhipuAi = new ZhipuAiSummaryConfig
             {
                 ApiKey = ZhipuApiKey,

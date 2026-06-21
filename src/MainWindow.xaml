@@ -64,7 +64,6 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-
                                         <Ellipse Grid.Column="0" Width="10" Height="10" Margin="0,0,8,0"
                                                  Fill="{Binding State, Converter={StaticResource TaskStateToColor}}" />
                                         <CheckBox Grid.Column="1" IsChecked="{Binding Enabled}" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -81,7 +80,6 @@
                                         <Button Grid.Column="5" Content="配置" Style="{StaticResource SmallButton}"
                                                 Command="{Binding ToggleConfigCommand}" />
                                     </Grid>
-
                                     <Border Margin="0,8,0,0" Padding="8" Background="#F5F5F5" CornerRadius="4"
                                             Visibility="{Binding IsConfigExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid>
@@ -97,28 +95,17 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-
                                             <TextBlock Grid.Row="0" Grid.Column="0" Text="工具路径:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ToolPath, UpdateSourceTrigger=PropertyChanged}"
-                                                     VerticalContentAlignment="Center" Margin="0,0,4,4" />
-                                            <Button Grid.Row="0" Grid.Column="2" Content="..." Style="{StaticResource SmallButton}"
-                                                    Command="{Binding BrowseToolPathCommand}" Width="30" Margin="0,0,0,4" />
-
+                                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ToolPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,4,4" />
+                                            <Button Grid.Row="0" Grid.Column="2" Content="..." Style="{StaticResource SmallButton}" Command="{Binding BrowseToolPathCommand}" Width="30" Margin="0,0,0,4" />
                                             <TextBlock Grid.Row="1" Grid.Column="0" Text="启动参数:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                            <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ToolArgs, UpdateSourceTrigger=PropertyChanged}"
-                                                     VerticalContentAlignment="Center" Margin="0,0,0,4" />
-
+                                            <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding ToolArgs, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="监控进程:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                            <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding GameProcessName, UpdateSourceTrigger=PropertyChanged}"
-                                                     VerticalContentAlignment="Center" Margin="0,0,0,4" />
-
+                                            <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding GameProcessName, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
                                             <TextBlock Grid.Row="3" Grid.Column="0" Text="延迟(毫秒):" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                            <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DelayBeforeStartMs, UpdateSourceTrigger=PropertyChanged}"
-                                                     VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
-
+                                            <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding DelayBeforeStartMs, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
                                             <TextBlock Grid.Row="4" Grid.Column="0" Text="超时(分钟):" VerticalAlignment="Center" />
-                                            <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding TimeoutMinutes, UpdateSourceTrigger=PropertyChanged}"
-                                                     VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" />
+                                            <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding TimeoutMinutes, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" />
                                         </Grid>
                                     </Border>
                                 </StackPanel>
@@ -187,15 +174,32 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="内容:" VerticalAlignment="Top" Margin="0,4,0,0" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
                 </Grid>
-                <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}"
-                        HorizontalAlignment="Left" Margin="70,8,0,0"
+                <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" Margin="70,8,0,0"
                         Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <StackPanel Margin="0,12,0,0">
-                    <Grid>
+                    <CheckBox Content="启用 webhook 中转" IsChecked="{Binding WebhookRelayEnabled}" Margin="0,0,0,8" />
+                    <Grid Visibility="{Binding WebhookRelayEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="端口:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookRelayPort, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,8,4" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WebhookRelayStatusMessage}" VerticalAlignment="Center" Foreground="#757575" />
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Margin="0,12,0,0">
+                    <CheckBox Content="AI智能总结" IsChecked="{Binding AiSummaryEnabled}" Margin="0,0,0,8" />
+                    <Grid Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
@@ -203,18 +207,15 @@
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="AI智能总结:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <ComboBox Grid.Row="0" Grid.Column="1"
-                                  Width="180"
-                                  HorizontalAlignment="Left"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <ComboBox Grid.Row="0" Grid.Column="1" Width="180" HorizontalAlignment="Left"
                                   ItemsSource="{Binding AiSummaryProviderOptions}"
                                   SelectedValuePath="Value"
                                   DisplayMemberPath="DisplayName"
                                   SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
 
-                    <Grid Margin="70,8,0,0"
-                          Visibility="{Binding SelectedAiSummaryProvider, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=ZhipuAi}">
+                    <Grid Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -243,25 +244,6 @@
                         <CheckBox Grid.Row="5" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
                         <Button Grid.Row="6" Grid.Column="1" Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" HorizontalAlignment="Left" Margin="0,4,0,0" />
                     </Grid>
-
-                    <StackPanel Margin="70,12,0,0">
-                        <CheckBox Content="启用 webhook 中转" IsChecked="{Binding WebhookRelayEnabled}" Margin="0,0,0,8" />
-                        <Grid Visibility="{Binding WebhookRelayEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="端口:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookRelayPort, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,8,4" />
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WebhookRelayStatusMessage}" VerticalAlignment="Center" Foreground="#757575" />
-                        </Grid>
-                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </GroupBox>
@@ -278,8 +260,7 @@
                 <TextBox Text="{Binding ScheduledEndMinute, StringFormat={}{0:D2}}" Width="35" Margin="0,0,16,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                 <TextBlock Text="分" VerticalAlignment="Center" Margin="0,0,16,0" />
                 <CheckBox Content="随机时间启动" IsChecked="{Binding RandomStartEnabled}" VerticalAlignment="Center" Margin="0,0,16,0" />
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0"
-                            Visibility="{Binding IsSchedulePolling, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" Visibility="{Binding IsSchedulePolling, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Ellipse Width="8" Height="8" Fill="#FF9800" Margin="0,0,6,0" />
                     <TextBlock Text="轮询中" FontSize="12" Foreground="#757575" VerticalAlignment="Center" />
                 </StackPanel>

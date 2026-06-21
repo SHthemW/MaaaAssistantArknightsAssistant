@@ -40,7 +40,6 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<LogEntryRecord> LogEntries { get; } = [];
     public IReadOnlyList<AiSummaryProviderOption> AiSummaryProviderOptions { get; } =
     [
-        new(AiSummaryProviderType.Off, "关闭"),
         new(AiSummaryProviderType.ZhipuAi, "智谱AI")
     ];
 
@@ -73,6 +72,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _twinkleTrayIsAvailable;
     [ObservableProperty] private string _twinkleTrayAvailabilityMessage = string.Empty;
     [ObservableProperty] private bool _shutdownOnlyOnAutoRun;
+    [ObservableProperty] private bool _aiSummaryEnabled;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -125,12 +125,15 @@ public partial class MainViewModel : ObservableObject
         TwinkleTrayOnStart = _appConfig.TwinkleTrayOnStart;
         TwinkleTrayOnlyOnAutoRun = _appConfig.TwinkleTrayOnlyOnAutoRun;
         ShutdownOnlyOnAutoRun = _appConfig.ShutdownOnlyOnAutoRun;
+        AiSummaryEnabled = _appConfig.AiSummary.Provider != AiSummaryProviderType.Off;
         WebhookEnabled = _appConfig.WebhookEnabled;
         WebhookUrl = _appConfig.WebhookUrl;
         WebhookBody = _appConfig.WebhookBody;
         WebhookRelayEnabled = _appConfig.WebhookRelayEnabled;
         WebhookRelayPort = _appConfig.WebhookRelayPort;
-        SelectedAiSummaryProvider = _appConfig.AiSummary.Provider;
+        SelectedAiSummaryProvider = _appConfig.AiSummary.Provider == AiSummaryProviderType.Off
+            ? AiSummaryProviderType.ZhipuAi
+            : _appConfig.AiSummary.Provider;
         ZhipuApiKey = _appConfig.AiSummary.ZhipuAi.ApiKey;
         ZhipuApiUrl = _appConfig.AiSummary.ZhipuAi.ApiUrl;
         ZhipuModel = _appConfig.AiSummary.ZhipuAi.Model;
@@ -472,6 +475,17 @@ public partial class MainViewModel : ObservableObject
             return;
 
         RefreshWebhookRelayState();
+    }
+
+    partial void OnAiSummaryEnabledChanged(bool value)
+    {
+        if (_isLoading)
+            return;
+
+        if (value && SelectedAiSummaryProvider == AiSummaryProviderType.Off)
+            SelectedAiSummaryProvider = AiSummaryProviderType.ZhipuAi;
+        else if (!value)
+            SelectedAiSummaryProvider = AiSummaryProviderType.ZhipuAi;
     }
 }
 
