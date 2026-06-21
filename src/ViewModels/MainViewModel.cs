@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject
     private readonly ConfigService _configService;
     private readonly AudioService _audioService;
     private readonly AiSummaryService _aiSummaryService;
+    private readonly AiPromptLogService _aiPromptLogService;
     private readonly TwinkleTrayService _twinkleTrayService;
     private readonly WebhookRelayService _webhookRelayService;
     private readonly DispatcherTimer _scheduleTimer;
@@ -95,6 +96,7 @@ public partial class MainViewModel : ObservableObject
         _configService = new ConfigService();
         _audioService = new AudioService();
         _aiSummaryService = new AiSummaryService();
+        _aiPromptLogService = new AiPromptLogService();
         _twinkleTrayService = new TwinkleTrayService();
         _webhookRelayService = new WebhookRelayService();
         _appConfig = _configService.Load();

@@ -50,6 +50,7 @@ public partial class MainViewModel
 
         try
         {
+            await _aiPromptLogService.WriteAsync(prompt);
             var summary = await _aiSummaryService.GenerateAsync(config, prompt);
             if (string.IsNullOrWhiteSpace(summary))
             {
