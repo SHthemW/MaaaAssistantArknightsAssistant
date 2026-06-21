@@ -62,6 +62,14 @@ public partial class MainWindow : Window
         helpWindow.ShowDialog();
     }
 
+    private async void OnLogListBoxMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (LogListBox.SelectedItem is not LogEntryRecord entry)
+            return;
+
+        await ClipboardService.TrySetTextAsync(entry.DisplayText);
+    }
+
     [DllImport("user32.dll")]
     private static extern nint MonitorFromWindow(nint hwnd, uint dwFlags);
 

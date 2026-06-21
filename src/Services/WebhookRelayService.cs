@@ -135,11 +135,21 @@ public sealed class WebhookRelayService : IDisposable
                 return;
             }
 
-            var forwardedBody = body.GetRawText();
+            if (!TryResolveForwardedBody(body, out var forwardedBody, out var parseLog, out var parseError))
+            {
+                var errorMessage = $"Webhook 中转转发失败：body 字符串不是有效 JSON，原因：{parseError}";
+                await logAsync(errorMessage, body.GetRawText());
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await context.Response.WriteAsync("Invalid body JSON.");
+                return;
+            }
+
             await logAsync($"Webhook 中转接收：url={url}", forwardedBody);
+            if (!string.IsNullOrWhiteSpace(parseLog))
+                await logAsync(parseLog, forwardedBody);
 
             var result = await ForwardAsync(url, forwardedBody);
-            await logAsync(result.Message, result.ForwardedBody);
+            await logAsync(result.Message, BuildForwardLogBody(result));
 
             if (!result.Success)
             {
@@ -161,6 +171,37 @@ public sealed class WebhookRelayService : IDisposable
         }
     }
 
+    private static bool TryResolveForwardedBody(
+        JsonElement body,
+        out string forwardedBody,
+        out string? parseLog,
+        out string? parseError)
+    {
+        parseLog = null;
+        parseError = null;
+
+        if (body.ValueKind != JsonValueKind.String)
+        {
+            forwardedBody = body.GetRawText();
+            return true;
+        }
+
+        var bodyText = body.GetString() ?? string.Empty;
+        try
+        {
+            using var document = JsonDocument.Parse(bodyText);
+            forwardedBody = document.RootElement.GetRawText();
+            parseLog = "Webhook 中转已将字符串 Body 解析为 JSON，并使用解析后的 JSON 转发。";
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            forwardedBody = string.Empty;
+            parseError = ex.Message;
+            return false;
+        }
+    }
+
     private async Task<WebhookRelayResult> ForwardAsync(string url, string bodyText)
     {
         try
@@ -176,13 +217,30 @@ public sealed class WebhookRelayService : IDisposable
                 response.IsSuccessStatusCode
                     ? $"Webhook 中转转发成功：url={url}，状态 {response.StatusCode}。"
                     : $"Webhook 中转转发失败：url={url}，状态 {response.StatusCode}。",
+                url,
                 bodyText);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Webhook relay forward failed: {ex.Message}");
-            return new WebhookRelayResult(false, $"Webhook 中转转发失败：url={url}，原因：{ex.Message}", bodyText);
+            return new WebhookRelayResult(false, $"Webhook 中转转发失败：url={url}，原因：{ex.Message}", url, bodyText);
         }
+    }
+
+    private static string BuildForwardLogBody(WebhookRelayResult result)
+    {
+        var builder = new StringBuilder();
+
+        if (!string.IsNullOrWhiteSpace(result.ForwardedUrl))
+            builder.AppendLine($"实际转发URL：{result.ForwardedUrl}");
+
+        if (!string.IsNullOrWhiteSpace(result.ForwardedBody))
+        {
+            builder.AppendLine("实际转发Body：");
+            builder.AppendLine(result.ForwardedBody);
+        }
+
+        return builder.ToString().TrimEnd();
     }
 
     public void Dispose()

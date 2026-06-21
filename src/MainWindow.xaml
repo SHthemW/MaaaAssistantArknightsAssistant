@@ -139,7 +139,7 @@
         <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" Background="Transparent" />
 
         <GroupBox Grid.Row="3" Header="运行日志" Padding="8" Margin="0,4,0,0">
-            <ListBox ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="22" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White">
+            <ListBox ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="22" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" />
