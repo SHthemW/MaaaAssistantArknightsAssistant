@@ -33,6 +33,7 @@ public partial class MainViewModel : ObservableObject
     private DateTime? _randomAutoStartTime;
     private int _startupMuteSuccessStreak;
     private int _startupTwinkleTraySuccessStreak;
+    private bool _twinkleTrayStartupInProgress;
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<LogEntryRecord> LogEntries { get; } = [];
@@ -207,12 +208,12 @@ public partial class MainViewModel : ObservableObject
         _startupTwinkleTraySuccessStreak = 0;
 
         _startupTwinkleTrayTimer.Start();
-        EnforceStartupTwinkleTrayOnce();
+        _ = EnforceStartupTwinkleTrayAsync();
     }
 
     private void OnStartupMuteTimerTick(object? sender, EventArgs e) => EnforceStartupMuteOnce();
 
-    private void OnStartupTwinkleTrayTimerTick(object? sender, EventArgs e) => EnforceStartupTwinkleTrayOnce();
+    private void OnStartupTwinkleTrayTimerTick(object? sender, EventArgs e) => _ = EnforceStartupTwinkleTrayAsync();
 
     private void EnforceStartupMuteOnce()
     {
@@ -239,33 +240,41 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void EnforceStartupTwinkleTrayOnce()
+    private async Task EnforceStartupTwinkleTrayAsync()
     {
-        if (!TwinkleTrayIsAvailable)
+        if (!TwinkleTrayIsAvailable || _twinkleTrayStartupInProgress)
             return;
 
-        var result = _twinkleTrayService.DetectAvailability();
-        if (!result.IsAvailable)
+        _twinkleTrayStartupInProgress = true;
+        try
         {
-            TwinkleTrayIsAvailable = false;
-            TwinkleTrayAvailabilityMessage = result.Message;
-            _startupTwinkleTrayTimer.Stop();
-            return;
-        }
-
-        if (_originalTwinkleTrayStates.Count == 0)
-            _originalTwinkleTrayStates = _twinkleTrayService.CaptureCurrentStates();
-
-        var dimResult = _twinkleTrayService.SetAllLowestAsync(result).GetAwaiter().GetResult();
-        if (dimResult.Success)
-        {
-            if (++_startupTwinkleTraySuccessStreak >= 3)
+            var result = await Task.Run(() => _twinkleTrayService.DetectAvailability());
+            if (!result.IsAvailable)
+            {
+                TwinkleTrayIsAvailable = false;
+                TwinkleTrayAvailabilityMessage = result.Message;
                 _startupTwinkleTrayTimer.Stop();
+                return;
+            }
+
+            if (_originalTwinkleTrayStates.Count == 0)
+                _originalTwinkleTrayStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
+
+            var dimResult = await _twinkleTrayService.SetAllLowestAsync(result);
+            if (dimResult.Success)
+            {
+                if (++_startupTwinkleTraySuccessStreak >= 3)
+                    _startupTwinkleTrayTimer.Stop();
+            }
+            else
+            {
+                _startupTwinkleTraySuccessStreak = 0;
+                TwinkleTrayAvailabilityMessage = dimResult.Message;
+            }
         }
-        else
+        finally
         {
-            _startupTwinkleTraySuccessStreak = 0;
-            TwinkleTrayAvailabilityMessage = dimResult.Message;
+            _twinkleTrayStartupInProgress = false;
         }
     }
 
