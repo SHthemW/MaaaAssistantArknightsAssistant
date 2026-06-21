@@ -115,6 +115,26 @@ public partial class MainViewModel
     [RelayCommand]
     private void TestWebhook()
     {
-        AddLog("这是一条来自 MAAA 的测试消息。");
+        _ = Task.Run(TestWebhookAsync);
+    }
+
+    private async Task TestWebhookAsync()
+    {
+        if (!WebhookEnabled || string.IsNullOrWhiteSpace(WebhookUrl))
+        {
+            AddLog("Webhook 未启用或 URL 为空。");
+            return;
+        }
+
+        var testContent = "这是一条来自 MAAA 的测试消息。";
+        var time = DateTime.Now.ToString("HH:mm:ss");
+        var requestBody = WebhookBody
+            .Replace("__TIME__", time)
+            .Replace("__CONTENT__", testContent);
+
+        AddLog($"测试内容已发送: {testContent}");
+        AddLog($"Webhook 测试请求体:\n{requestBody}");
+        await WebhookService.SendAsync(WebhookUrl, WebhookBody, time, testContent);
+        AddLog("Webhook 测试请求已发送。");
     }
 }

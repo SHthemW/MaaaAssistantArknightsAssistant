@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using System.Text;
 
 namespace Game_Daily_Routine_Launcher;
 
@@ -15,18 +16,18 @@ public partial class MainViewModel
         var config = BuildAiSummaryConfig();
         if (!_aiSummaryService.CanGenerate(config))
         {
-            AddLog("AI智能总结未启用或当前平台不受支持。");
+            AddLog("AI 智能总结未启用或当前平台不受支持。");
             return;
         }
 
         try
         {
-            var prompt = "请用一句话确认当前 AI 总结接口配置是否可用。";
+            var prompt = "请用一句话确认当前 AI 总结接口是否可用。";
             var requestBody = _aiSummaryService.BuildRequestBodyJson(config, prompt);
-            AddLog($"测试内容已发送：{prompt}");
+            AddLog($"测试内容已发送: {prompt}");
+            AddLog($"AI 测试请求体:\n{requestBody}");
 
             var summary = await _aiSummaryService.GenerateAsync(config, prompt, CancellationToken.None);
-            AddLog($"AI 测试请求发送成功，完整请求体如下：\n{requestBody}");
             AddLog(string.IsNullOrWhiteSpace(summary)
                 ? "AI 测试完成，但未返回内容。"
                 : $"AI 测试结果：{summary.Trim()}");
@@ -84,10 +85,10 @@ public partial class MainViewModel
     private string BuildSummaryPrompt()
     {
         var today = DateTime.Today;
-        var builder = new System.Text.StringBuilder();
+        var builder = new StringBuilder();
 
         builder.AppendLine("你需要根据下面的运行日志，简单总结每条任务完成情况。");
-        builder.AppendLine("请用简洁中文输出，逐条列出任务结论。");
+        builder.AppendLine("请使用简洁中文输出，逐条列出任务结论。");
         builder.AppendLine();
         builder.AppendLine("任务最终状态：");
         foreach (var task in Tasks)
@@ -96,7 +97,11 @@ public partial class MainViewModel
         builder.AppendLine();
         builder.AppendLine("今日运行日志：");
         foreach (var entry in LogEntries.Where(x => x.Timestamp.Date == today))
+        {
             builder.AppendLine(entry.DisplayText);
+            if (!string.IsNullOrWhiteSpace(entry.RawBody))
+                builder.AppendLine($"原始Body：{entry.RawBody}");
+        }
 
         return builder.ToString();
     }

@@ -11,13 +11,14 @@ public partial class MainViewModel : ObservableObject
     private static readonly HashSet<string> NonConfigProperties =
     [
         nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
-        nameof(AutoRunOnStart), nameof(IsSchedulePolling)
+        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage)
     ];
 
     private readonly ConfigService _configService;
     private readonly AudioService _audioService;
     private readonly AiSummaryService _aiSummaryService;
     private readonly TwinkleTrayService _twinkleTrayService;
+    private readonly WebhookRelayService _webhookRelayService;
     private readonly DispatcherTimer _scheduleTimer;
     private readonly DispatcherTimer _startupMuteTimer;
     private readonly DispatcherTimer _startupTwinkleTrayTimer;
@@ -63,6 +64,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _webhookEnabled;
     [ObservableProperty] private string _webhookUrl = string.Empty;
     [ObservableProperty] private string _webhookBody = string.Empty;
+    [ObservableProperty] private bool _webhookRelayEnabled;
+    [ObservableProperty] private int _webhookRelayPort = 5058;
+    [ObservableProperty] private bool _webhookRelayIsRunning;
+    [ObservableProperty] private string _webhookRelayStatusMessage = string.Empty;
     [ObservableProperty] private bool _twinkleTrayOnStart;
     [ObservableProperty] private bool _twinkleTrayOnlyOnAutoRun;
     [ObservableProperty] private bool _twinkleTrayIsAvailable;
@@ -82,6 +87,7 @@ public partial class MainViewModel : ObservableObject
         _audioService = new AudioService();
         _aiSummaryService = new AiSummaryService();
         _twinkleTrayService = new TwinkleTrayService();
+        _webhookRelayService = new WebhookRelayService();
         _appConfig = _configService.Load();
 
         _scheduleTimer = new DispatcherTimer();
@@ -122,6 +128,8 @@ public partial class MainViewModel : ObservableObject
         WebhookEnabled = _appConfig.WebhookEnabled;
         WebhookUrl = _appConfig.WebhookUrl;
         WebhookBody = _appConfig.WebhookBody;
+        WebhookRelayEnabled = _appConfig.WebhookRelayEnabled;
+        WebhookRelayPort = _appConfig.WebhookRelayPort;
         SelectedAiSummaryProvider = _appConfig.AiSummary.Provider;
         ZhipuApiKey = _appConfig.AiSummary.ZhipuAi.ApiKey;
         ZhipuApiUrl = _appConfig.AiSummary.ZhipuAi.ApiUrl;
@@ -146,6 +154,8 @@ public partial class MainViewModel : ObservableObject
 
         if (TwinkleTrayOnStart && (!TwinkleTrayOnlyOnAutoRun || App.IsAutoRun) && TwinkleTrayIsAvailable)
             StartStartupTwinkleTrayEnforcement();
+
+        RefreshWebhookRelayState();
 
         _scheduleTimer.Interval = TimeSpan.FromSeconds(Math.Max(PollIntervalSeconds, 1));
         _scheduleTimer.Start();
@@ -312,6 +322,8 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookEnabled = WebhookEnabled;
         _appConfig.WebhookUrl = WebhookUrl;
         _appConfig.WebhookBody = WebhookBody;
+        _appConfig.WebhookRelayEnabled = WebhookRelayEnabled;
+        _appConfig.WebhookRelayPort = WebhookRelayPort;
         _appConfig.AiSummary = BuildAiSummaryConfig();
         _configService.Save(_appConfig);
     }
@@ -341,6 +353,7 @@ public partial class MainViewModel : ObservableObject
         _startupMuteTimer.Stop();
         _startupTwinkleTrayTimer.Stop();
         IsSchedulePolling = false;
+        _ = _webhookRelayService.StopAsync();
 
         if (_didAutoMute && _audioService.IsMuted)
         {
@@ -356,9 +369,9 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void AddLog(string message)
+    private void AddLog(string message, string? rawBody = null)
     {
-        var entry = new LogEntryRecord(DateTime.Now, message);
+        var entry = new LogEntryRecord(DateTime.Now, message) { RawBody = rawBody };
         ExecuteOnUiThread(() => AppendLog(entry));
     }
 
@@ -367,9 +380,19 @@ public partial class MainViewModel : ObservableObject
         LogEntries.Add(entry);
         Debug.WriteLine(entry.DisplayText);
         Console.WriteLine(entry.DisplayText);
+        if (!string.IsNullOrWhiteSpace(entry.RawBody))
+            Console.WriteLine(entry.RawBody);
 
         if (WebhookEnabled && !string.IsNullOrWhiteSpace(WebhookUrl))
-            _ = WebhookService.SendAsync(WebhookUrl, WebhookBody, entry.Timestamp.ToString("HH:mm:ss"), entry.Message);
+            _ = Task.Run(async () =>
+            {
+                var content = string.IsNullOrWhiteSpace(entry.RawBody)
+                    ? entry.Message
+                    : $"{entry.Message}\n原始Body：\n{entry.RawBody}";
+                var result = await WebhookService.SendAsync(WebhookUrl, WebhookBody, entry.Timestamp.ToString("HH:mm:ss"), content);
+                if (result.Success)
+                    Debug.WriteLine($"Webhook sent: {result.RequestBody}");
+            });
     }
 
     private bool CanStartAll() => !IsRunning;
@@ -413,6 +436,42 @@ public partial class MainViewModel : ObservableObject
             if (!_isLoading)
                 AddLog($"Twinkle Tray 不可用：{availability.Message}");
         }
+    }
+
+    private async void RefreshWebhookRelayState()
+    {
+        if (!WebhookRelayEnabled)
+        {
+            WebhookRelayIsRunning = false;
+            WebhookRelayStatusMessage = "未启用。";
+            await _webhookRelayService.StopAsync();
+            return;
+        }
+
+        var result = await _webhookRelayService.StartAsync(WebhookRelayPort, (message, rawBody) =>
+        {
+            AddLog(message, rawBody);
+            return Task.CompletedTask;
+        });
+        WebhookRelayIsRunning = result.Success;
+        WebhookRelayStatusMessage = result.Message;
+        AddLog(result.Message);
+    }
+
+    partial void OnWebhookRelayEnabledChanged(bool value)
+    {
+        if (_isLoading)
+            return;
+
+        RefreshWebhookRelayState();
+    }
+
+    partial void OnWebhookRelayPortChanged(int value)
+    {
+        if (_isLoading || !WebhookRelayEnabled)
+            return;
+
+        RefreshWebhookRelayState();
     }
 }
 

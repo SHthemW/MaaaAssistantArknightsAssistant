@@ -19,6 +19,8 @@ public class AppConfig
     public bool WebhookEnabled { get; set; }
     public string WebhookUrl { get; set; } = string.Empty;
     public string WebhookBody { get; set; } = "{\"time\":\"__TIME__\",\"content\":\"__CONTENT__\"}";
+    public bool WebhookRelayEnabled { get; set; }
+    public int WebhookRelayPort { get; set; } = 5058;
 
     public bool IsInScheduledTimeRange(TimeOnly now)
     {
