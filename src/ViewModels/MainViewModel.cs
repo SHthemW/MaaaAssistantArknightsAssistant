@@ -11,7 +11,8 @@ public partial class MainViewModel : ObservableObject
     private static readonly HashSet<string> NonConfigProperties =
     [
         nameof(IsRunning), nameof(IsMuted), nameof(TwinkleTrayIsAvailable), nameof(TwinkleTrayAvailabilityMessage),
-        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage)
+        nameof(AutoRunOnStart), nameof(IsSchedulePolling), nameof(WebhookRelayIsRunning), nameof(WebhookRelayStatusMessage),
+        nameof(WebhookEnabledExpanded), nameof(WebhookRelayExpanded), nameof(AiSummaryExpanded)
     ];
 
     private readonly ConfigService _configService;
@@ -65,8 +66,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _webhookBody = string.Empty;
     [ObservableProperty] private bool _webhookRelayEnabled;
     [ObservableProperty] private int _webhookRelayPort = 5058;
+    [ObservableProperty] private bool _webhookOnlyPushAiSummary;
     [ObservableProperty] private bool _webhookRelayIsRunning;
     [ObservableProperty] private string _webhookRelayStatusMessage = string.Empty;
+    [ObservableProperty] private bool _webhookEnabledExpanded = true;
+    [ObservableProperty] private bool _webhookRelayExpanded = true;
     [ObservableProperty] private bool _twinkleTrayOnStart;
     [ObservableProperty] private bool _twinkleTrayOnlyOnAutoRun;
     [ObservableProperty] private bool _twinkleTrayIsAvailable;
@@ -74,6 +78,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _shutdownOnlyOnAutoRun;
     [ObservableProperty] private bool _aiSummaryEnabled;
     [ObservableProperty] private bool _aiSummaryOnlyOnAutoRun;
+    [ObservableProperty] private bool _aiSummaryExpanded = true;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -133,6 +138,7 @@ public partial class MainViewModel : ObservableObject
         WebhookBody = _appConfig.WebhookBody;
         WebhookRelayEnabled = _appConfig.WebhookRelayEnabled;
         WebhookRelayPort = _appConfig.WebhookRelayPort;
+        WebhookOnlyPushAiSummary = _appConfig.WebhookOnlyPushAiSummary;
         SelectedAiSummaryProvider = _appConfig.AiSummary.Provider == AiSummaryProviderType.Off
             ? AiSummaryProviderType.ZhipuAi
             : _appConfig.AiSummary.Provider;
@@ -329,6 +335,7 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookBody = WebhookBody;
         _appConfig.WebhookRelayEnabled = WebhookRelayEnabled;
         _appConfig.WebhookRelayPort = WebhookRelayPort;
+        _appConfig.WebhookOnlyPushAiSummary = WebhookOnlyPushAiSummary;
         _appConfig.AiSummaryOnlyOnAutoRun = AiSummaryOnlyOnAutoRun;
         _appConfig.AiSummary = BuildAiSummaryConfig();
         _configService.Save(_appConfig);
@@ -389,16 +396,29 @@ public partial class MainViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(entry.RawBody))
             Console.WriteLine(entry.RawBody);
 
-        if (WebhookEnabled && !string.IsNullOrWhiteSpace(WebhookUrl))
-            _ = Task.Run(async () =>
-            {
-                var content = string.IsNullOrWhiteSpace(entry.RawBody)
-                    ? entry.Message
-                    : $"{entry.Message}\n原始Body：\n{entry.RawBody}";
-                var result = await WebhookService.SendAsync(WebhookUrl, WebhookBody, entry.Timestamp.ToString("HH:mm:ss"), content);
-                if (result.Success)
-                    Debug.WriteLine($"Webhook sent: {result.RequestBody}");
-            });
+        if (ShouldPushLogEntry(entry))
+            _ = PushWebhookAsync(entry.Message, entry.RawBody, entry.Timestamp.ToString("HH:mm:ss"));
+    }
+
+    private bool ShouldPushLogEntry(LogEntryRecord entry)
+    {
+        if (!WebhookEnabled || string.IsNullOrWhiteSpace(WebhookUrl))
+            return false;
+
+        if (WebhookOnlyPushAiSummary)
+            return entry.Message.StartsWith("AI总结：", StringComparison.Ordinal);
+
+        return true;
+    }
+
+    private async Task PushWebhookAsync(string message, string? rawBody, string time)
+    {
+        var content = string.IsNullOrWhiteSpace(rawBody)
+            ? message
+            : $"{message}\n原始Body：\n{rawBody}";
+        var result = await WebhookService.SendAsync(WebhookUrl, WebhookBody, time, content);
+        if (result.Success)
+            Debug.WriteLine($"Webhook sent: {result.RequestBody}");
     }
 
     private bool CanStartAll() => !IsRunning;
@@ -461,7 +481,6 @@ public partial class MainViewModel : ObservableObject
         });
         WebhookRelayIsRunning = result.Success;
         WebhookRelayStatusMessage = result.Message;
-        AddLog(result.Message);
     }
 
     partial void OnWebhookRelayEnabledChanged(bool value)
@@ -478,6 +497,15 @@ public partial class MainViewModel : ObservableObject
             return;
 
         RefreshWebhookRelayState();
+    }
+
+    partial void OnWebhookOnlyPushAiSummaryChanged(bool value)
+    {
+        if (_isLoading)
+            return;
+
+        if (value && !AiSummaryEnabled)
+            AddLog("未开启 AI 总结服务。");
     }
 
     partial void OnAiSummaryEnabledChanged(bool value)

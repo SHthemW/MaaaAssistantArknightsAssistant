@@ -13,11 +13,44 @@
         Background="#FAFAFA"
         SizeToContent="Height"
         WindowStartupLocation="Manual">
-
     <Window.DataContext>
         <local:MainViewModel />
     </Window.DataContext>
-
+    <Window.Resources>
+        <Style x:Key="CollapseToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="#F5F5F5" />
+            <Setter Property="BorderBrush" Value="#D0D0D0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="#757575" />
+            <Setter Property="Content" Value="▸" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="9">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Content" Value="▾" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -33,18 +66,12 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Image Source="/res/icon.ico" Width="28" Height="28" Margin="0,0,8,0" />
-                <TextBlock Text="Maaa Assistant Arknights Assistant"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Foreground="#212121"
-                           VerticalAlignment="Center" />
+                <TextBlock Text="Maaa Assistant Arknights Assistant" FontSize="18" FontWeight="SemiBold" Foreground="#212121" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="启动全部" Style="{StaticResource ActionButton}" Command="{Binding StartAllCommand}" Margin="0,0,8,0" />
                 <Button Content="停止全部" Style="{StaticResource StopButton}" Command="{Binding StopAllCommand}" Margin="0,0,8,0" />
-                <Button Content="{Binding IsMuted, Converter={x:Static local:MuteTextConverter.Instance}}"
-                        Style="{StaticResource SmallButton}"
-                        Command="{Binding ToggleMuteCommand}" />
+                <Button Content="{Binding IsMuted, Converter={x:Static local:MuteTextConverter.Instance}}" Style="{StaticResource SmallButton}" Command="{Binding ToggleMuteCommand}" />
             </StackPanel>
         </DockPanel>
 
@@ -64,24 +91,17 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="10" Height="10" Margin="0,0,8,0"
-                                                 Fill="{Binding State, Converter={StaticResource TaskStateToColor}}" />
+                                        <Ellipse Grid.Column="0" Width="10" Height="10" Margin="0,0,8,0" Fill="{Binding State, Converter={StaticResource TaskStateToColor}}" />
                                         <CheckBox Grid.Column="1" IsChecked="{Binding Enabled}" VerticalAlignment="Center" Margin="0,0,8,0" />
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" FontSize="13" />
-                                            <TextBlock Text="{Binding ValidationMessage}" FontSize="11" Foreground="#EF5350"
-                                                       Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            <TextBlock Text="{Binding ValidationMessage}" FontSize="11" Foreground="#EF5350" Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                         </StackPanel>
-                                        <TextBlock Grid.Column="3" Text="{Binding StateText}" Foreground="{Binding State, Converter={StaticResource TaskStateToColor}}"
-                                                   FontSize="12" VerticalAlignment="Center" Margin="8,0" />
-                                        <Button Grid.Column="4" Content="启动" Style="{StaticResource SmallButton}"
-                                                Command="{Binding DataContext.StartSingleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}" Margin="0,0,4,0" />
-                                        <Button Grid.Column="5" Content="配置" Style="{StaticResource SmallButton}"
-                                                Command="{Binding ToggleConfigCommand}" />
+                                        <TextBlock Grid.Column="3" Text="{Binding StateText}" Foreground="{Binding State, Converter={StaticResource TaskStateToColor}}" FontSize="12" VerticalAlignment="Center" Margin="8,0" />
+                                        <Button Grid.Column="4" Content="启动" Style="{StaticResource SmallButton}" Command="{Binding DataContext.StartSingleCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Margin="0,0,4,0" />
+                                        <Button Grid.Column="5" Content="配置" Style="{StaticResource SmallButton}" Command="{Binding ToggleConfigCommand}" />
                                     </Grid>
-                                    <Border Margin="0,8,0,0" Padding="8" Background="#F5F5F5" CornerRadius="4"
-                                            Visibility="{Binding IsConfigExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border Margin="0,8,0,0" Padding="8" Background="#F5F5F5" CornerRadius="4" Visibility="{Binding IsConfigExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
@@ -140,18 +160,12 @@
                     <ColumnDefinition Width="Auto" SharedSizeGroup="AntiDisturbSecondary" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
                 <CheckBox Grid.Row="0" Grid.Column="0" Content="启动时静音" IsChecked="{Binding MuteOnStart}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <CheckBox Grid.Row="0" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding MuteOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,0,12,0"
-                          Visibility="{Binding MuteOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <CheckBox Grid.Row="0" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding MuteOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="{Binding MuteOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <TextBlock Grid.Row="0" Grid.Column="2" />
-
-                <CheckBox Grid.Row="1" Grid.Column="0" Content="启动时调低亮度" IsChecked="{Binding TwinkleTrayOnStart}" IsEnabled="{Binding TwinkleTrayIsAvailable}"
-                          VerticalAlignment="Center" Margin="0,4,12,0" />
-                <CheckBox Grid.Row="1" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding TwinkleTrayOnlyOnAutoRun}" IsEnabled="{Binding TwinkleTrayIsAvailable}"
-                          VerticalAlignment="Center" Margin="0,4,12,0" />
+                <CheckBox Grid.Row="1" Grid.Column="0" Content="启动时调低亮度" IsChecked="{Binding TwinkleTrayOnStart}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Margin="0,4,12,0" />
+                <CheckBox Grid.Row="1" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding TwinkleTrayOnlyOnAutoRun}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Margin="0,4,12,0" />
                 <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding TwinkleTrayAvailabilityMessage}" VerticalAlignment="Center" Foreground="#757575" TextWrapping="Wrap" />
-
                 <CheckBox Grid.Row="2" Grid.Column="0" Content="全部完成后关机" IsChecked="{Binding ShutdownOnComplete}" VerticalAlignment="Center" Margin="0,4,12,0" />
                 <CheckBox Grid.Row="2" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding ShutdownOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,4,12,0" />
                 <TextBlock Grid.Row="2" Grid.Column="2" />
@@ -160,89 +174,151 @@
 
         <GroupBox Grid.Row="5" Header="推送" Padding="8" Margin="0,8,0,0">
             <StackPanel>
-                <CheckBox Content="启用 Webhook 推送" IsChecked="{Binding WebhookEnabled}" Margin="0,0,0,8" />
-                <Grid Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="内容:" VerticalAlignment="Top" Margin="0,4,0,0" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
-                </Grid>
-                <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" Margin="70,8,0,0"
-                        Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                <StackPanel Margin="0,12,0,0">
-                    <CheckBox Content="启用 webhook 中转" IsChecked="{Binding WebhookRelayEnabled}" Margin="0,0,0,8" />
-                    <Grid Visibility="{Binding WebhookRelayEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                <StackPanel Margin="0,0,0,12">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="端口:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookRelayPort, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,8,4" />
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WebhookRelayStatusMessage}" VerticalAlignment="Center" Foreground="#757575" />
+                        <CheckBox Grid.Column="0" Content="启用 Webhook 推送" IsChecked="{Binding WebhookEnabled}" VerticalAlignment="Center" />
+                        <ToggleButton Grid.Column="1"
+                                      Style="{StaticResource CollapseToggleButtonStyle}"
+                                      IsChecked="{Binding WebhookEnabledExpanded}"
+                                      VerticalAlignment="Center"
+                                      Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Grid>
+                    <StackPanel Margin="24,8,0,0" Visibility="{Binding WebhookEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Visibility="{Binding WebhookEnabledExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding WebhookUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="内容:" VerticalAlignment="Top" Margin="0,4,0,0" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto" />
+                            </Grid>
+                            <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestWebhookCommand}" HorizontalAlignment="Left" Margin="70,8,0,0" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
 
-                <StackPanel Margin="0,12,0,0">
-                    <CheckBox Content="AI智能总结" IsChecked="{Binding AiSummaryEnabled}" Margin="0,0,0,8" />
-                    <Grid Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                <StackPanel Margin="0,0,0,12">
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
-                        <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="仅在自动运行时生效"
-                                  IsChecked="{Binding AiSummaryOnlyOnAutoRun}"
-                                  VerticalAlignment="Center"
-                                  Margin="0,0,12,0" />
-
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <ComboBox Grid.Row="1" Grid.Column="1" Width="180" HorizontalAlignment="Left"
-                                  ItemsSource="{Binding AiSummaryProviderOptions}"
-                                  SelectedValuePath="Value"
-                                  DisplayMemberPath="DisplayName"
-                                  SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZhipuApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ZhipuApiUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="模型:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ZhipuModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                        <TextBlock Grid.Row="7" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                        <CheckBox Grid.Row="7" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <CheckBox Grid.Column="0" Content="启用Webhook中转" IsChecked="{Binding WebhookRelayEnabled}" VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                ToolTip="帮助"
+                                Width="16"
+                                Height="16"
+                                Padding="0"
+                                Margin="6,0,0,0"
+                                VerticalAlignment="Center"
+                                Click="OnWebhookRelayHelpClicked"
+                                Background="#F5F5F5"
+                                BorderBrush="#D0D0D0"
+                                Foreground="#757575">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          RecognizesAccessKey="True" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Button.Content>
+                                <TextBlock Text="?" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button.Content>
+                        </Button>
+                        <ToggleButton Grid.Column="3"
+                                      Style="{StaticResource CollapseToggleButtonStyle}"
+                                      IsChecked="{Binding WebhookRelayExpanded}"
+                                      VerticalAlignment="Center"
+                                      Visibility="{Binding WebhookRelayEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Grid>
-                    <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" HorizontalAlignment="Left" Margin="70,8,0,0"
-                            Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <StackPanel Margin="24,8,0,0" Visibility="{Binding WebhookRelayEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Visibility="{Binding WebhookRelayExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="端口:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBox Text="{Binding WebhookRelayPort, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBlock Text="{Binding WebhookRelayStatusMessage}" VerticalAlignment="Center" Foreground="#757575" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Margin="0,0,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="0" Content="AI智能总结" IsChecked="{Binding AiSummaryEnabled}" VerticalAlignment="Center" />
+                        <ToggleButton Grid.Column="1"
+                                      Style="{StaticResource CollapseToggleButtonStyle}"
+                                      IsChecked="{Binding AiSummaryExpanded}"
+                                      VerticalAlignment="Center"
+                                      Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Grid>
+                    <StackPanel Margin="24,8,0,0" Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Visibility="{Binding AiSummaryExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="仅在自动运行时生效" IsChecked="{Binding AiSummaryOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <ComboBox Grid.Row="1" Grid.Column="1" Width="180" HorizontalAlignment="Left" ItemsSource="{Binding AiSummaryProviderOptions}" SelectedValuePath="Value" DisplayMemberPath="DisplayName" SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZhipuApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ZhipuApiUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="模型:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ZhipuModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <CheckBox Grid.Row="7" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                            </Grid>
+                            <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" HorizontalAlignment="Left" Margin="70,8,0,0" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </GroupBox>

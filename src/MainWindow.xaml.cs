@@ -52,6 +52,15 @@ public partial class MainWindow : Window
         SizeToContent = SizeToContent.Manual;
     }
 
+    private void OnWebhookRelayHelpClicked(object sender, RoutedEventArgs e)
+    {
+        var helpWindow = new WebhookRelayHelpWindow
+        {
+            Owner = this
+        };
+        helpWindow.ShowDialog();
+    }
+
     [DllImport("user32.dll")]
     private static extern nint MonitorFromWindow(nint hwnd, uint dwFlags);
 

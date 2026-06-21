@@ -21,6 +21,7 @@ public class AppConfig
     public string WebhookBody { get; set; } = "{\"time\":\"__TIME__\",\"content\":\"__CONTENT__\"}";
     public bool WebhookRelayEnabled { get; set; }
     public int WebhookRelayPort { get; set; } = 5058;
+    public bool WebhookOnlyPushAiSummary { get; set; }
     public bool AiSummaryOnlyOnAutoRun { get; set; }
 
     public bool IsInScheduledTimeRange(TimeOnly now)

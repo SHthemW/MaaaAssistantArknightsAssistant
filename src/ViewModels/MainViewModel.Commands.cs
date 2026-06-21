@@ -53,6 +53,8 @@ public partial class MainViewModel
 
         if (completed && autoSummaryRequested)
             await GenerateAndLogAiSummaryAsync();
+        else if (completed && WebhookOnlyPushAiSummary && !AiSummaryEnabled)
+            _ = PushWebhookAsync("未开启AI总结服务", null, DateTime.Now.ToString("HH:mm:ss"));
 
         if (completed && ShutdownOnComplete && (!ShutdownOnlyOnAutoRun || autoSummaryRequested))
         {
