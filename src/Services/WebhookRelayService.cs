@@ -139,7 +139,9 @@ public sealed class WebhookRelayService : IDisposable
             await logAsync($"Webhook 中转接收：url={url}", forwardedBody);
 
             var result = await ForwardAsync(url, forwardedBody);
-            if (!result)
+            await logAsync(result.Message, result.ForwardedBody);
+
+            if (!result.Success)
             {
                 context.Response.StatusCode = StatusCodes.Status502BadGateway;
                 await context.Response.WriteAsync("Forward failed.");
@@ -159,7 +161,7 @@ public sealed class WebhookRelayService : IDisposable
         }
     }
 
-    private async Task<bool> ForwardAsync(string url, string bodyText)
+    private async Task<WebhookRelayResult> ForwardAsync(string url, string bodyText)
     {
         try
         {
@@ -169,12 +171,17 @@ public sealed class WebhookRelayService : IDisposable
             };
 
             using var response = await _httpClient.SendAsync(request);
-            return response.IsSuccessStatusCode;
+            return new WebhookRelayResult(
+                response.IsSuccessStatusCode,
+                response.IsSuccessStatusCode
+                    ? $"Webhook 中转转发成功：url={url}，状态 {response.StatusCode}。"
+                    : $"Webhook 中转转发失败：url={url}，状态 {response.StatusCode}。",
+                bodyText);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Webhook relay forward failed: {ex.Message}");
-            return false;
+            return new WebhookRelayResult(false, $"Webhook 中转转发失败：url={url}，原因：{ex.Message}", bodyText);
         }
     }
 

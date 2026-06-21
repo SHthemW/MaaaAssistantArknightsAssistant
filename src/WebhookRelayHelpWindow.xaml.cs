@@ -121,37 +121,31 @@ public sealed class WebhookRelayHelpViewModel : INotifyPropertyChanged
     private void RefreshPreview()
     {
         ForwardUrl = $"http://127.0.0.1:{_port}/";
-        ForwardBody = BuildForwardBody(SourceUrl, SourceBody);
+        ForwardBody = BuildRelayBodyPreview(SourceUrl, SourceBody);
     }
 
-    private static string BuildForwardBody(string url, string body)
+    private static string BuildRelayBodyPreview(string url, string body)
     {
-        var payload = new
-        {
-            url,
-            body = ParseJsonOrText(body)
-        };
+        object? bodyValue = body;
 
-        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
-    }
-
-    private static object ParseJsonOrText(string body)
-    {
         try
         {
             using var document = JsonDocument.Parse(body);
-            return JsonElementClone(document.RootElement);
+            bodyValue = document.RootElement.Clone();
         }
         catch
         {
-            return body;
+            // Keep the original text when it is not valid JSON, so the preview
+            // still matches what the relay service can receive.
         }
-    }
 
-    private static JsonElement JsonElementClone(JsonElement element)
-    {
-        using var document = JsonDocument.Parse(element.GetRawText());
-        return document.RootElement.Clone();
+        var payload = new Dictionary<string, object?>
+        {
+            ["url"] = url,
+            ["body"] = bodyValue
+        };
+
+        return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
