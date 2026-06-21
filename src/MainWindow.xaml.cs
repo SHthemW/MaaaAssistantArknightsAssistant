@@ -54,10 +54,11 @@ public partial class MainWindow : Window
 
     private void OnWebhookRelayHelpClicked(object sender, RoutedEventArgs e)
     {
+        var vm = DataContext as MainViewModel;
         var helpWindow = new WebhookRelayHelpWindow
         {
             Owner = this,
-            DataContext = new WebhookRelayHelpViewModel((DataContext as MainViewModel)?.WebhookRelayPort ?? 5058)
+            DataContext = new WebhookRelayHelpViewModel(vm?.WebhookRelayPort ?? 5058, vm?.WebhookRelaySourceUrl)
         };
         helpWindow.ShowDialog();
     }

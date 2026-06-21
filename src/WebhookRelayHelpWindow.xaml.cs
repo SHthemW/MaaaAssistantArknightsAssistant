@@ -23,10 +23,23 @@ public partial class WebhookRelayHelpWindow : Window
 
 public sealed class WebhookRelayHelpViewModel
 {
-    public WebhookRelayHelpViewModel(int port = 5058)
+    public WebhookRelayHelpViewModel(int port = 5058, string? sourceUrl = null)
     {
-        ForwardUrlExample = $"http://127.0.0.1:{port}/cgi-bin/webhook/send?key=你的key";
+        SourceUrlExample = string.IsNullOrWhiteSpace(sourceUrl)
+            ? "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=你的key"
+            : sourceUrl;
+        ForwardUrlExample = BuildForwardUrlExample(port, SourceUrlExample);
     }
 
+    public string SourceUrlExample { get; }
+
     public string ForwardUrlExample { get; }
+
+    private static string BuildForwardUrlExample(int port, string sourceUrl)
+    {
+        if (Uri.TryCreate(sourceUrl, UriKind.Absolute, out var uri))
+            return $"http://127.0.0.1:{port}{uri.PathAndQuery}";
+
+        return $"http://127.0.0.1:{port}/原路径?原参数";
+    }
 }

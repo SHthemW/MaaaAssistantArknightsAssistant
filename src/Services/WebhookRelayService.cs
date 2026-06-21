@@ -11,25 +11,27 @@ namespace Game_Daily_Routine_Launcher;
 
 public sealed class WebhookRelayService : IDisposable
 {
-    private const string WeComWebhookHost = "https://qyapi.weixin.qq.com";
-    private const string WeComWebhookPath = "/cgi-bin/webhook/send";
-
     private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
     private readonly SemaphoreSlim _gate = new(1, 1);
     private IHost? _host;
+    private WebhookRelayRoute? _route;
 
     public bool IsRunning => _host is not null;
     public int Port { get; private set; }
 
-    public async Task<WebhookRelayResult> StartAsync(int port, Func<string, string?, Task>? logAsync = null)
+    public async Task<WebhookRelayResult> StartAsync(int port, string sourceUrl, Func<string, string?, Task>? logAsync = null)
     {
         await _gate.WaitAsync();
         try
         {
-            if (IsRunning && Port == port)
+            if (!WebhookRelayRoute.TryCreate(sourceUrl, out var route, out var routeError))
+                return new WebhookRelayResult(false, $"Webhook 中转启动失败：{routeError}");
+
+            if (IsRunning && Port == port && route.Equals(_route))
                 return new WebhookRelayResult(true, $"Webhook 中转已运行，端口 {port}。");
 
             await StopCoreAsync().ConfigureAwait(false);
+            _route = route;
 
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -49,11 +51,12 @@ public sealed class WebhookRelayService : IDisposable
                 _host = builder.Build();
                 await _host.StartAsync();
                 Port = port;
-                return new WebhookRelayResult(true, $"Webhook 中转已启动，监听端口 {port}。");
+                return new WebhookRelayResult(true, $"Webhook 中转已启动，监听端口 {port}，路径 {route.LocalPath}。");
             }
             catch (Exception ex)
             {
                 _host = null;
+                _route = null;
                 return new WebhookRelayResult(false, $"Webhook 中转启动失败：{ex.Message}");
             }
         }
@@ -92,6 +95,7 @@ public sealed class WebhookRelayService : IDisposable
         {
             _host.Dispose();
             _host = null;
+            _route = null;
         }
     }
 
@@ -106,19 +110,27 @@ public sealed class WebhookRelayService : IDisposable
                 return;
             }
 
-            if (!IsWeComCompatibleRequest(context.Request))
+            var route = _route;
+            if (route is null)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
-                await context.Response.WriteAsync("Only WeCom webhook path is supported.");
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                await context.Response.WriteAsync("Relay route is not configured.");
                 return;
             }
 
-            var url = BuildWeComForwardUrl(context.Request);
+            if (!route.Matches(context.Request))
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsync("Request path does not match configured source url.");
+                return;
+            }
+
+            var url = route.BuildForwardUrl(context.Request);
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var forwardedBody = await reader.ReadToEndAsync();
 
             await logAsync($"Webhook 中转接收：url={url}", forwardedBody);
-            await logAsync("Webhook 中转使用企业微信兼容模式，已原样转发请求 Body。", forwardedBody);
+            await logAsync("Webhook 中转已根据原请求 URL 映射真实地址，并原样转发请求 Body。", forwardedBody);
 
             var result = await ForwardAsync(url, forwardedBody);
             await logAsync(result.Message, BuildForwardLogBody(result));
@@ -142,13 +154,6 @@ public sealed class WebhookRelayService : IDisposable
             }
         }
     }
-
-    private static bool IsWeComCompatibleRequest(HttpRequest request)
-        => request.Path.Equals(WeComWebhookPath, StringComparison.OrdinalIgnoreCase) &&
-           request.Query.ContainsKey("key");
-
-    private static string BuildWeComForwardUrl(HttpRequest request)
-        => $"{WeComWebhookHost}{request.Path}{request.QueryString}";
 
     private async Task<WebhookRelayResult> ForwardAsync(string url, string bodyText)
     {
@@ -197,4 +202,35 @@ public sealed class WebhookRelayService : IDisposable
         _httpClient.Dispose();
         _gate.Dispose();
     }
+}
+
+public sealed record WebhookRelayRoute(string ForwardBaseUrl, string LocalPath)
+{
+    public static bool TryCreate(string sourceUrl, out WebhookRelayRoute route, out string error)
+    {
+        route = new WebhookRelayRoute(string.Empty, string.Empty);
+        error = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(sourceUrl))
+        {
+            error = "未配置原请求 URL。";
+            return false;
+        }
+
+        if (!Uri.TryCreate(sourceUrl, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            error = "原请求 URL 必须是有效的 HTTP 或 HTTPS 地址。";
+            return false;
+        }
+
+        route = new WebhookRelayRoute($"{uri.Scheme}://{uri.Authority}", uri.AbsolutePath);
+        return true;
+    }
+
+    public bool Matches(HttpRequest request)
+        => request.Path.Equals(LocalPath, StringComparison.OrdinalIgnoreCase);
+
+    public string BuildForwardUrl(HttpRequest request)
+        => $"{ForwardBaseUrl}{request.Path}{request.QueryString}";
 }

@@ -283,6 +283,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="70" />
@@ -293,6 +294,8 @@
                                     <TextBox Text="{Binding WebhookRelayPort, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Margin="0,0,8,0" />
                                     <TextBlock Text="{Binding WebhookRelayStatusMessage}" VerticalAlignment="Center" Foreground="#757575" TextWrapping="Wrap" />
                                 </StackPanel>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="原URL:" VerticalAlignment="Center" Margin="0,4,0,0" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebhookRelaySourceUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,4,0,0" />
                             </Grid>
                         </StackPanel>
                     </StackPanel>

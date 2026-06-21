@@ -67,6 +67,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _webhookBody = string.Empty;
     [ObservableProperty] private bool _webhookRelayEnabled;
     [ObservableProperty] private int _webhookRelayPort = 5058;
+    [ObservableProperty] private string _webhookRelaySourceUrl = string.Empty;
     [ObservableProperty] private bool _webhookOnlyPushAiSummary;
     [ObservableProperty] private bool _webhookCustomPushContentEnabled;
     [ObservableProperty] private bool _webhookCustomPushContentExpanded = true;
@@ -142,6 +143,7 @@ public partial class MainViewModel : ObservableObject
         WebhookBody = _appConfig.WebhookBody;
         WebhookRelayEnabled = _appConfig.WebhookRelayEnabled;
         WebhookRelayPort = _appConfig.WebhookRelayPort;
+        WebhookRelaySourceUrl = _appConfig.WebhookRelaySourceUrl;
         WebhookOnlyPushAiSummary = _appConfig.WebhookOnlyPushAiSummary;
         WebhookCustomPushContentEnabled = _appConfig.WebhookCustomPushContentEnabled;
         WebhookEnabledExpanded = _appConfig.WebhookEnabledExpanded;
@@ -345,6 +347,7 @@ public partial class MainViewModel : ObservableObject
         _appConfig.WebhookBody = WebhookBody;
         _appConfig.WebhookRelayEnabled = WebhookRelayEnabled;
         _appConfig.WebhookRelayPort = WebhookRelayPort;
+        _appConfig.WebhookRelaySourceUrl = WebhookRelaySourceUrl;
         _appConfig.WebhookOnlyPushAiSummary = WebhookOnlyPushAiSummary;
         _appConfig.WebhookCustomPushContentEnabled = WebhookCustomPushContentEnabled;
         _appConfig.WebhookEnabledExpanded = WebhookEnabledExpanded;
@@ -547,7 +550,7 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var result = await _webhookRelayService.StartAsync(WebhookRelayPort, (message, rawBody) =>
+        var result = await _webhookRelayService.StartAsync(WebhookRelayPort, WebhookRelaySourceUrl, (message, rawBody) =>
         {
             AddLog(message, rawBody);
             return Task.CompletedTask;
@@ -565,6 +568,14 @@ public partial class MainViewModel : ObservableObject
     }
 
     partial void OnWebhookRelayPortChanged(int value)
+    {
+        if (_isLoading || !WebhookRelayEnabled)
+            return;
+
+        RefreshWebhookRelayState();
+    }
+
+    partial void OnWebhookRelaySourceUrlChanged(string value)
     {
         if (_isLoading || !WebhookRelayEnabled)
             return;
