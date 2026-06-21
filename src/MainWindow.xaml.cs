@@ -40,8 +40,8 @@ public partial class MainWindow : Window
         var monitorLeft = info.rcWork.Left * scaleX;
         var monitorTop = info.rcWork.Top * scaleY;
 
-        var maxWidth = monitorWidth * 0.8;
-        var maxHeight = monitorHeight * 0.8;
+        var maxWidth = monitorWidth * 0.85;
+        var maxHeight = monitorHeight * 0.85;
 
         if (Width > maxWidth) Width = maxWidth;
         if (Height > maxHeight) Height = maxHeight;
