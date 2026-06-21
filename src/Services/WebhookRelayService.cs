@@ -2,7 +2,6 @@ using System.Net.Http;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -107,32 +106,19 @@ public sealed class WebhookRelayService : IDisposable
                 return;
             }
 
-            var compatibleRequest = IsWeComCompatibleRequest(context.Request);
-            string url;
-            string forwardedBody;
-            string? parseLog = null;
-
-            if (compatibleRequest)
+            if (!IsWeComCompatibleRequest(context.Request))
             {
-                url = BuildWeComForwardUrl(context.Request);
-                using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
-                forwardedBody = await reader.ReadToEndAsync();
-                parseLog = "Webhook 中转使用企业微信兼容模式，已原样转发请求 Body。";
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                await context.Response.WriteAsync("Only WeCom webhook path is supported.");
+                return;
             }
-            else
-            {
-                var wrappedRequest = await ReadWrappedRequestAsync(context, logAsync);
-                if (!wrappedRequest.Success)
-                    return;
 
-                url = wrappedRequest.Url;
-                forwardedBody = wrappedRequest.Body;
-                parseLog = wrappedRequest.ParseLog;
-            }
+            var url = BuildWeComForwardUrl(context.Request);
+            using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
+            var forwardedBody = await reader.ReadToEndAsync();
 
             await logAsync($"Webhook 中转接收：url={url}", forwardedBody);
-            if (!string.IsNullOrWhiteSpace(parseLog))
-                await logAsync(parseLog, forwardedBody);
+            await logAsync("Webhook 中转使用企业微信兼容模式，已原样转发请求 Body。", forwardedBody);
 
             var result = await ForwardAsync(url, forwardedBody);
             await logAsync(result.Message, BuildForwardLogBody(result));
@@ -163,92 +149,6 @@ public sealed class WebhookRelayService : IDisposable
 
     private static string BuildWeComForwardUrl(HttpRequest request)
         => $"{WeComWebhookHost}{request.Path}{request.QueryString}";
-
-    private static async Task<RelayRequestReadResult> ReadWrappedRequestAsync(
-        HttpContext context,
-        Func<string, string?, Task> logAsync)
-    {
-        string url;
-        JsonElement body;
-
-        try
-        {
-            using var document = await JsonDocument.ParseAsync(context.Request.Body);
-            var root = document.RootElement;
-
-            if (!root.TryGetProperty("url", out var urlElement) || urlElement.ValueKind != JsonValueKind.String)
-            {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync("Missing url.");
-                return RelayRequestReadResult.Failed();
-            }
-
-            if (!root.TryGetProperty("body", out var bodyElement))
-            {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await context.Response.WriteAsync("Missing body.");
-                return RelayRequestReadResult.Failed();
-            }
-
-            url = urlElement.GetString() ?? string.Empty;
-            body = bodyElement.Clone();
-        }
-        catch (Exception ex)
-        {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            await context.Response.WriteAsync($"Invalid request: {ex.Message}");
-            return RelayRequestReadResult.Failed();
-        }
-
-        if (TryResolveForwardedBody(body, out var forwardedBody, out var parseLog, out var parseError))
-            return RelayRequestReadResult.Succeeded(url, forwardedBody, parseLog);
-
-        var errorMessage = $"Webhook 中转转发失败：body 字符串不是有效 JSON，原因：{parseError}";
-        await logAsync(errorMessage, body.GetRawText());
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        await context.Response.WriteAsync("Invalid body JSON.");
-        return RelayRequestReadResult.Failed();
-    }
-
-    private sealed record RelayRequestReadResult(bool Success, string Url, string Body, string? ParseLog)
-    {
-        public static RelayRequestReadResult Succeeded(string url, string body, string? parseLog)
-            => new(true, url, body, parseLog);
-
-        public static RelayRequestReadResult Failed()
-            => new(false, string.Empty, string.Empty, null);
-    }
-
-    private static bool TryResolveForwardedBody(
-        JsonElement body,
-        out string forwardedBody,
-        out string? parseLog,
-        out string? parseError)
-    {
-        parseLog = null;
-        parseError = null;
-
-        if (body.ValueKind != JsonValueKind.String)
-        {
-            forwardedBody = body.GetRawText();
-            return true;
-        }
-
-        var bodyText = body.GetString() ?? string.Empty;
-        try
-        {
-            using var document = JsonDocument.Parse(bodyText);
-            forwardedBody = document.RootElement.GetRawText();
-            parseLog = "Webhook 中转已将字符串 Body 解析为 JSON，并使用解析后的 JSON 转发。";
-            return true;
-        }
-        catch (JsonException ex)
-        {
-            forwardedBody = string.Empty;
-            parseError = ex.Message;
-            return false;
-        }
-    }
 
     private async Task<WebhookRelayResult> ForwardAsync(string url, string bodyText)
     {
