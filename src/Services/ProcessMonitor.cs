@@ -7,7 +7,9 @@ public class ProcessMonitor : IDisposable
     private readonly string _processName;
     private readonly int _pollIntervalMs;
     private readonly CancellationTokenSource _cts = new();
+    private readonly object _gate = new();
     private Task? _monitorTask;
+    private bool _disposed;
 
     public event Action? ProcessStarted;
     public event Action? ProcessExited;
@@ -22,13 +24,29 @@ public class ProcessMonitor : IDisposable
 
     public void Start()
     {
-        _monitorTask = Task.Run(() => MonitorLoop(_cts.Token));
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            _monitorTask = Task.Run(() => MonitorLoop(_cts.Token));
+        }
     }
 
     public void Stop()
     {
-        _cts.Cancel();
-        _monitorTask?.Wait(TimeSpan.FromSeconds(5));
+        Task? monitorTask;
+
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            _cts.Cancel();
+            monitorTask = _monitorTask;
+        }
+
+        WaitForMonitorTask(monitorTask);
     }
 
     private async Task MonitorLoop(CancellationToken ct)
@@ -78,8 +96,28 @@ public class ProcessMonitor : IDisposable
 
     public void Dispose()
     {
-        _cts.Cancel();
+        Task? monitorTask;
+
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            _cts.Cancel();
+            monitorTask = _monitorTask;
+        }
+
+        WaitForMonitorTask(monitorTask);
         _cts.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    private static void WaitForMonitorTask(Task? monitorTask)
+    {
+        if (monitorTask == null || monitorTask.Id == Task.CurrentId)
+            return;
+
+        monitorTask.Wait(TimeSpan.FromSeconds(5));
     }
 }

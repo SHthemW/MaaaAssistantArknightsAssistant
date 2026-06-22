@@ -143,10 +143,10 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ListBox Grid.Row="0" ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="84" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
+                <ListBox Grid.Row="0" ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="84" MaxHeight="160" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" ScrollViewer.VerticalScrollBarVisibility="Auto" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" LineHeight="16" LineStackingStrategy="BlockLineHeight" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

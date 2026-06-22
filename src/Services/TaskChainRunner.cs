@@ -145,8 +145,15 @@ public class TaskChainRunner : IDisposable
         using var reg = ct.Register(() => tcs.TrySetCanceled(ct));
 
         monitor.Start();
-        await tcs.Task;
-        _currentMonitor = null;
+        try
+        {
+            await tcs.Task;
+        }
+        finally
+        {
+            if (ReferenceEquals(_currentMonitor, monitor))
+                _currentMonitor = null;
+        }
     }
 
     public void Stop()
