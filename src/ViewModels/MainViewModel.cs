@@ -468,6 +468,7 @@ public partial class MainViewModel : ObservableObject
     private void AppendLog(LogEntryRecord entry)
     {
         LogEntries.Add(entry);
+        RuntimeLogService.WriteEntry(entry);
         Debug.WriteLine(entry.DisplayText);
         Console.WriteLine(entry.DisplayText);
         if (!string.IsNullOrWhiteSpace(entry.RawBody))
@@ -498,7 +499,10 @@ public partial class MainViewModel : ObservableObject
             : $"{message}\n原始Body：\n{rawBody}";
         var result = await WebhookService.SendAsync(WebhookUrl, WebhookBody, time, content);
         if (result.Success)
+        {
+            RuntimeLogService.WriteMessage($"Webhook sent: {result.RequestBody}");
             Debug.WriteLine($"Webhook sent: {result.RequestBody}");
+        }
     }
 
     private bool CanStartAll() => !IsRunning;

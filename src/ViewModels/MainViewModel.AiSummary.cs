@@ -151,11 +151,7 @@ public partial class MainViewModel
         builder.AppendLine();
         builder.AppendLine("今日运行日志：");
         foreach (var entry in LogEntries.Where(x => x.Timestamp.Date == today))
-        {
-            builder.AppendLine(entry.DisplayText);
-            if (!string.IsNullOrWhiteSpace(entry.RawBody))
-                builder.AppendLine($"原始Body：{entry.RawBody}");
-        }
+            builder.AppendLine(AiSummaryPromptLogFormatter.Format(entry));
 
         return builder.ToString();
     }

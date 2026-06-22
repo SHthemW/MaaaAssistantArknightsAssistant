@@ -23,6 +23,7 @@ public static class WebhookService
         }
         catch (Exception ex)
         {
+            RuntimeLogService.WriteException("Webhook 发送失败", ex);
             Debug.WriteLine($"Webhook failed: {ex.Message}");
             return new WebhookSendResult(false, ex.Message, string.Empty);
         }

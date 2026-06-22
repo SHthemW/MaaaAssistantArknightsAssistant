@@ -146,6 +146,7 @@ public sealed class WebhookRelayService : IDisposable
         }
         catch (Exception ex)
         {
+            RuntimeLogService.WriteException("Webhook 中转处理请求失败", ex);
             Debug.WriteLine($"Webhook relay error: {ex.Message}");
             if (!context.Response.HasStarted)
             {
@@ -175,6 +176,7 @@ public sealed class WebhookRelayService : IDisposable
         }
         catch (Exception ex)
         {
+            RuntimeLogService.WriteException("Webhook 中转转发失败", ex);
             Debug.WriteLine($"Webhook relay forward failed: {ex.Message}");
             return new WebhookRelayResult(false, $"Webhook 中转转发失败：url={url}，原因：{ex.Message}", url, bodyText);
         }

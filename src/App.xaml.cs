@@ -10,8 +10,12 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        RuntimeLogService.Initialize();
+        RuntimeLogService.WriteMessage($"启动参数：{string.Join(' ', e.Args)}");
+
         DispatcherUnhandledException += (_, args) =>
         {
+            RuntimeLogService.WriteException("发生未处理的异常", args.Exception);
             MessageBox.Show($"发生未处理的异常:\n{args.Exception.Message}",
                 "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
@@ -26,9 +30,16 @@ public partial class App : Application
 
             if (!config.RandomStartEnabled && !config.IsInScheduledTimeRange(now))
             {
+                RuntimeLogService.WriteMessage("自动运行启动，但当前不在允许的定时启动窗口，程序退出。");
                 Shutdown();
                 return;
             }
         }
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        RuntimeLogService.WriteMessage($"程序退出，退出码：{e.ApplicationExitCode}。");
+        base.OnExit(e);
     }
 }
