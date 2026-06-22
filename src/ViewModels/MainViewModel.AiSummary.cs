@@ -68,12 +68,12 @@ public partial class MainViewModel
         var skipReason = GetAiSummarySkipReason(isAutoRunExecution);
         if (skipReason != null)
         {
-            await LogFinalAiSummaryAsync(skipReason);
+            AddLog(skipReason, pushWebhook: false);
             return;
         }
 
         var config = BuildAiSummaryConfig();
-        var prompt = BuildSummaryPrompt();
+        var prompt = BuildSummaryPrompt(config.ZhipuAi.SummaryPrompt);
         if (string.IsNullOrWhiteSpace(prompt))
             return;
 
@@ -110,9 +110,13 @@ public partial class MainViewModel
                 ApiUrl = ZhipuApiUrl,
                 Model = ZhipuModel,
                 SystemPrompt = ZhipuSystemPrompt,
+                SummaryPrompt = string.IsNullOrWhiteSpace(ZhipuSummaryPrompt)
+                    ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
+                    : ZhipuSummaryPrompt,
                 Temperature = ZhipuTemperature,
                 TimeoutSeconds = Math.Max(ZhipuTimeoutSeconds, 1),
                 RequestRetryCount = Math.Max(ZhipuRequestRetryCount, 0),
+                ThinkingEnabled = ZhipuThinkingEnabled,
                 Stream = ZhipuStream
             }
         };
@@ -135,13 +139,14 @@ public partial class MainViewModel
         return null;
     }
 
-    private string BuildSummaryPrompt()
+    private string BuildSummaryPrompt(string summaryPrompt)
     {
         var today = DateTime.Today;
         var builder = new StringBuilder();
 
-        builder.AppendLine("你需要根据下面的运行日志，简单总结每条任务完成情况。");
-        builder.AppendLine("请使用简洁中文输出，逐条列出任务结论。");
+        builder.AppendLine(string.IsNullOrWhiteSpace(summaryPrompt)
+            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
+            : summaryPrompt.TrimEnd());
         builder.AppendLine();
         builder.AppendLine("任务最终状态：");
         foreach (var task in Tasks)

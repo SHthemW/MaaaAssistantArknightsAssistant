@@ -341,8 +341,6 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="70" />
@@ -359,14 +357,31 @@
                                 <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ZhipuModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
                                 <TextBlock Grid.Row="5" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
                                 <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
-                                <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                                <TextBlock Grid.Row="7" Grid.Column="0" Text="超时时间(秒):" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding ZhipuTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
-                                <TextBlock Grid.Row="8" Grid.Column="0" Text="重试次数:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding ZhipuRequestRetryCount, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
-                                <TextBlock Grid.Row="9" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <CheckBox Grid.Row="9" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="6" Grid.Column="0" Text="总结提示:" VerticalAlignment="Top" Margin="0,4,0,4" />
+                                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuSummaryPrompt, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" Height="44" Margin="0,0,0,4" />
+                                <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,4">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="90" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="深度思考:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                    <CheckBox Grid.Row="0" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuThinkingEnabled}" VerticalAlignment="Center" Margin="0,0,16,4" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="超时时间:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ZhipuTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,16,4" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="重试次数:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                    <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding ZhipuRequestRetryCount, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,0" />
+                                    <CheckBox Grid.Row="2" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                                </Grid>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="70,8,0,0">
                                 <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" />

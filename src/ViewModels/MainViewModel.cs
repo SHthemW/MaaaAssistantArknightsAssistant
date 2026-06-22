@@ -89,9 +89,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
     [ObservableProperty] private string _zhipuModel = string.Empty;
     [ObservableProperty] private string _zhipuSystemPrompt = string.Empty;
+    [ObservableProperty] private string _zhipuSummaryPrompt = string.Empty;
     [ObservableProperty] private double _zhipuTemperature = 1.0;
     [ObservableProperty] private int _zhipuTimeoutSeconds = 800;
     [ObservableProperty] private int _zhipuRequestRetryCount = 3;
+    [ObservableProperty] private bool _zhipuThinkingEnabled = true;
     [ObservableProperty] private bool _zhipuStream = true;
     [ObservableProperty] private bool _autoScrollLogs = true;
 
@@ -161,9 +163,13 @@ public partial class MainViewModel : ObservableObject
         ZhipuApiUrl = _appConfig.AiSummary.ZhipuAi.ApiUrl;
         ZhipuModel = _appConfig.AiSummary.ZhipuAi.Model;
         ZhipuSystemPrompt = _appConfig.AiSummary.ZhipuAi.SystemPrompt;
+        ZhipuSummaryPrompt = string.IsNullOrWhiteSpace(_appConfig.AiSummary.ZhipuAi.SummaryPrompt)
+            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
+            : _appConfig.AiSummary.ZhipuAi.SummaryPrompt;
         ZhipuTemperature = _appConfig.AiSummary.ZhipuAi.Temperature;
         ZhipuTimeoutSeconds = _appConfig.AiSummary.ZhipuAi.TimeoutSeconds;
         ZhipuRequestRetryCount = _appConfig.AiSummary.ZhipuAi.RequestRetryCount;
+        ZhipuThinkingEnabled = _appConfig.AiSummary.ZhipuAi.ThinkingEnabled;
         ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
@@ -622,6 +628,15 @@ public partial class MainViewModel : ObservableObject
 
         if (!value && App.IsAutoRun)
             AddLog("AI 智能总结已设置为始终生效。");
+    }
+
+    partial void OnZhipuSummaryPromptChanged(string value)
+    {
+        if (_isLoading)
+            return;
+
+        if (string.IsNullOrWhiteSpace(value))
+            ZhipuSummaryPrompt = ZhipuAiSummaryConfig.DefaultSummaryPrompt;
     }
 }
 

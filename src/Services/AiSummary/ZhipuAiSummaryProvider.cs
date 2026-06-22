@@ -124,6 +124,10 @@ public sealed class ZhipuAiSummaryProvider : IAiSummaryProvider
                 new { role = "user", content = prompt }
             },
             temperature = config.Temperature,
+            thinking = new
+            {
+                type = config.ThinkingEnabled ? "enabled" : "disabled"
+            },
             stream = config.Stream
         };
     }
