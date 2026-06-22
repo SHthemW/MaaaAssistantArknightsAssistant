@@ -6,8 +6,10 @@ namespace Game_Daily_Routine_Launcher;
 
 public static class RuntimeLogService
 {
-    private const int MaxLogFileCount = 5;
+    private const int RetentionDays = 5;
     private const string LogFilePattern = "session-*.log";
+    private const string FilePrefix = "session-";
+    private const string TimestampFormat = "yyyyMMdd-HHmmss-fff";
 
     private static readonly object SyncRoot = new();
     private static string? _currentLogFilePath;
@@ -32,7 +34,7 @@ public static class RuntimeLogService
                     $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] 程序启动。{Environment.NewLine}",
                     Encoding.UTF8);
 
-                PruneOldSessionLogs(logDir);
+                PruneExpiredSessionLogs(logDir);
             }
             catch (Exception ex)
             {
@@ -69,6 +71,9 @@ public static class RuntimeLogService
                     return;
 
                 File.AppendAllText(_currentLogFilePath, text + Environment.NewLine, Encoding.UTF8);
+                var logDir = Path.GetDirectoryName(_currentLogFilePath);
+                if (!string.IsNullOrWhiteSpace(logDir))
+                    PruneExpiredSessionLogs(logDir);
             }
             catch (Exception ex)
             {
@@ -79,42 +84,55 @@ public static class RuntimeLogService
 
     private static string CreateSessionLogPath(string logDir)
     {
-        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
-        var path = Path.Combine(logDir, $"session-{timestamp}.log");
+        var timestamp = DateTime.Now.ToString(TimestampFormat);
+        var path = Path.Combine(logDir, $"{FilePrefix}{timestamp}.log");
         if (!File.Exists(path))
             return path;
 
         for (var index = 1; index < 1000; index++)
         {
-            path = Path.Combine(logDir, $"session-{timestamp}-{index}.log");
+            path = Path.Combine(logDir, $"{FilePrefix}{timestamp}-{index}.log");
             if (!File.Exists(path))
                 return path;
         }
 
-        return Path.Combine(logDir, $"session-{timestamp}-{Guid.NewGuid():N}.log");
+        return Path.Combine(logDir, $"{FilePrefix}{timestamp}-{Guid.NewGuid():N}.log");
     }
 
-    private static void PruneOldSessionLogs(string logDir)
+    private static void PruneExpiredSessionLogs(string logDir)
     {
         var sessionLogs = Directory
             .GetFiles(logDir, LogFilePattern)
-            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .Select(path => (Path: path, Timestamp: GetLogTimestamp(path)))
             .ToList();
 
-        var deleteCount = sessionLogs.Count - MaxLogFileCount;
-        if (deleteCount <= 0)
-            return;
+        var cutoff = DateTime.Now.AddDays(-RetentionDays);
+        var expiredLogs = sessionLogs
+            .Where(x => x.Timestamp < cutoff)
+            .OrderBy(x => x.Timestamp)
+            .ToList();
 
-        var currentPath = _currentLogFilePath == null
-            ? string.Empty
-            : Path.GetFullPath(_currentLogFilePath);
-
-        foreach (var filePath in sessionLogs.Take(deleteCount))
+        var currentPath = _currentLogFilePath == null ? string.Empty : Path.GetFullPath(_currentLogFilePath);
+        foreach (var item in expiredLogs)
         {
-            if (string.Equals(Path.GetFullPath(filePath), currentPath, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFullPath(item.Path), currentPath, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            File.Delete(filePath);
+            File.Delete(item.Path);
         }
+    }
+
+    private static DateTime GetLogTimestamp(string path)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(path);
+        if (fileName.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase) &&
+            fileName.Length >= FilePrefix.Length + TimestampFormat.Length)
+        {
+            var timestampText = fileName.Substring(FilePrefix.Length, TimestampFormat.Length);
+            if (DateTime.TryParseExact(timestampText, TimestampFormat, null, System.Globalization.DateTimeStyles.None, out var timestamp))
+                return timestamp;
+        }
+
+        return File.GetLastWriteTime(path);
     }
 }
