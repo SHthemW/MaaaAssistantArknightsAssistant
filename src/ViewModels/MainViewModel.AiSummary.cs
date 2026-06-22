@@ -34,8 +34,7 @@ public partial class MainViewModel
             AddLog($"测试内容已发送: {prompt}");
             AddLog($"AI 测试请求体:\n{requestBody}");
 
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            var summary = await _aiSummaryService.GenerateAsync(config, prompt, timeoutCts.Token);
+            var summary = await GenerateAiSummaryWithRetryAsync(config, prompt, 60);
             if (string.IsNullOrWhiteSpace(summary))
             {
                 AiSummaryTestStatus = "测试成功：服务器已回应，但未返回内容。";
@@ -69,7 +68,7 @@ public partial class MainViewModel
         var skipReason = GetAiSummarySkipReason(isAutoRunExecution);
         if (skipReason != null)
         {
-            AddLog(skipReason);
+            await LogFinalAiSummaryAsync(skipReason);
             return;
         }
 
@@ -81,23 +80,22 @@ public partial class MainViewModel
         try
         {
             await _aiPromptLogService.WriteAsync(prompt);
-            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(config.ZhipuAi.TimeoutSeconds, 1)));
-            var summary = await _aiSummaryService.GenerateAsync(config, prompt, timeoutCts.Token);
+            var summary = await GenerateAiSummaryWithRetryAsync(config, prompt, Math.Max(config.ZhipuAi.TimeoutSeconds, 1));
             if (string.IsNullOrWhiteSpace(summary))
             {
-                AddLog("AI 总结返回为空。");
+                await LogFinalAiSummaryAsync("AI 总结返回为空。");
                 return;
             }
 
-            AddLog($"AI总结：{summary.Trim()}");
+            await LogFinalAiSummaryAsync($"AI总结：{summary.Trim()}");
         }
         catch (OperationCanceledException)
         {
-            AddLog($"AI 总结超时：服务器 {Math.Max(config.ZhipuAi.TimeoutSeconds, 1)} 秒内未回应。");
+            await LogFinalAiSummaryAsync($"AI 总结超时：服务器 {Math.Max(config.ZhipuAi.TimeoutSeconds, 1)} 秒内未回应。");
         }
         catch (Exception ex)
         {
-            AddLog($"AI 总结失败：{ex.Message}");
+            await LogFinalAiSummaryAsync($"AI 总结失败：{ex.Message}");
         }
     }
 
@@ -114,6 +112,7 @@ public partial class MainViewModel
                 SystemPrompt = ZhipuSystemPrompt,
                 Temperature = ZhipuTemperature,
                 TimeoutSeconds = Math.Max(ZhipuTimeoutSeconds, 1),
+                RequestRetryCount = Math.Max(ZhipuRequestRetryCount, 0),
                 Stream = ZhipuStream
             }
         };

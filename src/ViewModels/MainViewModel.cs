@@ -91,6 +91,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _zhipuSystemPrompt = string.Empty;
     [ObservableProperty] private double _zhipuTemperature = 1.0;
     [ObservableProperty] private int _zhipuTimeoutSeconds = 800;
+    [ObservableProperty] private int _zhipuRequestRetryCount = 3;
     [ObservableProperty] private bool _zhipuStream = true;
     [ObservableProperty] private bool _autoScrollLogs = true;
 
@@ -162,6 +163,7 @@ public partial class MainViewModel : ObservableObject
         ZhipuSystemPrompt = _appConfig.AiSummary.ZhipuAi.SystemPrompt;
         ZhipuTemperature = _appConfig.AiSummary.ZhipuAi.Temperature;
         ZhipuTimeoutSeconds = _appConfig.AiSummary.ZhipuAi.TimeoutSeconds;
+        ZhipuRequestRetryCount = _appConfig.AiSummary.ZhipuAi.RequestRetryCount;
         ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
@@ -408,19 +410,21 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void AddLog(string message, string? rawBody = null)
+    private void AddLog(string message, string? rawBody = null, bool pushWebhook = true)
     {
         var entry = new LogEntryRecord(DateTime.Now, message)
         {
             RawBody = rawBody,
             Category = InferWebhookPushCategory(message, rawBody)
         };
-        ExecuteOnUiThread(() => AppendLog(entry));
+        ExecuteOnUiThread(() => AppendLog(entry, pushWebhook));
     }
 
     private static WebhookPushContentCategory InferWebhookPushCategory(string message, string? rawBody)
     {
-        if (message.Contains("AI总结：", StringComparison.Ordinal) || message.Contains("AI 智能总结", StringComparison.Ordinal))
+        if (message.Contains("AI总结：", StringComparison.Ordinal) ||
+            message.Contains("AI 总结", StringComparison.Ordinal) ||
+            message.Contains("AI 智能总结", StringComparison.Ordinal))
             return WebhookPushContentCategory.AiSummary;
 
         if (message.Contains("Webhook", StringComparison.Ordinal) || message.Contains("中转", StringComparison.Ordinal))
@@ -465,7 +469,7 @@ public partial class MainViewModel : ObservableObject
         (WebhookPushContentCategory.Other, "其他日志")
     ];
 
-    private void AppendLog(LogEntryRecord entry)
+    private void AppendLog(LogEntryRecord entry, bool pushWebhook = true)
     {
         LogEntries.Add(entry);
         RuntimeLogService.WriteEntry(entry);
@@ -474,7 +478,7 @@ public partial class MainViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(entry.RawBody))
             Console.WriteLine(entry.RawBody);
 
-        if (ShouldPushLogEntry(entry))
+        if (pushWebhook && ShouldPushLogEntry(entry))
             _ = PushWebhookAsync(entry.Message, entry.RawBody, entry.Timestamp.ToString("HH:mm:ss"));
     }
 

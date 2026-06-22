@@ -21,6 +21,8 @@ public class ZhipuAiSummaryConfig
 
     public int TimeoutSeconds { get; set; } = 800;
 
+    public int RequestRetryCount { get; set; } = 3;
+
     public bool Stream { get; set; } = true;
 }
 
