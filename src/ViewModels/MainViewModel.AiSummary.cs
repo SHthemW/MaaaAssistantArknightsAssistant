@@ -64,10 +64,14 @@ public partial class MainViewModel
 
     private bool CanTestAiSummary() => !IsTestingAiSummary;
 
-    private async Task GenerateAndLogAiSummaryAsync()
+    private async Task GenerateAndLogAiSummaryAsync(bool isAutoRunExecution)
     {
-        if (!ShouldGenerateAiSummary())
+        var skipReason = GetAiSummarySkipReason(isAutoRunExecution);
+        if (skipReason != null)
+        {
+            AddLog(skipReason);
             return;
+        }
 
         var config = BuildAiSummaryConfig();
         var prompt = BuildSummaryPrompt();
@@ -115,15 +119,21 @@ public partial class MainViewModel
         };
     }
 
-    private bool ShouldGenerateAiSummary(bool respectOnlyOnAutoRun = true)
+    private bool ShouldGenerateAiSummary(bool respectOnlyOnAutoRun = true) =>
+        GetAiSummarySkipReason(!respectOnlyOnAutoRun || App.IsAutoRun) == null;
+
+    private string? GetAiSummarySkipReason(bool isAutoRunExecution)
     {
         if (!AiSummaryEnabled)
-            return false;
+            return "AI 智能总结未启用。";
 
-        if (respectOnlyOnAutoRun && AiSummaryOnlyOnAutoRun && !App.IsAutoRun)
-            return false;
+        if (AiSummaryOnlyOnAutoRun && !isAutoRunExecution)
+            return "AI 智能总结已设置为仅在自动运行时生效，本次手动任务链不生成总结。";
 
-        return _aiSummaryService.CanGenerate(BuildAiSummaryConfig());
+        if (!_aiSummaryService.CanGenerate(BuildAiSummaryConfig()))
+            return "AI 智能总结当前平台不受支持。";
+
+        return null;
     }
 
     private string BuildSummaryPrompt()

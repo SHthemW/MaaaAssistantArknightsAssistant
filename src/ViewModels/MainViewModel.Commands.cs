@@ -53,9 +53,10 @@ public partial class MainViewModel
 
         AddLog(completed ? "任务链执行完成。" : "任务链已停止。");
 
-        if (completed && autoSummaryRequested)
-            await GenerateAndLogAiSummaryAsync();
-        else if (completed && WebhookOnlyPushAiSummary && !AiSummaryEnabled)
+        if (completed && AiSummaryEnabled)
+            await GenerateAndLogAiSummaryAsync(autoSummaryRequested);
+
+        if (completed && WebhookOnlyPushAiSummary && !AiSummaryEnabled)
             _ = PushWebhookAsync("未开启AI总结服务", null, DateTime.Now.ToString("HH:mm:ss"));
 
         if (completed && ShutdownOnComplete && (!ShutdownOnlyOnAutoRun || autoSummaryRequested))
