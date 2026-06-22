@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Text;
 
@@ -5,19 +6,25 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class MainViewModel
 {
-    [RelayCommand]
-    private void TestAiSummary()
-    {
-        _ = Task.Run(TestAiSummaryAsync);
-    }
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(TestAiSummaryCommand))]
+    private bool _isTestingAiSummary;
 
+    [ObservableProperty]
+    private string _aiSummaryTestStatus = string.Empty;
+
+    [RelayCommand(CanExecute = nameof(CanTestAiSummary))]
     private async Task TestAiSummaryAsync()
     {
         if (!ShouldGenerateAiSummary(respectOnlyOnAutoRun: false))
         {
+            AiSummaryTestStatus = "测试失败：AI 智能总结未启用或当前平台不受支持。";
             AddLog("AI 智能总结未启用或当前平台不受支持。");
             return;
         }
+
+        IsTestingAiSummary = true;
+        AiSummaryTestStatus = "等待服务器回应...";
 
         try
         {
@@ -27,16 +34,35 @@ public partial class MainViewModel
             AddLog($"测试内容已发送: {prompt}");
             AddLog($"AI 测试请求体:\n{requestBody}");
 
-            var summary = await _aiSummaryService.GenerateAsync(config, prompt, CancellationToken.None);
-            AddLog(string.IsNullOrWhiteSpace(summary)
-                ? "AI 测试完成，但未返回内容。"
-                : $"AI 测试结果：{summary.Trim()}");
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            var summary = await _aiSummaryService.GenerateAsync(config, prompt, timeoutCts.Token);
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                AiSummaryTestStatus = "测试成功：服务器已回应，但未返回内容。";
+                AddLog("AI 测试完成，但未返回内容。");
+                return;
+            }
+
+            AiSummaryTestStatus = "测试成功：服务器已回应。";
+            AddLog($"AI 测试结果：{summary.Trim()}");
+        }
+        catch (OperationCanceledException)
+        {
+            AiSummaryTestStatus = "测试超时：服务器 60 秒内未回应。";
+            AddLog("AI 测试超时：服务器 60 秒内未回应。");
         }
         catch (Exception ex)
         {
+            AiSummaryTestStatus = $"测试失败：{ex.Message}";
             AddLog($"AI 测试失败：{ex.Message}");
         }
+        finally
+        {
+            IsTestingAiSummary = false;
+        }
     }
+
+    private bool CanTestAiSummary() => !IsTestingAiSummary;
 
     private async Task GenerateAndLogAiSummaryAsync()
     {
