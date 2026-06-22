@@ -348,8 +348,8 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="仅在自动运行时生效" IsChecked="{Binding AiSummaryOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <ComboBox Grid.Row="1" Grid.Column="1" Width="180" HorizontalAlignment="Left" ItemsSource="{Binding AiSummaryProviderOptions}" SelectedValuePath="Value" DisplayMemberPath="DisplayName" SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,4,0,4" />
+                                <ComboBox Grid.Row="1" Grid.Column="1" Width="170" HorizontalAlignment="Left" ItemsSource="{Binding AiSummaryProviderOptions}" SelectedValuePath="Value" DisplayMemberPath="DisplayName" SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,4" />
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
                                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZhipuApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
