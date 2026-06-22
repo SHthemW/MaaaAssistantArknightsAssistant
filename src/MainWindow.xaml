@@ -341,6 +341,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="70" />
@@ -359,8 +360,10 @@
                                 <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ZhipuSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
                                 <TextBlock Grid.Row="6" Grid.Column="0" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
                                 <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ZhipuTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
-                                <TextBlock Grid.Row="7" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                                <CheckBox Grid.Row="7" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="7" Grid.Column="0" Text="超时时间(秒):" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding ZhipuTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
+                                <TextBlock Grid.Row="8" Grid.Column="0" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                                <CheckBox Grid.Row="8" Grid.Column="1" Content="启用" IsChecked="{Binding ZhipuStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="70,8,0,0">
                                 <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" />

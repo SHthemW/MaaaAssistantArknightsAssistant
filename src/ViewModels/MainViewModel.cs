@@ -90,6 +90,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _zhipuModel = string.Empty;
     [ObservableProperty] private string _zhipuSystemPrompt = string.Empty;
     [ObservableProperty] private double _zhipuTemperature = 1.0;
+    [ObservableProperty] private int _zhipuTimeoutSeconds = 800;
     [ObservableProperty] private bool _zhipuStream = true;
     [ObservableProperty] private bool _autoScrollLogs = true;
 
@@ -160,6 +161,7 @@ public partial class MainViewModel : ObservableObject
         ZhipuModel = _appConfig.AiSummary.ZhipuAi.Model;
         ZhipuSystemPrompt = _appConfig.AiSummary.ZhipuAi.SystemPrompt;
         ZhipuTemperature = _appConfig.AiSummary.ZhipuAi.Temperature;
+        ZhipuTimeoutSeconds = _appConfig.AiSummary.ZhipuAi.TimeoutSeconds;
         ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;

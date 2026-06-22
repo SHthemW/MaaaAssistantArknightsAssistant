@@ -19,6 +19,8 @@ public class ZhipuAiSummaryConfig
 
     public double Temperature { get; set; } = 1.0;
 
+    public int TimeoutSeconds { get; set; } = 800;
+
     public bool Stream { get; set; } = true;
 }
 

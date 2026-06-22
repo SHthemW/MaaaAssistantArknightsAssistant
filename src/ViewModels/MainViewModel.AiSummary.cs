@@ -77,7 +77,8 @@ public partial class MainViewModel
         try
         {
             await _aiPromptLogService.WriteAsync(prompt);
-            var summary = await _aiSummaryService.GenerateAsync(config, prompt);
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(config.ZhipuAi.TimeoutSeconds, 1)));
+            var summary = await _aiSummaryService.GenerateAsync(config, prompt, timeoutCts.Token);
             if (string.IsNullOrWhiteSpace(summary))
             {
                 AddLog("AI 总结返回为空。");
@@ -85,6 +86,10 @@ public partial class MainViewModel
             }
 
             AddLog($"AI总结：{summary.Trim()}");
+        }
+        catch (OperationCanceledException)
+        {
+            AddLog($"AI 总结超时：服务器 {Math.Max(config.ZhipuAi.TimeoutSeconds, 1)} 秒内未回应。");
         }
         catch (Exception ex)
         {
@@ -104,6 +109,7 @@ public partial class MainViewModel
                 Model = ZhipuModel,
                 SystemPrompt = ZhipuSystemPrompt,
                 Temperature = ZhipuTemperature,
+                TimeoutSeconds = Math.Max(ZhipuTimeoutSeconds, 1),
                 Stream = ZhipuStream
             }
         };

@@ -8,7 +8,7 @@ namespace Game_Daily_Routine_Launcher;
 
 public sealed class ZhipuAiSummaryProvider : IAiSummaryProvider
 {
-    private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(60) };
+    private static readonly HttpClient Client = new() { Timeout = Timeout.InfiniteTimeSpan };
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public AiSummaryProviderType ProviderType => AiSummaryProviderType.ZhipuAi;
