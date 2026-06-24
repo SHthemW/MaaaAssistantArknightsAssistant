@@ -10,6 +10,8 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class MainWindow : Window
 {
+    private bool _cleanupCompleted;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -20,8 +22,21 @@ public partial class MainWindow : Window
                 LogListBox.ScrollIntoView(LogListBox.Items[^1]);
         };
 
-        Closing += (_, _) => (DataContext as MainViewModel)?.Cleanup();
+        Closing += OnClosing;
         Loaded += OnLoaded;
+    }
+
+    private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_cleanupCompleted)
+            return;
+
+        e.Cancel = true;
+        if (DataContext is MainViewModel vm)
+            await vm.CleanupAsync();
+
+        _cleanupCompleted = true;
+        Close();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
