@@ -29,40 +29,49 @@ public partial class MainViewModel
 
     private static WebhookPushContentCategory InferWebhookPushCategory(string message, string? rawBody)
     {
-        if (message.Contains("AI总结：", StringComparison.Ordinal) ||
-            message.Contains("AI 总结", StringComparison.Ordinal) ||
-            message.Contains("AI 智能总结", StringComparison.Ordinal))
+        if (ContainsAny(message, "AI总结：", "AI 总结", "AI 智能总结"))
             return WebhookPushContentCategory.AiSummary;
 
-        if (message.Contains("Webhook", StringComparison.Ordinal) || message.Contains("中转", StringComparison.Ordinal))
+        if (ContainsAny(message, "Webhook", "中转"))
             return WebhookPushContentCategory.Webhook;
 
-        if (message.Contains("静音", StringComparison.Ordinal) || message.Contains("音量", StringComparison.Ordinal))
+        if (ContainsAny(message, "静音", "音量"))
             return WebhookPushContentCategory.Audio;
 
-        if (message.Contains("亮度", StringComparison.Ordinal) || message.Contains("Twinkle Tray", StringComparison.Ordinal))
+        if (ContainsAny(message, "亮度", "Twinkle Tray"))
             return WebhookPushContentCategory.Brightness;
 
-        if (message.Contains("开机自启", StringComparison.Ordinal) ||
-            message.Contains("关机", StringComparison.Ordinal) ||
-            message.Contains("设置", StringComparison.Ordinal))
+        if (ContainsAny(
+            message,
+            "程序启动",
+            "程序退出",
+            "自动运行启动",
+            "静默退出",
+            "启动参数",
+            "关机"))
+            return WebhookPushContentCategory.PowerIndicator;
+
+        if (ContainsAny(
+            message,
+            "开机自启",
+            "计划任务",
+            "注册表自启",
+            "管理员权限",
+            "系统设置",
+            "设置"))
             return WebhookPushContentCategory.System;
 
-        if (message.Contains("任务链", StringComparison.Ordinal) ||
-            message.Contains("任务", StringComparison.Ordinal) ||
-            message.Contains("启动", StringComparison.Ordinal) ||
-            message.Contains("完成", StringComparison.Ordinal) ||
-            message.Contains("停止", StringComparison.Ordinal))
+        if (ContainsAny(message, "任务链", "任务", "启动", "完成", "停止"))
             return WebhookPushContentCategory.TaskExecution;
 
-        if (message.Contains("监控", StringComparison.Ordinal) ||
-            message.Contains("等待", StringComparison.Ordinal) ||
-            message.Contains("超时", StringComparison.Ordinal) ||
-            message.Contains("进程", StringComparison.Ordinal))
+        if (ContainsAny(message, "监控", "等待", "超时", "进程"))
             return WebhookPushContentCategory.TaskMonitoring;
 
         return WebhookPushContentCategory.Other;
     }
+
+    private static bool ContainsAny(string value, params string[] fragments) =>
+        fragments.Any(fragment => value.Contains(fragment, StringComparison.Ordinal));
 
     private void LoadWebhookPushContentOptions()
     {
@@ -88,6 +97,7 @@ public partial class MainViewModel
         (WebhookPushContentCategory.Brightness, "亮度调节"),
         (WebhookPushContentCategory.Webhook, "Webhook 推送"),
         (WebhookPushContentCategory.AiSummary, "AI 总结"),
+        (WebhookPushContentCategory.PowerIndicator, "开关指示"),
         (WebhookPushContentCategory.System, "系统设置"),
         (WebhookPushContentCategory.Other, "其他日志")
     ];

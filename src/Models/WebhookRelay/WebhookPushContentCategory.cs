@@ -8,6 +8,7 @@ public enum WebhookPushContentCategory
     Brightness,
     Webhook,
     AiSummary,
+    PowerIndicator,
     System,
     Other
 }
