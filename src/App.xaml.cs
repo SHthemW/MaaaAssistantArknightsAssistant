@@ -23,23 +23,30 @@ public partial class App : Application
 
         IsAutoRun = e.Args.Contains("--autorun", StringComparer.OrdinalIgnoreCase);
 
-        if (IsAutoRun)
+        if (ShouldExitSilentlyForAutoRun())
         {
-            var config = new ConfigService().Load();
-            var now = TimeOnly.FromDateTime(DateTime.Now);
-
-            if (!config.RandomStartEnabled && !config.IsInScheduledTimeRange(now))
-            {
-                RuntimeLogService.WriteMessage("自动运行启动，但当前不在允许的定时启动窗口，程序退出。");
-                Shutdown();
-                return;
-            }
+            RuntimeLogService.WriteMessage("自动运行启动，但当前不在允许的定时启动窗口，程序静默退出。");
+            Shutdown();
+            return;
         }
+
+        MainWindow = new MainWindow();
+        MainWindow.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
         RuntimeLogService.WriteMessage($"程序退出，退出码：{e.ApplicationExitCode}。");
         base.OnExit(e);
+    }
+
+    private static bool ShouldExitSilentlyForAutoRun()
+    {
+        if (!IsAutoRun)
+            return false;
+
+        var config = new ConfigService().Load();
+        var now = TimeOnly.FromDateTime(DateTime.Now);
+        return !config.IsInScheduledTimeRange(now);
     }
 }
