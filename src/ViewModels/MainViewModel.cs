@@ -34,6 +34,9 @@ public partial class MainViewModel : ObservableObject
     private bool _didAutoMute;
     private bool _originalMuteState;
     private float _originalVolume;
+    private bool _isTestAutoMuting;
+    private bool _testAutoMuteOriginalState;
+    private float _testAutoMuteOriginalVolume;
     private bool _didDimTwinkleTray;
     private IReadOnlyList<TwinkleTrayMonitorState> _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _hasRunInCurrentWindow;
@@ -57,6 +60,7 @@ public partial class MainViewModel : ObservableObject
     private bool _isRunning;
 
     [ObservableProperty] private bool _isMuted;
+    [ObservableProperty] private string _testAutoMuteButtonText = "测试";
     [ObservableProperty] private bool _muteOnStart;
     [ObservableProperty] private bool _muteOnlyOnAutoRun;
     [ObservableProperty] private bool _shutdownOnComplete;

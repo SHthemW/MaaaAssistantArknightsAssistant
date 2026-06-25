@@ -118,6 +118,31 @@ public partial class MainViewModel
     }
 
     [RelayCommand]
+    private void TestAutoMute()
+    {
+        if (_isTestAutoMuting)
+        {
+            _audioService.SetMute(_testAutoMuteOriginalState);
+            _audioService.SetVolume(_testAutoMuteOriginalVolume);
+            IsMuted = _audioService.IsMuted;
+            _isTestAutoMuting = false;
+            TestAutoMuteButtonText = "测试";
+            AddLog("测试自动静音已结束，音量已恢复。");
+        }
+        else
+        {
+            _testAutoMuteOriginalState = _audioService.IsMuted;
+            _testAutoMuteOriginalVolume = _audioService.Volume;
+            _audioService.SetMute(true);
+            _audioService.SetVolume(0f);
+            IsMuted = _audioService.IsMuted;
+            _isTestAutoMuting = true;
+            TestAutoMuteButtonText = "还原";
+            AddLog("测试自动静音已生效。");
+        }
+    }
+
+    [RelayCommand]
     private void ClearLogs()
     {
         LogEntries.Clear();
