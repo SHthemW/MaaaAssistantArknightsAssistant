@@ -9,6 +9,7 @@ public partial class MainViewModel
     private void StartStartupMuteEnforcement()
     {
         _originalMuteState = _audioService.IsMuted;
+        _originalVolume = _audioService.Volume;
         _didAutoMute = true;
         _startupMuteSuccessStreak = 0;
 
@@ -45,6 +46,7 @@ public partial class MainViewModel
         }
 
         _audioService.SetMute(true);
+        _audioService.SetVolume(0f);
         IsMuted = _audioService.IsMuted;
 
         if (IsMuted)
@@ -129,6 +131,7 @@ public partial class MainViewModel
             return;
 
         _audioService.SetMute(_originalMuteState);
+        _audioService.SetVolume(_originalVolume);
         AddLog("退出时已恢复原始静音状态。");
     }
 

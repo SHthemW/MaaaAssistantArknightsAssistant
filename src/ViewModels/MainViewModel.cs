@@ -33,6 +33,7 @@ public partial class MainViewModel : ObservableObject
     private bool _isLoading;
     private bool _didAutoMute;
     private bool _originalMuteState;
+    private float _originalVolume;
     private bool _didDimTwinkleTray;
     private IReadOnlyList<TwinkleTrayMonitorState> _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _hasRunInCurrentWindow;
