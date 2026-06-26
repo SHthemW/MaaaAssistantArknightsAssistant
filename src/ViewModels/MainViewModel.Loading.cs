@@ -18,6 +18,9 @@ public partial class MainViewModel
         LoadWebhookConfig();
 
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
+        var migration = SystemService.EnsureAutoRunUsesScheduledTask();
+        if (migration.changed && !string.IsNullOrWhiteSpace(migration.message) && !_isLoading)
+            AddLog(migration.message);
         IsMuted = _audioService.IsMuted;
         LoadWebhookPushContentOptions();
         RefreshTwinkleTrayAvailability();

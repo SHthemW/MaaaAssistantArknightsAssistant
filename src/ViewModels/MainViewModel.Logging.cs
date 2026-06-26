@@ -55,7 +55,6 @@ public partial class MainViewModel
             message,
             "开机自启",
             "计划任务",
-            "注册表自启",
             "管理员权限",
             "系统设置",
             "设置"))

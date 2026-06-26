@@ -20,7 +20,7 @@
 
 - **音量控制**：启动时自动静音，避免凌晨执行时打扰
 
-- **开机自启**：一键注册/取消 Windows 开机自启（基于注册表 `HKCU\...\Run`，无需管理员权限）
+- **开机自启**：一键启用/取消 Windows 开机自启（基于计划任务，无需管理员权限）
 
 - **定时启动窗口**：可配置允许自动启动的时间范围（如 04:00 ~ 06:00），程序运行期间持续检测，进入时间窗口时自动启动任务链
 
@@ -113,7 +113,7 @@ A WPF-based game daily routine automation launcher for managing and orchestratin
 - **Visual Management**: GUI displaying all task statuses with individual or batch launch support
 - **Configurable Paths**: All automation tool paths managed via JSON config, editable directly in the UI
 - **Volume Control**: Auto-mute on launch to avoid disturbance during early morning runs
-- **Auto-Start on Login**: One-click registration via Windows Registry (`HKCU\...\Run`), no admin privileges required
+- **Auto-Start on Login**: One-click enable/disable via Windows Task Scheduler, no admin privileges required
 - **Scheduled Time Window**: Configure an allowed auto-start time range (e.g., 04:00 ~ 06:00) — continuously monitored at runtime, automatically starts the task chain when entering the window
 - **Shutdown on Completion**: Optionally shut down the PC after all tasks finish
 - **Webhook Notifications**: HTTP POST on every log entry to a configured URL with customizable body template (`__TIME__`, `__CONTENT__` placeholders), includes a test button

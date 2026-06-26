@@ -60,8 +60,8 @@ public partial class MainViewModel
             : SystemService.UnregisterAutoRun();
 
         AddLog(success
-            ? $"开机自启{(value ? "注册" : "取消")}成功：{message}"
-            : $"开机自启{(value ? "注册" : "取消")}失败：{message}");
+            ? $"开机自启{(value ? "启用" : "取消")}成功：{message}"
+            : $"开机自启{(value ? "启用" : "取消")}失败：{message}");
     }
 
     partial void OnTwinkleTrayOnStartChanged(bool value)
