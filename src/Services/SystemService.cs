@@ -1,6 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Xml.Linq;
 using Microsoft.Win32;
 
 namespace Game_Daily_Routine_Launcher;
@@ -8,7 +11,8 @@ namespace Game_Daily_Routine_Launcher;
 public static class SystemService
 {
     private const string LegacyRunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
-    private const string DefaultTaskPrefix = "GameDailyRoutineLauncher";
+    private const string LegacyTaskPrefix = "GameDailyRoutineLauncher";
+    private const string LegacyBatchTaskName = "RunMyBatchAtLogon";
 
     public static void Shutdown(int delaySeconds = 10)
     {
@@ -34,17 +38,17 @@ public static class SystemService
 
     public static string GetAutoRunTaskName()
     {
-        var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName ?? "unknown";
-        var fileName = Path.GetFileNameWithoutExtension(exePath);
-        var normalized = string.IsNullOrWhiteSpace(fileName) ? "UnknownApp" : fileName;
-        return $"{DefaultTaskPrefix}-{normalized}";
+        var exePath = GetCurrentExePath() ?? "unknown";
+        var normalizedPath = NormalizePath(exePath);
+        var fileName = Path.GetFileNameWithoutExtension(normalizedPath);
+        return $"{GetTaskDisplayName(fileName)}-{BuildShortHash(normalizedPath)}";
     }
 
     public static (bool success, string message) RegisterAutoRun() => RegisterAutoRun(GetAutoRunTaskName());
 
     public static (bool success, string message) RegisterAutoRun(string taskName)
     {
-        var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
+        var exePath = GetCurrentExePath();
         if (exePath == null)
             return (false, "无法获取当前程序路径。");
 
@@ -60,52 +64,64 @@ public static class SystemService
         if (!createResult.success)
             return createResult;
 
-        var cleanupResult = CleanupLegacyAutoRunEntry(taskName);
-        return cleanupResult.changed
-            ? (true, $"已创建计划任务 {taskName}，并清理旧版注册表自启项。")
-            : (true, $"已创建计划任务 {taskName}，登录时将自动启动。");
+        var cleanupMessages = CleanupLegacyAutoRunEntries().ToList();
+        cleanupMessages.AddRange(CleanupLegacyScheduledTasks(taskName, exePath));
+        var cleanupText = FormatCleanupMessages(cleanupMessages);
+        return (true, $"已创建计划任务 {taskName}，登录时将自动启动。{cleanupText}");
     }
 
     public static (bool success, string message) UnregisterAutoRun() => UnregisterAutoRun(GetAutoRunTaskName());
 
     public static (bool success, string message) UnregisterAutoRun(string taskName)
     {
-        var deleteResult = RunSchtasksWithAutoElevate("/Delete", "/TN", taskName, "/F");
-        var cleanupResult = CleanupLegacyAutoRunEntry(taskName);
-
+        var exePath = GetCurrentExePath();
+        var deleteResult = DeleteScheduledTask(taskName);
         if (!deleteResult.success)
             return deleteResult;
 
-        return cleanupResult.changed
-            ? (true, $"已删除计划任务 {taskName}，并清理旧版注册表自启项。")
-            : (true, $"已删除计划任务 {taskName}。");
+        var cleanupMessages = CleanupLegacyAutoRunEntries().ToList();
+        if (exePath != null)
+            cleanupMessages.AddRange(CleanupLegacyScheduledTasks(taskName, exePath));
+
+        var cleanupText = FormatCleanupMessages(cleanupMessages);
+        return (true, $"{deleteResult.message}{cleanupText}");
     }
 
     public static bool IsAutoRunRegistered() => IsAutoRunRegistered(GetAutoRunTaskName());
 
     public static bool IsAutoRunRegistered(string taskName)
     {
-        return IsScheduledTaskRegistered(taskName) || HasLegacyAutoRunEntry(taskName);
+        return IsScheduledTaskRegistered(taskName) || HasLegacyAutoRunEntryForCurrentInstance();
     }
 
     public static (bool changed, string? message) EnsureAutoRunUsesScheduledTask() => EnsureAutoRunUsesScheduledTask(GetAutoRunTaskName());
 
     public static (bool changed, string? message) EnsureAutoRunUsesScheduledTask(string taskName)
     {
-        if (!HasLegacyAutoRunEntry(taskName))
+        var exePath = GetCurrentExePath();
+        if (exePath == null)
             return (false, null);
 
-        if (!IsScheduledTaskRegistered(taskName))
+        var messages = new List<string>();
+        var hasLegacyRegistry = HasLegacyAutoRunEntryForCurrentInstance();
+        var legacyTasks = GetLegacyScheduledTaskNames(taskName)
+            .Where(name => IsScheduledTaskForExe(name, exePath))
+            .ToList();
+
+        if ((hasLegacyRegistry || legacyTasks.Count > 0) && !IsScheduledTaskRegistered(taskName))
         {
             var migrated = RegisterAutoRun(taskName);
-            return migrated.success
-                ? (true, $"检测到旧版注册表自启项，已迁移为计划任务 {taskName}。")
-                : (true, $"检测到旧版注册表自启项，但迁移失败：{migrated.message}");
+            if (!migrated.success)
+                messages.Add($"检测到旧版开机自启项，但迁移失败：{migrated.message}");
+            else
+                messages.Add($"检测到旧版开机自启项，已迁移为当前实例专属计划任务 {taskName}。");
         }
 
-        var cleanupResult = CleanupLegacyAutoRunEntry(taskName);
-        return cleanupResult.changed
-            ? (true, $"检测到旧版注册表自启项，已自动清理。")
+        messages.AddRange(CleanupLegacyAutoRunEntries());
+        messages.AddRange(CleanupLegacyScheduledTasks(taskName, exePath));
+
+        return messages.Count > 0
+            ? (true, string.Join(" ", messages))
             : (false, null);
     }
 
@@ -113,6 +129,17 @@ public static class SystemService
     {
         var result = RunSchtasks("/Query", "/TN", taskName);
         return result.success;
+    }
+
+    private static (bool success, string message) DeleteScheduledTask(string taskName)
+    {
+        if (!IsScheduledTaskRegistered(taskName))
+            return (true, $"计划任务 {taskName} 不存在，无需删除。");
+
+        var deleteResult = RunSchtasksWithAutoElevate("/Delete", "/TN", taskName, "/F");
+        return deleteResult.success
+            ? (true, $"已删除计划任务 {taskName}。")
+            : deleteResult;
     }
 
     private static (bool success, string message) RunSchtasksWithAutoElevate(params string[] arguments)
@@ -131,10 +158,7 @@ public static class SystemService
         return (false, AppendElevateHint(elevatedResult.message));
     }
 
-    private static (bool success, string message) RunSchtasks(params string[] arguments)
-    {
-        return RunProcess("schtasks.exe", arguments);
-    }
+    private static (bool success, string message) RunSchtasks(params string[] arguments) => RunProcess("schtasks.exe", arguments);
 
     private static (bool success, string message) RunProcess(string fileName, params string[] arguments)
     {
@@ -225,33 +249,174 @@ public static class SystemService
         return string.IsNullOrWhiteSpace(message) ? "命令执行成功。" : message;
     }
 
-    private static bool HasLegacyAutoRunEntry(string taskName)
+    private static string? GetCurrentExePath()
+    {
+        var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
+        return string.IsNullOrWhiteSpace(exePath) ? null : exePath;
+    }
+
+    private static string NormalizePath(string path)
     {
         try
         {
-            using var key = Registry.CurrentUser.OpenSubKey(LegacyRunKey);
-            return key?.GetValue(taskName) != null;
+            return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).ToUpperInvariant();
         }
         catch
         {
-            return false;
+            return path.Trim().ToUpperInvariant();
         }
     }
 
-    private static (bool changed, string? message) CleanupLegacyAutoRunEntry(string taskName)
+    private static string BuildShortHash(string value)
     {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
+        return Convert.ToHexString(bytes)[..12];
+    }
+
+    private static string GetTaskDisplayName(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return "UnknownApp";
+
+        return string.Equals(fileName, "MaaaAssistantArknightsAssistant", StringComparison.OrdinalIgnoreCase)
+            ? "MAAA"
+            : fileName;
+    }
+
+    private static string GetLegacyFileNameTaskName()
+    {
+        var exePath = GetCurrentExePath() ?? "unknown";
+        var fileName = Path.GetFileNameWithoutExtension(exePath);
+        var normalized = string.IsNullOrWhiteSpace(fileName) ? "UnknownApp" : fileName;
+        return $"{LegacyTaskPrefix}-{normalized}";
+    }
+
+    private static IEnumerable<string> GetLegacyScheduledTaskNames(string currentTaskName)
+    {
+        return new[] { LegacyTaskPrefix, GetLegacyFileNameTaskName(), LegacyBatchTaskName }
+            .Where(name => !string.Equals(name, currentTaskName, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool HasLegacyAutoRunEntryForCurrentInstance()
+    {
+        return FindLegacyAutoRunEntriesForCurrentInstance().Count > 0;
+    }
+
+    private static IReadOnlyList<string> FindLegacyAutoRunEntriesForCurrentInstance()
+    {
+        var exePath = GetCurrentExePath();
+        if (exePath == null)
+            return Array.Empty<string>();
+
+        var legacyNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            LegacyTaskPrefix,
+            GetLegacyFileNameTaskName(),
+            GetAutoRunTaskName()
+        };
+
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(LegacyRunKey);
+            if (key == null)
+                return Array.Empty<string>();
+
+            return key.GetValueNames()
+                .Where(name => legacyNames.Contains(name) || CommandTargetsExe(key.GetValue(name) as string, exePath))
+                .ToList();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    private static IReadOnlyList<string> CleanupLegacyAutoRunEntries()
+    {
+        var names = FindLegacyAutoRunEntriesForCurrentInstance();
+        if (names.Count == 0)
+            return Array.Empty<string>();
+
+        var messages = new List<string>();
+
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(LegacyRunKey, writable: true);
-            if (key?.GetValue(taskName) == null)
-                return (false, null);
+            if (key == null)
+                return messages;
 
-            key.DeleteValue(taskName);
-            return (true, $"已清理旧版注册表自启项 {taskName}。");
+            foreach (var name in names)
+            {
+                if (key.GetValue(name) == null)
+                    continue;
+
+                key.DeleteValue(name);
+                messages.Add($"检测到旧版注册表自启项 {name}，已自动清理。");
+            }
         }
         catch (Exception ex)
         {
-            return (false, ex.Message);
+            messages.Add($"检测到旧版注册表自启项，但清理失败：{ex.Message}");
         }
+
+        return messages;
+    }
+
+    private static IEnumerable<string> CleanupLegacyScheduledTasks(string currentTaskName, string exePath)
+    {
+        foreach (var taskName in GetLegacyScheduledTaskNames(currentTaskName))
+        {
+            if (!IsScheduledTaskForExe(taskName, exePath))
+                continue;
+
+            var result = DeleteScheduledTask(taskName);
+            yield return result.success
+                ? $"检测到旧版共享计划任务 {taskName}，已自动清理。"
+                : $"检测到旧版共享计划任务 {taskName}，但清理失败：{result.message}";
+        }
+    }
+
+    private static bool IsScheduledTaskForExe(string taskName, string exePath)
+    {
+        var result = RunSchtasks("/Query", "/TN", taskName, "/XML");
+        if (!result.success)
+            return false;
+
+        try
+        {
+            var document = XDocument.Parse(result.message);
+            var exec = document.Descendants().FirstOrDefault(node => node.Name.LocalName == "Exec");
+            var command = exec?.Elements().FirstOrDefault(node => node.Name.LocalName == "Command")?.Value;
+            var arguments = exec?.Elements().FirstOrDefault(node => node.Name.LocalName == "Arguments")?.Value;
+            return PathTargetsExe(command, exePath)
+                || CommandTargetsExe($"{command} {arguments}", exePath);
+        }
+        catch
+        {
+            return CommandTargetsExe(result.message, exePath);
+        }
+    }
+
+    private static bool CommandTargetsExe(string? command, string exePath)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+            return false;
+
+        return command.Contains(exePath, StringComparison.OrdinalIgnoreCase)
+            || command.Contains(NormalizePath(exePath), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool PathTargetsExe(string? path, string exePath)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return false;
+
+        return string.Equals(NormalizePath(path), NormalizePath(exePath), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FormatCleanupMessages(IReadOnlyCollection<string> messages)
+    {
+        return messages.Count == 0 ? string.Empty : $" {string.Join(" ", messages)}";
     }
 }

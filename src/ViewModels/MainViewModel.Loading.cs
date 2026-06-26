@@ -17,15 +17,16 @@ public partial class MainViewModel
         LoadAiSummaryConfig();
         LoadWebhookConfig();
 
-        AutoRunOnStart = SystemService.IsAutoRunRegistered();
         var migration = SystemService.EnsureAutoRunUsesScheduledTask();
-        if (migration.changed && !string.IsNullOrWhiteSpace(migration.message) && !_isLoading)
-            AddLog(migration.message);
+        AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
         LoadWebhookPushContentOptions();
         RefreshTwinkleTrayAvailability();
 
         _isLoading = false;
+
+        if (migration.changed && !string.IsNullOrWhiteSpace(migration.message))
+            AddLog(migration.message);
 
         if (App.IsAutoRun && RandomStartEnabled)
             _randomAutoStartTime = _appConfig.GetRandomScheduledStartTime(DateTime.Now, Random.Shared);

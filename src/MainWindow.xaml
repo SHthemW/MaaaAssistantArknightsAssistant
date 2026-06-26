@@ -166,9 +166,9 @@
         <GroupBox Grid.Row="4" Header="防打扰" Padding="8" Margin="0,8,0,0">
             <Grid Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="34" />
+                    <RowDefinition Height="Auto" MinHeight="34" />
+                    <RowDefinition Height="Auto" MinHeight="34" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="AntiDisturbPrimary" />
