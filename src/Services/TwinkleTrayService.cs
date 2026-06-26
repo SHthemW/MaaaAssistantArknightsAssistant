@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Game_Daily_Routine_Launcher;
 
@@ -25,11 +26,11 @@ public sealed class TwinkleTrayService
 
     public IReadOnlyList<TwinkleTrayMonitorState> CaptureCurrentStates()
     {
-        var available = DetectAvailability();
-        if (!available.IsAvailable || string.IsNullOrWhiteSpace(available.ExecutablePath))
+        var availability = DetectAvailability();
+        if (!availability.IsAvailable || string.IsNullOrWhiteSpace(availability.ExecutablePath))
             return Array.Empty<TwinkleTrayMonitorState>();
 
-        var output = RunCapture(available.ExecutablePath, "--List");
+        var output = RunCapture(availability.ExecutablePath, "--List");
         return ParseMonitorStates(output);
     }
 
@@ -83,33 +84,51 @@ public sealed class TwinkleTrayService
     private static IReadOnlyList<TwinkleTrayMonitorState> ParseMonitorStates(string output)
     {
         var states = new List<TwinkleTrayMonitorState>();
-        var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var index = 1;
+        var cleaned = StripAnsiEscapeSequences(output);
+        var blocks = cleaned.Split(["\r\n\r\n", "\n\n", "\r\r"], StringSplitOptions.RemoveEmptyEntries);
 
-        foreach (var line in lines)
+        foreach (var block in blocks)
         {
-            var trimmed = line.Trim();
-            if (string.IsNullOrWhiteSpace(trimmed))
+            var normalized = block.Trim();
+            if (string.IsNullOrWhiteSpace(normalized))
                 continue;
 
-            if (!trimmed.Contains("Monitor", StringComparison.OrdinalIgnoreCase) &&
-                !trimmed.Contains("Display", StringComparison.OrdinalIgnoreCase))
+            var monitorNum = ExtractValue(normalized, @"MonitorNum\s*:\s*(\d+)");
+            var monitorId = ExtractValue(normalized, @"MonitorID\s*:\s*(.+)");
+            var name = ExtractValue(normalized, @"Name\s*:\s*(.+)");
+            var brightness = ExtractBrightness(normalized);
+
+            if (string.IsNullOrWhiteSpace(monitorNum) || string.IsNullOrWhiteSpace(monitorId))
                 continue;
 
-            states.Add(new TwinkleTrayMonitorState("MonitorNum", index.ToString(), ExtractBrightness(trimmed), trimmed));
-            index++;
+            states.Add(new TwinkleTrayMonitorState(
+                "MonitorID",
+                monitorId,
+                brightness,
+                name));
         }
 
         return states;
     }
 
-    private static int ExtractBrightness(string line)
+    private static string ExtractValue(string block, string pattern)
     {
-        var digits = new string(line.Where(char.IsDigit).ToArray());
-        if (int.TryParse(digits, out var value))
+        var match = Regex.Match(block, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        return match.Success ? match.Groups[1].Value.Trim() : string.Empty;
+    }
+
+    private static int ExtractBrightness(string block)
+    {
+        var match = Regex.Match(block, @"Brightness\s*:\s*(\d{1,3})", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        if (match.Success && int.TryParse(match.Groups[1].Value, out var value))
             return Math.Clamp(value, LowestBrightness, 100);
 
         return LowestBrightness;
+    }
+
+    private static string StripAnsiEscapeSequences(string text)
+    {
+        return Regex.Replace(text, @"\x1B\[[0-?]*[ -/]*[@-~]", string.Empty);
     }
 
     private static string RunCapture(string fileName, string arguments)

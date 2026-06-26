@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using System.IO;
 using System.Text;
 
@@ -142,6 +142,86 @@ public partial class MainViewModel
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanRunTwinkleTrayTest))]
+    private async Task TestTwinkleTray()
+    {
+        IsTwinkleTrayTestBusy = true;
+        TestTwinkleTrayButtonText = _isTwinkleTrayTestDimmed ? "还原" : "等待";
+        AddLog("正在检测 Twinkle Tray...");
+
+        try
+        {
+            await RunTwinkleTrayTestFlowAsync();
+        }
+        finally
+        {
+            IsTwinkleTrayTestBusy = false;
+            TestTwinkleTrayButtonText = _isTwinkleTrayTestDimmed ? "还原" : "测试";
+        }
+    }
+
+    private bool CanRunTwinkleTrayTest() => !IsTwinkleTrayTestBusy;
+
+    private async Task RunTwinkleTrayTestFlowAsync()
+    {
+        var availability = await DetectTwinkleTrayAvailabilityWithRetryAsync();
+        if (!availability.IsAvailable)
+        {
+            AddLog($"Twinkle Tray 测试失败：{availability.Message}");
+            return;
+        }
+
+        if (_isTwinkleTrayTestDimmed)
+        {
+            var restoreStates = _testTwinkleTrayOriginalStates.Count > 0
+                ? _testTwinkleTrayOriginalStates
+                : await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
+
+            AddLog($"Twinkle Tray 恢复目标：{string.Join("；", restoreStates.Select(x => $"{x.DisplayName ?? x.SelectorValue}:{x.Brightness}%"))}");
+
+            var restoreResult = await _twinkleTrayService.RestoreAsync(availability, restoreStates);
+            if (restoreResult.Success)
+            {
+                _isTwinkleTrayTestDimmed = false;
+                _testTwinkleTrayOriginalStates = Array.Empty<TwinkleTrayMonitorState>();
+                AddLog("Twinkle Tray 测试已恢复原始亮度。");
+            }
+            else
+            {
+                AddLog($"Twinkle Tray 测试恢复失败：{restoreResult.Message}");
+            }
+
+            return;
+        }
+
+        _testTwinkleTrayOriginalStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
+        AddLog($"Twinkle Tray 原始亮度：{string.Join("；", _testTwinkleTrayOriginalStates.Select(x => $"{x.DisplayName ?? x.SelectorValue}:{x.Brightness}%"))}");
+        var dimResult = await _twinkleTrayService.SetAllLowestAsync(availability);
+        if (dimResult.Success)
+        {
+            _isTwinkleTrayTestDimmed = true;
+            AddLog("Twinkle Tray 测试已将亮度调至最低。");
+        }
+        else
+        {
+            AddLog($"Twinkle Tray 测试失败：{dimResult.Message}");
+        }
+    }
+
+    private async Task<TwinkleTrayAvailability> DetectTwinkleTrayAvailabilityWithRetryAsync()
+    {
+        var delaySeconds = 1;
+        while (true)
+        {
+            var availability = await Task.Run(() => _twinkleTrayService.DetectAvailability());
+            if (availability.IsAvailable || _isCleaningUp)
+                return availability;
+
+            TwinkleTrayAvailabilityMessage = availability.Message;
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+            delaySeconds = Math.Min(delaySeconds + 1, 5);
+        }
+    }
     [RelayCommand]
     private void ClearLogs()
     {

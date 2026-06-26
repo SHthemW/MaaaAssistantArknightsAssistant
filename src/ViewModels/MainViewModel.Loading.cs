@@ -33,7 +33,7 @@ public partial class MainViewModel
         if (MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun))
             StartStartupMuteEnforcement();
 
-        if (TwinkleTrayOnStart && (!TwinkleTrayOnlyOnAutoRun || App.IsAutoRun) && TwinkleTrayIsAvailable)
+        if (TwinkleTrayOnStart && (!TwinkleTrayOnlyOnAutoRun || App.IsAutoRun))
             StartStartupTwinkleTrayEnforcement();
 
         RefreshWebhookRelayState();

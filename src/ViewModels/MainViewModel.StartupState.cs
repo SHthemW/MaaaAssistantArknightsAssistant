@@ -1,4 +1,4 @@
-namespace Game_Daily_Routine_Launcher;
+﻿namespace Game_Daily_Routine_Launcher;
 
 public partial class MainViewModel
 {
@@ -19,7 +19,6 @@ public partial class MainViewModel
 
     private void StartStartupTwinkleTrayEnforcement()
     {
-        _originalTwinkleTrayStates = _twinkleTrayService.CaptureCurrentStates();
         _didDimTwinkleTray = true;
         _startupTwinkleTraySuccessStreak = 0;
 
@@ -62,7 +61,7 @@ public partial class MainViewModel
 
     private async Task EnforceStartupTwinkleTrayAsync()
     {
-        if (_isCleaningUp || !TwinkleTrayIsAvailable || _twinkleTrayStartupInProgress)
+        if (_isCleaningUp || _twinkleTrayStartupInProgress)
             return;
 
         _twinkleTrayStartupInProgress = true;
@@ -74,11 +73,12 @@ public partial class MainViewModel
 
             if (!result.IsAvailable)
             {
-                TwinkleTrayIsAvailable = false;
                 TwinkleTrayAvailabilityMessage = result.Message;
-                _startupTwinkleTrayTimer.Stop();
                 return;
             }
+
+            TwinkleTrayIsAvailable = true;
+            TwinkleTrayAvailabilityMessage = result.Message;
 
             if (_originalTwinkleTrayStates.Count == 0)
                 _originalTwinkleTrayStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
@@ -92,6 +92,7 @@ public partial class MainViewModel
 
             if (dimResult.Success)
             {
+                _didDimTwinkleTray = true;
                 if (++_startupTwinkleTraySuccessStreak >= 3)
                     _startupTwinkleTrayTimer.Stop();
             }

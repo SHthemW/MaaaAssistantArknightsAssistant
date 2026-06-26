@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -10,6 +10,9 @@ public partial class MainViewModel : ObservableObject
     [
         nameof(IsRunning),
         nameof(IsMuted),
+        nameof(TestAutoMuteButtonText),
+        nameof(TestTwinkleTrayButtonText),
+        nameof(IsTwinkleTrayTestBusy),
         nameof(TwinkleTrayIsAvailable),
         nameof(TwinkleTrayAvailabilityMessage),
         nameof(AutoRunOnStart),
@@ -37,6 +40,8 @@ public partial class MainViewModel : ObservableObject
     private bool _isTestAutoMuting;
     private bool _testAutoMuteOriginalState;
     private float _testAutoMuteOriginalVolume;
+    private bool _isTwinkleTrayTestDimmed;
+    private IReadOnlyList<TwinkleTrayMonitorState> _testTwinkleTrayOriginalStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _didDimTwinkleTray;
     private IReadOnlyList<TwinkleTrayMonitorState> _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _hasRunInCurrentWindow;
@@ -61,6 +66,10 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty] private bool _isMuted;
     [ObservableProperty] private string _testAutoMuteButtonText = "测试";
+    [ObservableProperty] private string _testTwinkleTrayButtonText = "测试";
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(TestTwinkleTrayCommand))]
+    private bool _isTwinkleTrayTestBusy;
     [ObservableProperty] private bool _muteOnStart;
     [ObservableProperty] private bool _muteOnlyOnAutoRun;
     [ObservableProperty] private bool _shutdownOnComplete;

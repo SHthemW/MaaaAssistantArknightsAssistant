@@ -1,4 +1,4 @@
-namespace Game_Daily_Routine_Launcher;
+﻿namespace Game_Daily_Routine_Launcher;
 
 public partial class MainViewModel
 {
@@ -68,12 +68,6 @@ public partial class MainViewModel
     {
         if (_isLoading)
             return;
-
-        if (value && !TwinkleTrayIsAvailable)
-        {
-            TwinkleTrayOnStart = false;
-            AddLog($"Twinkle Tray 不可用：{TwinkleTrayAvailabilityMessage}");
-        }
     }
 
     private void RefreshTwinkleTrayAvailability()
@@ -84,8 +78,6 @@ public partial class MainViewModel
 
         if (!availability.IsAvailable)
         {
-            TwinkleTrayOnStart = false;
-            TwinkleTrayOnlyOnAutoRun = false;
             if (!_isLoading)
                 AddLog($"Twinkle Tray 不可用：{availability.Message}");
         }
