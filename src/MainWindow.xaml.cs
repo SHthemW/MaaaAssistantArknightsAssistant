@@ -11,6 +11,7 @@ namespace Game_Daily_Routine_Launcher;
 public partial class MainWindow : Window
 {
     private bool _cleanupCompleted;
+    private bool _cleanupInProgress;
 
     public MainWindow()
     {
@@ -32,11 +33,15 @@ public partial class MainWindow : Window
             return;
 
         e.Cancel = true;
+        if (_cleanupInProgress)
+            return;
+
+        _cleanupInProgress = true;
         if (DataContext is MainViewModel vm)
             await vm.CleanupAsync();
 
         _cleanupCompleted = true;
-        Close();
+        _ = Dispatcher.BeginInvoke(new Action(Close));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

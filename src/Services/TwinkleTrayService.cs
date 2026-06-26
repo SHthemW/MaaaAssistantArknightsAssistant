@@ -7,6 +7,7 @@ namespace Game_Daily_Routine_Launcher;
 public sealed class TwinkleTrayService
 {
     private const int LowestBrightness = 1;
+    private static readonly TimeSpan CommandExitGracePeriod = TimeSpan.FromSeconds(2);
 
     public TwinkleTrayAvailability DetectAvailability()
     {
@@ -50,13 +51,9 @@ public sealed class TwinkleTrayService
         if (!availability.IsAvailable || string.IsNullOrWhiteSpace(availability.ExecutablePath))
             return new TwinkleTrayCommandResult(false, availability.Message);
 
-        var errors = new List<string>();
-        foreach (var monitor in originalStates)
-        {
-            var result = await RunCommandAsync(availability.ExecutablePath, monitor.BuildSetArguments(), cancellationToken);
-            if (!result.Success)
-                errors.Add(result.Message);
-        }
+        var results = await Task.WhenAll(originalStates.Select(monitor =>
+            RunCommandAsync(availability.ExecutablePath, monitor.BuildSetArguments(), cancellationToken)));
+        var errors = results.Where(result => !result.Success).Select(result => result.Message).ToList();
 
         return errors.Count == 0
             ? new TwinkleTrayCommandResult(true, "已恢复显示器亮度。")
@@ -168,24 +165,24 @@ public sealed class TwinkleTrayService
                 FileName = fileName,
                 Arguments = arguments,
                 UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             using var process = Process.Start(psi);
             if (process == null)
                 return new TwinkleTrayCommandResult(false, "无法启动 Twinkle Tray 命令。");
 
-            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-            var output = await outputTask;
-            var error = await errorTask;
+            var exitTask = process.WaitForExitAsync(cancellationToken);
+            var completedTask = await Task.WhenAny(exitTask, Task.Delay(CommandExitGracePeriod, cancellationToken));
+            if (completedTask != exitTask)
+                return new TwinkleTrayCommandResult(true, "命令已发送，Twinkle Tray 仍在后台处理。");
+
+            await exitTask;
 
             return process.ExitCode == 0
-                ? new TwinkleTrayCommandResult(true, string.IsNullOrWhiteSpace(output) ? "命令执行成功。" : output.Trim())
-                : new TwinkleTrayCommandResult(false, string.IsNullOrWhiteSpace(error) ? "命令执行失败。" : error.Trim());
+                ? new TwinkleTrayCommandResult(true, "命令执行成功。")
+                : new TwinkleTrayCommandResult(false, $"命令执行失败，退出码 {process.ExitCode}。");
         }
         catch (Exception ex)
         {
