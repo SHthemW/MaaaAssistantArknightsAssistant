@@ -170,7 +170,8 @@ public static class SystemService
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             foreach (var argument in arguments)
@@ -204,7 +205,8 @@ public static class SystemService
                 FileName = fileName,
                 UseShellExecute = true,
                 Verb = "runas",
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden
             };
 
             foreach (var argument in arguments)
