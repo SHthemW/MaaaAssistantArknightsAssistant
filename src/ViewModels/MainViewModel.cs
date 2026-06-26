@@ -34,14 +34,12 @@ public partial class MainViewModel : ObservableObject
     private AppConfig _appConfig;
     private TaskChainRunner? _chainRunner;
     private bool _isLoading;
+    private bool _hasMuteSnapshot;
     private bool _didAutoMute;
     private bool _originalMuteState;
     private float _originalVolume;
     private bool _isTestAutoMuting;
-    private bool _testAutoMuteOriginalState;
-    private float _testAutoMuteOriginalVolume;
     private bool _isTwinkleTrayTestDimmed;
-    private IReadOnlyList<TwinkleTrayMonitorState> _testTwinkleTrayOriginalStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _didDimTwinkleTray;
     private IReadOnlyList<TwinkleTrayMonitorState> _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
     private bool _hasRunInCurrentWindow;

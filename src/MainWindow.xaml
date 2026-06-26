@@ -72,7 +72,6 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="启动全部" Style="{StaticResource ActionButton}" Command="{Binding StartAllCommand}" Margin="0,0,8,0" />
                 <Button Content="停止全部" Style="{StaticResource StopButton}" Command="{Binding StopAllCommand}" Margin="0,0,8,0" />
-                <Button Content="{Binding IsMuted, Converter={x:Static local:MuteTextConverter.Instance}}" Style="{StaticResource SmallButton}" Command="{Binding ToggleMuteCommand}" />
             </StackPanel>
         </DockPanel>
 

@@ -122,20 +122,15 @@ public partial class MainViewModel
     {
         if (_isTestAutoMuting)
         {
-            _audioService.SetMute(_testAutoMuteOriginalState);
-            _audioService.SetVolume(_testAutoMuteOriginalVolume);
-            IsMuted = _audioService.IsMuted;
+            RestoreMute();
             _isTestAutoMuting = false;
             TestAutoMuteButtonText = "测试";
             AddLog("测试自动静音已结束，音量已恢复。");
         }
         else
         {
-            _testAutoMuteOriginalState = _audioService.IsMuted;
-            _testAutoMuteOriginalVolume = _audioService.Volume;
-            _audioService.SetMute(true);
-            _audioService.SetVolume(0f);
-            IsMuted = _audioService.IsMuted;
+            _didAutoMute = true;
+            ApplyMute();
             _isTestAutoMuting = true;
             TestAutoMuteButtonText = "还原";
             AddLog("测试自动静音已生效。");
@@ -173,38 +168,27 @@ public partial class MainViewModel
 
         if (_isTwinkleTrayTestDimmed)
         {
-            var restoreStates = _testTwinkleTrayOriginalStates.Count > 0
-                ? _testTwinkleTrayOriginalStates
-                : await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
-
-            AddLog($"Twinkle Tray 恢复目标：{string.Join("；", restoreStates.Select(x => $"{x.DisplayName ?? x.SelectorValue}:{x.Brightness}%"))}");
-
-            var restoreResult = await _twinkleTrayService.RestoreAsync(availability, restoreStates);
-            if (restoreResult.Success)
+            if (await RestoreTwinkleTrayAsync(availability))
             {
                 _isTwinkleTrayTestDimmed = false;
-                _testTwinkleTrayOriginalStates = Array.Empty<TwinkleTrayMonitorState>();
                 AddLog("Twinkle Tray 测试已恢复原始亮度。");
             }
             else
             {
-                AddLog($"Twinkle Tray 测试恢复失败：{restoreResult.Message}");
+                AddLog($"Twinkle Tray 测试恢复失败：{TwinkleTrayAvailabilityMessage}");
             }
 
             return;
         }
 
-        _testTwinkleTrayOriginalStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
-        AddLog($"Twinkle Tray 原始亮度：{string.Join("；", _testTwinkleTrayOriginalStates.Select(x => $"{x.DisplayName ?? x.SelectorValue}:{x.Brightness}%"))}");
-        var dimResult = await _twinkleTrayService.SetAllLowestAsync(availability);
-        if (dimResult.Success)
+        if (await ApplyTwinkleTrayDimAsync(availability))
         {
             _isTwinkleTrayTestDimmed = true;
             AddLog("Twinkle Tray 测试已将亮度调至最低。");
         }
         else
         {
-            AddLog($"Twinkle Tray 测试失败：{dimResult.Message}");
+            AddLog($"Twinkle Tray 测试失败：{TwinkleTrayAvailabilityMessage}");
         }
     }
 

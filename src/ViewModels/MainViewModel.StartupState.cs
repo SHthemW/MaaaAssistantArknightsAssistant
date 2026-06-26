@@ -8,8 +8,7 @@ public partial class MainViewModel
 
     private void StartStartupMuteEnforcement()
     {
-        _originalMuteState = _audioService.IsMuted;
-        _originalVolume = _audioService.Volume;
+        CaptureMuteSnapshot();
         _didAutoMute = true;
         _startupMuteSuccessStreak = 0;
 
@@ -35,20 +34,7 @@ public partial class MainViewModel
 
     private void EnforceStartupMuteOnce()
     {
-        if (_audioService.IsMuted)
-        {
-            IsMuted = true;
-            if (++_startupMuteSuccessStreak >= 3)
-                _startupMuteTimer.Stop();
-
-            return;
-        }
-
-        _audioService.SetMute(true);
-        _audioService.SetVolume(0f);
-        IsMuted = _audioService.IsMuted;
-
-        if (IsMuted)
+        if (ApplyMute())
         {
             if (++_startupMuteSuccessStreak >= 3)
                 _startupMuteTimer.Stop();
@@ -80,26 +66,14 @@ public partial class MainViewModel
             TwinkleTrayIsAvailable = true;
             TwinkleTrayAvailabilityMessage = result.Message;
 
-            if (_originalTwinkleTrayStates.Count == 0)
-                _originalTwinkleTrayStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
-
-            if (_isCleaningUp)
-                return;
-
-            var dimResult = await _twinkleTrayService.SetAllLowestAsync(result);
-            if (_isCleaningUp)
-                return;
-
-            if (dimResult.Success)
+            if (await ApplyTwinkleTrayDimAsync(result))
             {
-                _didDimTwinkleTray = true;
                 if (++_startupTwinkleTraySuccessStreak >= 3)
                     _startupTwinkleTrayTimer.Stop();
             }
             else
             {
                 _startupTwinkleTraySuccessStreak = 0;
-                TwinkleTrayAvailabilityMessage = dimResult.Message;
             }
         }
         finally
@@ -128,12 +102,11 @@ public partial class MainViewModel
 
     private void RestoreOriginalMuteState()
     {
-        if (!_didAutoMute || !_audioService.IsMuted)
+        if (!_didAutoMute)
             return;
 
-        _audioService.SetMute(_originalMuteState);
-        _audioService.SetVolume(_originalVolume);
-        AddLog("退出时已恢复原始静音状态。");
+        if (RestoreMute())
+            AddLog("退出时已恢复原始静音状态。");
     }
 
     private async Task RestoreOriginalTwinkleTrayStateAsync()
@@ -148,9 +121,76 @@ public partial class MainViewModel
             return;
         }
 
-        var restoreResult = await _twinkleTrayService.RestoreAsync(result, _originalTwinkleTrayStates);
-        AddLog(restoreResult.Success
-            ? "退出时已恢复原始亮度。"
-            : $"退出时恢复亮度失败：{restoreResult.Message}");
+        if (await RestoreTwinkleTrayAsync(result))
+            AddLog("退出时已恢复原始亮度。");
+        else
+            AddLog("退出时恢复亮度失败。");
+    }
+
+    private bool ApplyMute()
+    {
+        _didAutoMute = true;
+        if (!_hasMuteSnapshot)
+            CaptureMuteSnapshot();
+
+        _audioService.SetMute(true);
+        _audioService.SetVolume(0f);
+        IsMuted = _audioService.IsMuted;
+        return IsMuted;
+    }
+
+    private bool RestoreMute()
+    {
+        if (!_hasMuteSnapshot)
+            return false;
+
+        _audioService.SetMute(_originalMuteState);
+        _audioService.SetVolume(_originalVolume);
+        IsMuted = _audioService.IsMuted;
+        return IsMuted == _originalMuteState;
+    }
+
+    private async Task<bool> ApplyTwinkleTrayDimAsync(TwinkleTrayAvailability availability)
+    {
+        _didDimTwinkleTray = true;
+
+        if (_originalTwinkleTrayStates.Count == 0)
+            _originalTwinkleTrayStates = await Task.Run(() => _twinkleTrayService.CaptureCurrentStates());
+
+        if (_originalTwinkleTrayStates.Count == 0)
+            return false;
+
+        var dimResult = await _twinkleTrayService.SetAllLowestAsync(availability);
+        if (!dimResult.Success)
+        {
+            TwinkleTrayAvailabilityMessage = dimResult.Message;
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> RestoreTwinkleTrayAsync(TwinkleTrayAvailability availability)
+    {
+        if (_originalTwinkleTrayStates.Count == 0)
+            return false;
+
+        var restoreResult = await _twinkleTrayService.RestoreAsync(availability, _originalTwinkleTrayStates);
+        if (!restoreResult.Success)
+        {
+            TwinkleTrayAvailabilityMessage = restoreResult.Message;
+            return false;
+        }
+
+        _didDimTwinkleTray = false;
+        _originalTwinkleTrayStates = Array.Empty<TwinkleTrayMonitorState>();
+        return true;
+    }
+
+    private void CaptureMuteSnapshot()
+    {
+        _originalMuteState = _audioService.IsMuted;
+        _originalVolume = _audioService.Volume;
+        _hasMuteSnapshot = true;
     }
 }
