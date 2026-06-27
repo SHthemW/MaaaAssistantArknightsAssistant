@@ -84,6 +84,15 @@ public partial class MainViewModel
 
     public Task CleanupAsync() => _cleanupTask ??= CleanupCoreAsync();
 
+    private async Task RestoreConfiguredStateAsync()
+    {
+        if (RestoreVolumeOnCompletion)
+            RestoreOriginalMuteState();
+
+        if (RestoreBrightnessOnCompletion)
+            await RestoreOriginalTwinkleTrayStateAsync();
+    }
+
     private async Task CleanupCoreAsync()
     {
         _isCleaningUp = true;
@@ -96,8 +105,7 @@ public partial class MainViewModel
             await _startupTwinkleTrayTask;
 
         await _webhookRelayService.StopAsync();
-        RestoreOriginalMuteState();
-        await RestoreOriginalTwinkleTrayStateAsync();
+        await RestoreConfiguredStateAsync();
     }
 
     private void RestoreOriginalMuteState()
@@ -106,7 +114,11 @@ public partial class MainViewModel
             return;
 
         if (RestoreMute())
-            AddLog("退出时已恢复原始静音状态。");
+        {
+            AddLog("已恢复原始静音状态。");
+            _didAutoMute = false;
+            _hasMuteSnapshot = false;
+        }
     }
 
     private async Task RestoreOriginalTwinkleTrayStateAsync()
@@ -117,14 +129,14 @@ public partial class MainViewModel
         var result = await Task.Run(() => _twinkleTrayService.DetectAvailability());
         if (!result.IsAvailable)
         {
-            AddLog($"退出时恢复亮度失败：{result.Message}");
+            AddLog($"恢复亮度失败：{result.Message}");
             return;
         }
 
         if (await RestoreTwinkleTrayAsync(result))
-            AddLog("退出时已恢复原始亮度。");
+            AddLog("已恢复原始亮度。");
         else
-            AddLog("退出时恢复亮度失败。");
+            AddLog("恢复亮度失败。");
     }
 
     private bool ApplyMute()

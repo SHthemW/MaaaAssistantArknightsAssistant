@@ -7,6 +7,8 @@ public partial class MainViewModel
         _appConfig.Tasks = Tasks.Select(t => t.ToConfig()).ToList();
         _appConfig.MuteOnStart = MuteOnStart;
         _appConfig.MuteOnlyOnAutoRun = MuteOnlyOnAutoRun;
+        _appConfig.RestoreVolumeOnCompletion = RestoreVolumeOnCompletion;
+        _appConfig.RestoreBrightnessOnCompletion = RestoreBrightnessOnCompletion;
         _appConfig.ShutdownOnComplete = ShutdownOnComplete;
         _appConfig.RandomStartEnabled = RandomStartEnabled;
         _appConfig.ScheduledHour = ScheduledHour;

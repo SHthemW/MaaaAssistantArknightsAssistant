@@ -51,6 +51,8 @@ public partial class MainViewModel
     {
         MuteOnStart = _appConfig.MuteOnStart;
         MuteOnlyOnAutoRun = _appConfig.MuteOnlyOnAutoRun;
+        RestoreVolumeOnCompletion = _appConfig.RestoreVolumeOnCompletion;
+        RestoreBrightnessOnCompletion = _appConfig.RestoreBrightnessOnCompletion;
         ShutdownOnComplete = _appConfig.ShutdownOnComplete;
         RandomStartEnabled = _appConfig.RandomStartEnabled;
         ScheduledHour = _appConfig.ScheduledHour;

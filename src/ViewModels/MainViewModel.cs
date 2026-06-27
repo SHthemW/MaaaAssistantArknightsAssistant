@@ -70,6 +70,8 @@ public partial class MainViewModel : ObservableObject
     private bool _isTwinkleTrayTestBusy;
     [ObservableProperty] private bool _muteOnStart;
     [ObservableProperty] private bool _muteOnlyOnAutoRun;
+    [ObservableProperty] private bool _restoreVolumeOnCompletion = true;
+    [ObservableProperty] private bool _restoreBrightnessOnCompletion = true;
     [ObservableProperty] private bool _shutdownOnComplete;
     [ObservableProperty] private bool _randomStartEnabled;
     [ObservableProperty] private bool _autoRunOnStart;

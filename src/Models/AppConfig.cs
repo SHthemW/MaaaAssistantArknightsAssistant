@@ -6,6 +6,8 @@ public class AppConfig
     public AiSummaryConfig AiSummary { get; set; } = new();
     public bool MuteOnStart { get; set; } = true;
     public bool MuteOnlyOnAutoRun { get; set; }
+    public bool RestoreVolumeOnCompletion { get; set; } = true;
+    public bool RestoreBrightnessOnCompletion { get; set; } = true;
     public bool ShutdownOnComplete { get; set; }
     public bool RandomStartEnabled { get; set; }
     public int ScheduledHour { get; set; } = 4;

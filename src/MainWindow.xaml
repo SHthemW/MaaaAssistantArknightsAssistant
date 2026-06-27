@@ -176,10 +176,16 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <CheckBox Grid.Row="0" Grid.Column="0" Content="启动时静音" IsChecked="{Binding MuteOnStart}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <CheckBox Grid.Row="0" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding MuteOnlyOnAutoRun}" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="{Binding MuteOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <CheckBox Content="仅在自动运行时生效" IsChecked="{Binding MuteOnlyOnAutoRun}" VerticalAlignment="Center" Visibility="{Binding MuteOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <CheckBox Content="运行结束后恢复音量" IsChecked="{Binding RestoreVolumeOnCompletion}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                </StackPanel>
                 <Button Grid.Row="0" Grid.Column="2" Content="{Binding TestAutoMuteButtonText}" Style="{StaticResource SmallButton}" Command="{Binding TestAutoMuteCommand}" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 <CheckBox Grid.Row="1" Grid.Column="0" Content="启动时调低亮度" IsChecked="{Binding TwinkleTrayOnStart}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Margin="0,4,12,0" />
-                <CheckBox Grid.Row="1" Grid.Column="1" Content="仅在自动运行时生效" IsChecked="{Binding TwinkleTrayOnlyOnAutoRun}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Margin="0,4,12,0" Visibility="{Binding TwinkleTrayOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,12,0">
+                    <CheckBox Content="仅在自动运行时生效" IsChecked="{Binding TwinkleTrayOnlyOnAutoRun}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Visibility="{Binding TwinkleTrayOnStart, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <CheckBox Content="运行结束后恢复亮度" IsChecked="{Binding RestoreBrightnessOnCompletion}" IsEnabled="{Binding TwinkleTrayIsAvailable}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="{Binding TestTwinkleTrayButtonText}" Style="{StaticResource SmallButton}" Command="{Binding TestTwinkleTrayCommand}" HorizontalAlignment="Left" />
                     <TextBlock Text="{Binding TwinkleTrayAvailabilityMessage}" VerticalAlignment="Center" Foreground="#757575" TextWrapping="Wrap" Margin="8,0,0,0" />

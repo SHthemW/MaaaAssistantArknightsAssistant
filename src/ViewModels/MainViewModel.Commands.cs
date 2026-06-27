@@ -20,6 +20,14 @@ public partial class MainViewModel
             return;
         }
 
+        var shouldMuteOnStart = MuteOnStart && (!MuteOnlyOnAutoRun || App.IsAutoRun);
+        if (shouldMuteOnStart)
+        {
+            if (!_hasMuteSnapshot)
+                CaptureMuteSnapshot();
+            _didAutoMute = true;
+        }
+
         foreach (var task in Tasks)
             task.State = TaskState.Idle;
 
@@ -42,7 +50,7 @@ public partial class MainViewModel
         var completed = false;
         try
         {
-            completed = await _chainRunner.RunChainAsync(enabledTasks, MuteOnStart);
+            completed = await _chainRunner.RunChainAsync(enabledTasks, shouldMuteOnStart);
         }
         finally
         {
@@ -50,6 +58,9 @@ public partial class MainViewModel
             _chainRunner = null;
             IsRunning = false;
         }
+
+        if (RestoreVolumeOnCompletion || RestoreBrightnessOnCompletion)
+            await RestoreConfiguredStateAsync();
 
         AddLog(completed ? "任务链执行完成。" : "任务链已停止。");
 
