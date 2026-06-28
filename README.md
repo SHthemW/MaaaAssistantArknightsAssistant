@@ -1,32 +1,81 @@
-# Maaa Assistant Arknights Assistant (MAAA)
+<div align="center">
+  <img src="res/icon.ico" width="20%" alt="MAAA icon" />
+  <h1>Maaa Assistant Arknights Assistant</h1>
+  <p>
+    <img src="https://img.shields.io/github/downloads/SHthemW/MaaEnd-Webhook-Retransmitter/total" alt="downloads" />
+  </p>
+  <p>
+    <a href="CHANGELOG.md">CHANGELOG</a>
+  </p>
+  <p>
+    游戏日常助手Hub, 可用来集中编排多款游戏自动化工具的启动、监控、通知与收尾流程.
+  </p>
+  <p>
+    本程序和 <a href="https://github.com/MaaAssistantArknights/MaaAssistantArknights">MAA (MaaAssistantArknights)</a> 没有直接关联, 但很适合搭配使用.
+  </p>
+  <p>
+    除了链式启动, MAAA还集成了许多实用的自动化功能, 让你可以每天几乎无需消耗心智在无聊的日常上.
+  </p>
+  <p>
+    <em>可能是你用过的最好的助手编排器 !</em>
+  </p>
+</div>
 
-基于 WPF 的游戏日常任务统一启动器，用来集中编排多款游戏自动化工具的启动、监控、通知与收尾流程。
 
-[CHANGELOG](CHANGELOG.md)
+
+除了启动各个助手, 本程序还提供以下全面且实用的功能:
+- **开机静默运行**:
+
+  支持活跃时间配置. 在非活跃时间段不产生任何影响, 在活跃时间段内开工! 
+
+  搭配米家智能插座+BIOS来电自启设置, 在你睡觉的时候静默开启一条龙, 完成任务后自动关机, 醒来时已然清新无负担🌿.
 
 <p align="center">
-  <img src="res/icon.ico" width="20%" />
+  <img src="res/test_video.gif" width="30%" />
 </p>
 
-<p align="center">
-  <img src="res/mainui.png" width="70%" />
-</p>
 
-## 主要能力
 
-- 多任务链顺序执行，前一项任务结束后自动进入下一项。
-- 图形界面集中管理任务启用状态、启动参数、监控进程、延迟和超时时间。
-- 支持单独启动某一项任务，也支持一键启动整条任务链。
-- 支持登录后自动运行，并可限制在指定时间窗内启动。
-- 支持时间窗内随机时刻自动启动，降低固定时点触发的干扰。
-- 支持启动时自动静音，并在任务结束后恢复原始音量状态。
-- 支持通过 Twinkle Tray 将显示器亮度调至最低，并在结束后恢复原亮度。
-- 支持任务完成后自动关机，并可限制为仅自动运行时生效。
-- 支持运行日志落盘、界面日志导出、清空与自动滚动。
-- 支持 Webhook 推送、自定义推送模板、按日志类别筛选推送内容。
-- 支持本地 Webhook 中转，将本地地址映射转发到原始 Webhook 地址。
-- 支持调用智谱 AI 对最近一次运行结果做总结，并支持超时、重试、流式返回、深度思考和提示词配置。
-- 支持复用最近一次 AI 总结提示日志进行测试，便于调试总结效果。
+- **多重防打扰:** 
+
+  活跃时间内自动静音🔕+调低屏幕亮度☀️(需搭配Twinkle Tray), 不打扰正在熟睡的你.
+
+  特别支持计划任务高优先级启动, 把开机时其他程序的提示音也扼杀在摇篮中.
+
+  <p align="center">
+    <img src="res/fn_mute.png" width="70%" />
+  </p>
+
+  
+
+- **完善的过程链和保底机制:**
+
+  从进程层面监控每个助手的运行情况, 实现**无人托管的自动链式运行**.
+
+  具有**超时保底**机制, 如果某个游戏因为需要更新/助手内部错误等问题无法运行, 也不会影响其它助手的功能.
+
+  
+
+- **额外的Webhook推送和中转**:
+
+  MAAA单独维护了一套Webhook推送功能, 对一些不支持Webhook的助手友好, 让你至少能得知对应助手的运行状态.
+
+  支持**Webhook中转服务**. 将你原本的推送桥接到MAAA上, 不仅能实现原本的推送功能, 还能让MAAA得知更多助手内部状态, 用于接下来的AI总结.
+
+  <p align="center">
+    <img src="res/fn_webhook.png" width="60%" />
+  </p>
+
+- **AI智能总结**:
+
+  通过接入外部的免费大模型, 对助手们今天的工作情况做汇总, 让你无需花费经历二次验收.
+
+  <p align="center">
+    <img src="res/fn_aip.png" width="66%" />
+    <img src="res/fn_ai.jpg" width="20%" />
+  </p>
+
+
 
 ## 支持的游戏与工具
 
@@ -38,6 +87,8 @@
 | 原神 | [BetterGI](https://github.com/babalae/better-genshin-impact) |
 | 鸣潮 | [ok-ww](https://github.com/ok-oldking/ok-ww) |
 | MaaEnd | 本仓库内置批处理任务 |
+
+
 
 ## 安装与运行
 
@@ -55,13 +106,15 @@
 - 自动运行模式会以 `--autorun` 参数启动。
 - 如果当前时间不在允许的自动启动时间窗内，程序会静默退出，不弹出主界面。
 
+
+
 ## 配置说明
 
 ### 任务配置
 
 每个任务都可以在界面中单独配置：
 
-- 启动文件路径或 URI。
+- 启动文件路径或 URL。
 - 启动参数。
 - 需要监控的游戏进程名。
 - 启动前延迟时间。
@@ -116,12 +169,16 @@ Webhook 中转会监听本地端口，并按照“原始 URL 的路径和查询�
 - 是否启用流式返回。
 - 是否仅在自动运行时生成总结。
 
+
+
 ## 日志与文件
 
 - 运行日志会写入 `logs/session-*.log`。
 - AI 总结提示日志会写入 `logs/aiprompt-*.log`。
 - 运行日志和 AI 提示日志默认保留 5 天。
 - 界面导出的日志会写入 `logs/runtime-{yyyyMMdd-HHmmss}.log`。
+
+
 
 ## 开发
 
@@ -149,6 +206,8 @@ dotnet publish -c Release -r win-x64 --self-contained false
 ```
 
 发布完成后会自动压缩输出目录，并生成到 `bin/Release-Archives/`，文件名格式为 `MaaaAssistantArknightsAssistant-{RID}-{yyyyMMdd-HHmm}.zip`。
+
+
 
 ## 项目结构
 
