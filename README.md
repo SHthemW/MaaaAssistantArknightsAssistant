@@ -1,73 +1,144 @@
 # Maaa Assistant Arknights Assistant (MAAA)
 
-一个基于 WPF 的游戏日常任务自动化启动器，用于统一管理和编排多款游戏的自动化工具。
+基于 WPF 的游戏日常任务统一启动器，用来集中编排多款游戏自动化工具的启动、监控、通知与收尾流程。
+
+[CHANGELOG](CHANGELOG.md)
 
 <p align="center">
-  <img src="res/icon.ico" width="25%" />
+  <img src="res/icon.ico" width="20%" />
 </p>
-
-## 功能
-
-- **任务链编排**：按顺序自动执行多个游戏的日常任务，前一个游戏进程退出后自动启动下一个
-
-- **进程监控**：实时轮询监控游戏进程状态（启动、运行中、已退出）
-
-- **任务超时**：每个任务可配置超时时间（默认 60 分钟），超时后标记为红色"已超时"并继续下一个任务
-
-- **可视化管理**：GUI 界面展示所有任务状态，支持单独启动或全部启动
-
-- **路径可配置**：所有自动化工具路径通过 JSON 配置文件管理，支持在界面中直接修改
-
-- **音量控制**：启动时自动静音，避免凌晨执行时打扰
-
-- **开机自启**：一键启用/取消 Windows 开机自启（基于计划任务，无需管理员权限）
-
-- **定时启动窗口**：可配置允许自动启动的时间范围（如 04:00 ~ 06:00），程序运行期间持续检测，进入时间窗口时自动启动任务链
-
-- **完成后关机**：全部任务完成后可自动关机
-
-- **Webhook 推送**：每条日志触发时可通过 HTTP POST 推送到指定 URL，支持自定义 Body 模板（`__TIME__`、`__CONTENT__` 占位符），内置测试按钮
 
 <p align="center">
-  <img src="res/mainui.png" width="50%" />
+  <img src="res/mainui.png" width="70%" />
 </p>
 
-## 支持的游戏及自动化工具
+## 主要能力
 
-| 游戏           | 自动化工具                                                                           |
-| -------------- | ------------------------------------------------------------------------------------ |
-| 明日方舟       | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights)                |
-| 崩坏：星穹铁道 | [March7th Assistant](https://github.com/moesnow/March7thAssistant)                   |
-| 绝区零         | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
-| 原神           | [BetterGI](https://github.com/babalae/better-genshin-impact)                         |
-| 鸣潮           | [ok-ww](https://github.com/ok-oldking/ok-ww)                                         |
+- 多任务链顺序执行，前一项任务结束后自动进入下一项。
+- 图形界面集中管理任务启用状态、启动参数、监控进程、延迟和超时时间。
+- 支持单独启动某一项任务，也支持一键启动整条任务链。
+- 支持登录后自动运行，并可限制在指定时间窗内启动。
+- 支持时间窗内随机时刻自动启动，降低固定时点触发的干扰。
+- 支持启动时自动静音，并在任务结束后恢复原始音量状态。
+- 支持通过 Twinkle Tray 将显示器亮度调至最低，并在结束后恢复原亮度。
+- 支持任务完成后自动关机，并可限制为仅自动运行时生效。
+- 支持运行日志落盘、界面日志导出、清空与自动滚动。
+- 支持 Webhook 推送、自定义推送模板、按日志类别筛选推送内容。
+- 支持本地 Webhook 中转，将本地地址映射转发到原始 Webhook 地址。
+- 支持调用智谱 AI 对最近一次运行结果做总结，并支持超时、重试、流式返回、深度思考和提示词配置。
+- 支持复用最近一次 AI 总结提示日志进行测试，便于调试总结效果。
 
-## 安装
+## 支持的游戏与工具
 
-从 [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) 页面下载最新版本，解压后运行即可。
+| 游戏 | 自动化工具 |
+| --- | --- |
+| 明日方舟 | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights) |
+| 崩坏：星穹铁道 | [March7th Assistant](https://github.com/moesnow/March7thAssistant) |
+| 绝区零 | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
+| 原神 | [BetterGI](https://github.com/babalae/better-genshin-impact) |
+| 鸣潮 | [ok-ww](https://github.com/ok-oldking/ok-ww) |
+| MaaEnd | 本仓库内置批处理任务 |
 
-## 配置
+## 安装与运行
 
-首次运行会自动生成 `appsettings.Local.json` 配置文件（不纳入版本控制）。可直接编辑该文件或在程序界面中修改：
+### 直接使用
 
-- 各工具的可执行文件路径和启动参数
-- 需要监控的游戏进程名
-- 启动前延迟时间
-- 每个任务的超时时间（分钟）
-- 定时启动时间范围和轮询间隔
-- Webhook 推送 URL 和 Body 模板
+从 [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) 下载最新版本，解压后运行主程序即可。
+
+### 首次启动
+
+程序首次启动会在可执行文件同目录生成 `appsettings.Local.json`，后续配置会自动保存到该文件。
+
+### 自动运行
+
+- 在界面中勾选“开机自动启动”后，程序会通过 Windows 计划任务注册当前实例的登录自启动项。
+- 自动运行模式会以 `--autorun` 参数启动。
+- 如果当前时间不在允许的自动启动时间窗内，程序会静默退出，不弹出主界面。
+
+## 配置说明
+
+### 任务配置
+
+每个任务都可以在界面中单独配置：
+
+- 启动文件路径或 URI。
+- 启动参数。
+- 需要监控的游戏进程名。
+- 启动前延迟时间。
+- 超时时间。
+- 是否启用。
+
+其中原神默认支持通过 `bettergi://` URI 方式启动，使用前需要本机已正确安装并注册 BetterGI 协议。
+
+### 防打扰配置
+
+- 启动时静音。
+- 仅自动运行时静音。
+- 结束后恢复音量。
+- 启动时调低亮度。
+- 仅自动运行时调低亮度。
+- 结束后恢复亮度。
+- 全部任务完成后关机。
+- 仅自动运行时关机。
+
+亮度控制依赖本机正在运行的 Twinkle Tray。
+
+### 调度配置
+
+- 自动运行时间窗起止时间。
+- 轮询间隔。
+- 时间窗内随机启动。
+
+### Webhook 配置
+
+- 普通 Webhook 推送 URL。
+- 自定义请求体模板，支持 `__TIME__` 和 `__CONTENT__` 占位符。
+- 仅推送 AI 总结结果。
+- 按日志分类选择推送内容。
+- Webhook 中转端口。
+- Webhook 中转原始 URL。
+
+Webhook 中转会监听本地端口，并按照“原始 URL 的路径和查询参数”进行映射转发。
+
+### AI 总结配置
+
+当前已接入智谱 AI，总结配置支持：
+
+- API Key。
+- API URL。
+- 模型名。
+- 系统提示词。
+- 总结提示词。
+- Temperature。
+- 超时秒数。
+- 重试次数。
+- 是否启用深度思考。
+- 是否启用流式返回。
+- 是否仅在自动运行时生成总结。
+
+## 日志与文件
+
+- 运行日志会写入 `logs/session-*.log`。
+- AI 总结提示日志会写入 `logs/aiprompt-*.log`。
+- 运行日志和 AI 提示日志默认保留 5 天。
+- 界面导出的日志会写入 `logs/runtime-{yyyyMMdd-HHmmss}.log`。
 
 ## 开发
 
 ### 环境要求
 
-- Windows 10/11
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Windows 10 / 11
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-### 构建与运行
+### 构建
 
 ```bash
 dotnet build
+```
+
+### 运行
+
+```bash
 dotnet run
 ```
 
@@ -77,113 +148,25 @@ dotnet run
 dotnet publish -c Release -r win-x64 --self-contained false
 ```
 
-发布后会自动压缩为 zip，输出到 `bin/Release-Archives/`，文件名格式为 `MaaaAssistantArknightsAssistant-{平台}-{日期时间}.zip`。
+发布完成后会自动压缩输出目录，并生成到 `bin/Release-Archives/`，文件名格式为 `MaaaAssistantArknightsAssistant-{RID}-{yyyyMMdd-HHmm}.zip`。
 
-### 项目结构
+## 项目结构
 
-```
-├── Game-Daily-Routine-Launcher.csproj
-├── appsettings.Local.json    # 本地配置（自动生成，不纳入版本控制）
-├── res/
-│   └── icon.png              # 程序图标
-└── src/
-    ├── App.xaml              # 应用入口与全局样式
-    ├── MainWindow.xaml       # 主界面
-    ├── Models/               # 数据模型（任务配置、状态枚举）
-    ├── Services/             # 业务逻辑（配置、进程监控、任务链、音量、系统）
-    ├── ViewModels/           # MVVM ViewModel
-    └── Converters/           # WPF 值转换器
-```
-
-<br/>
-
-# Maaa Assistant Arknights Assistant (MAAA)
-
-A WPF-based game daily routine automation launcher for managing and orchestrating automation tools across multiple games.
-
-<p align="center">
-  <img src="res/icon.ico" width="25%" />
-</p>
-
-## Features
-
-- **Task Chain Orchestration**: Sequentially execute daily tasks for multiple games — automatically starts the next task when the previous game process exits
-- **Process Monitoring**: Real-time polling of game process status (started, running, exited)
-- **Task Timeout**: Per-task configurable timeout (default 60 minutes) — timed-out tasks are marked red and the chain continues
-- **Visual Management**: GUI displaying all task statuses with individual or batch launch support
-- **Configurable Paths**: All automation tool paths managed via JSON config, editable directly in the UI
-- **Volume Control**: Auto-mute on launch to avoid disturbance during early morning runs
-- **Auto-Start on Login**: One-click enable/disable via Windows Task Scheduler, no admin privileges required
-- **Scheduled Time Window**: Configure an allowed auto-start time range (e.g., 04:00 ~ 06:00) — continuously monitored at runtime, automatically starts the task chain when entering the window
-- **Shutdown on Completion**: Optionally shut down the PC after all tasks finish
-- **Webhook Notifications**: HTTP POST on every log entry to a configured URL with customizable body template (`__TIME__`, `__CONTENT__` placeholders), includes a test button
-
-## Supported Games & Automation Tools
-
-| Game              | Automation Tool                                                                      |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| Arknights         | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights)                |
-| Honkai: Star Rail | [March7th Assistant](https://github.com/moesnow/March7thAssistant)                   |
-| Zenless Zone Zero | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
-| Genshin Impact    | [BetterGI](https://github.com/babalae/better-genshin-impact)                         |
-| Wuthering Waves   | [ok-ww](https://github.com/ok-oldking/ok-ww)                                         |
-
-## Installation
-
-Download the latest version from the [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) page, extract, and run.
-
-## Configuration
-
-On first launch, an `appsettings.Local.json` config file is auto-generated (not tracked in version control). Edit it directly or through the program UI:
-
-- Executable paths and arguments for each tool
-- Game process names to monitor
-- Pre-launch delay
-- Per-task timeout (minutes)
-- Scheduled time window and polling interval
-- Webhook URL and body template
-
-## Development
-
-### Requirements
-
-- Windows 10/11
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-### Build & Run
-
-```bash
-dotnet build
-dotnet run
+```text
+.
+|-- Game-Daily-Routine-Launcher.csproj
+|-- res/
+|   |-- icon.ico
+|   `-- mainui.png
+`-- src/
+    |-- App.xaml
+    |-- MainWindow.xaml
+    |-- Models/
+    |-- Services/
+    |-- ViewModels/
+    |-- Converters/
+    |-- batch/
+    `-- WebhookRelayHelpWindow.xaml
 ```
 
-### Publish
-
-```bash
-dotnet publish -c Release -r win-x64 --self-contained false
-```
-
-After publish, the output is automatically zipped to `bin/Release-Archives/` with the filename format `MaaaAssistantArknightsAssistant-{RID}-{yyyyMMdd-HHmm}.zip`.
-
-### Project Structure
-
-```
-├── Game-Daily-Routine-Launcher.csproj
-├── appsettings.Local.json    # Local config (auto-generated, not version-controlled)
-├── res/
-│   └── icon.png              # Application icon
-└── src/
-    ├── App.xaml              # App entry & global styles
-    ├── MainWindow.xaml       # Main window UI
-    ├── Models/               # Data models (task config, state enum)
-    ├── Services/             # Business logic (config, process monitor, task chain, audio, system)
-    ├── ViewModels/           # MVVM ViewModels
-    └── Converters/           # WPF value converters
-```
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://img.shields.io/github/downloads/SHthemW/MaaEnd-Webhook-Retransmitter/total" alt="downloads" />
-</p>
+`src/batch/` 中保留了原有批处理脚本，便于兼容既有工具链与独立脚本调用。
