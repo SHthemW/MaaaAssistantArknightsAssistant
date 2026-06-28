@@ -20,6 +20,7 @@ public partial class MainViewModel
         var migration = SystemService.EnsureAutoRunUsesScheduledTask();
         AutoRunOnStart = SystemService.IsAutoRunRegistered();
         IsMuted = _audioService.IsMuted;
+        RefreshRecentAiSummaryPromptLogAvailability();
         LoadWebhookPushContentOptions();
         RefreshTwinkleTrayAvailability();
 

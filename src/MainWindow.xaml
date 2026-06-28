@@ -142,7 +142,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <ListBox Grid.Row="0" ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="84" MaxHeight="160" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" ScrollViewer.VerticalScrollBarVisibility="Auto" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
+                <ListBox Grid.Row="0" ItemsSource="{Binding LogEntries}" x:Name="LogListBox" MinHeight="84" MaxHeight="160" FontFamily="Consolas" FontSize="12" BorderThickness="0" Background="White" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="False" MouseDoubleClick="OnLogListBoxMouseDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap" LineHeight="16" LineStackingStrategy="BlockLineHeight" />
@@ -392,7 +392,8 @@
                                 </Grid>
                             </Grid>
                             <StackPanel Orientation="Horizontal" Margin="70,8,0,0">
-                                <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" />
+                                <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" IsEnabled="{Binding CanRunAiSummaryTest}" />
+                                <Button Content="使用最近日志测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryWithRecentLogCommand}" IsEnabled="{Binding CanRunRecentAiSummaryTest}" Margin="8,0,0,0" />
                                 <TextBlock Text="{Binding AiSummaryTestStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="#757575" TextWrapping="Wrap" />
                             </StackPanel>
                         </StackPanel>

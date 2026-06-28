@@ -102,6 +102,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _aiSummaryEnabled;
     [ObservableProperty] private bool _aiSummaryOnlyOnAutoRun;
     [ObservableProperty] private bool _aiSummaryExpanded = true;
+    [ObservableProperty] private bool _hasRecentAiSummaryPromptLog;
     [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
     [ObservableProperty] private string _zhipuApiKey = string.Empty;
     [ObservableProperty] private string _zhipuApiUrl = string.Empty;
@@ -136,6 +137,10 @@ public partial class MainViewModel : ObservableObject
 
         LoadConfig();
     }
+
+    public bool CanRunAiSummaryTest => !IsTestingAiSummary;
+
+    public bool CanRunRecentAiSummaryTest => !IsTestingAiSummary && HasRecentAiSummaryPromptLog;
 
     private bool CanStartAll() => !IsRunning;
 

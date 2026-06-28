@@ -7,15 +7,17 @@ namespace Game_Daily_Routine_Launcher;
 public partial class MainViewModel
 {
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(TestAiSummaryCommand))]
     private bool _isTestingAiSummary;
 
     [ObservableProperty]
     private string _aiSummaryTestStatus = string.Empty;
 
-    [RelayCommand(CanExecute = nameof(CanTestAiSummary))]
+    [RelayCommand]
     private async Task TestAiSummaryAsync()
     {
+        if (IsTestingAiSummary)
+            return;
+
         if (!ShouldGenerateAiSummary(respectOnlyOnAutoRun: false))
         {
             AiSummaryTestStatus = "测试失败：AI 智能总结未启用或当前平台不受支持。";
@@ -34,7 +36,7 @@ public partial class MainViewModel
             AddLog($"测试内容已发送: {prompt}");
             AddLog($"AI 测试请求体:\n{requestBody}");
 
-            var summary = await GenerateAiSummaryWithRetryAsync(config, prompt, 60);
+            var summary = await GenerateAiSummaryInBackgroundAsync(config, prompt, 60);
             if (string.IsNullOrWhiteSpace(summary))
             {
                 AiSummaryTestStatus = "测试成功：服务器已回应，但未返回内容。";
@@ -61,8 +63,6 @@ public partial class MainViewModel
         }
     }
 
-    private bool CanTestAiSummary() => !IsTestingAiSummary;
-
     private async Task GenerateAndLogAiSummaryAsync(bool isAutoRunExecution)
     {
         var skipReason = GetAiSummarySkipReason(isAutoRunExecution);
@@ -80,7 +80,8 @@ public partial class MainViewModel
         try
         {
             await _aiPromptLogService.WriteAsync(prompt);
-            var summary = await GenerateAiSummaryWithRetryAsync(config, prompt, Math.Max(config.ZhipuAi.TimeoutSeconds, 1));
+            RefreshRecentAiSummaryPromptLogAvailability();
+            var summary = await GenerateAiSummaryInBackgroundAsync(config, prompt, Math.Max(config.ZhipuAi.TimeoutSeconds, 1));
             if (string.IsNullOrWhiteSpace(summary))
             {
                 await LogFinalAiSummaryAsync("AI 总结返回为空。");

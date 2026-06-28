@@ -122,4 +122,15 @@ public partial class MainViewModel
         if (string.IsNullOrWhiteSpace(value))
             ZhipuSummaryPrompt = ZhipuAiSummaryConfig.DefaultSummaryPrompt;
     }
+
+    partial void OnIsTestingAiSummaryChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanRunAiSummaryTest));
+        OnPropertyChanged(nameof(CanRunRecentAiSummaryTest));
+    }
+
+    partial void OnHasRecentAiSummaryPromptLogChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanRunRecentAiSummaryTest));
+    }
 }

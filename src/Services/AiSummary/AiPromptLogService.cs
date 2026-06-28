@@ -33,6 +33,18 @@ public sealed class AiPromptLogService
         PruneExpiredPromptLogs();
     }
 
+    public bool HasAvailablePromptLog() => GetLatestPromptLogPath() != null;
+
+    public async Task<string?> ReadLatestPromptAsync(CancellationToken cancellationToken = default)
+    {
+        var filePath = GetLatestPromptLogPath();
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            return null;
+
+        var content = await File.ReadAllTextAsync(filePath, Encoding.UTF8, cancellationToken);
+        return ExtractPromptContent(content);
+    }
+
     private string CreateLogFilePath()
     {
         var timestamp = DateTime.Now.ToString(TimestampFormat);
@@ -48,6 +60,18 @@ public sealed class AiPromptLogService
         }
 
         return Path.Combine(_logDir, $"{FilePrefix}{timestamp}-{Guid.NewGuid():N}.log");
+    }
+
+    private string? GetLatestPromptLogPath()
+    {
+        if (!Directory.Exists(_logDir))
+            return null;
+
+        return Directory.EnumerateFiles(_logDir, $"{FilePrefix}*.log")
+            .Concat(Directory.EnumerateFiles(_logDir, LegacyFileName))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(GetLogTimestamp)
+            .FirstOrDefault();
     }
 
     private void PruneExpiredPromptLogs()
@@ -83,5 +107,25 @@ public sealed class AiPromptLogService
         }
 
         return File.GetLastWriteTime(path);
+    }
+
+    private static string? ExtractPromptContent(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return null;
+
+        using var reader = new StringReader(content);
+        var firstLine = reader.ReadLine();
+        var remaining = reader.ReadToEnd().Trim();
+
+        if (!string.IsNullOrWhiteSpace(remaining) &&
+            !string.IsNullOrWhiteSpace(firstLine) &&
+            firstLine.StartsWith('[') &&
+            firstLine.EndsWith(']'))
+        {
+            return remaining;
+        }
+
+        return content.Trim();
     }
 }
