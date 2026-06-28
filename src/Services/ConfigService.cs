@@ -14,11 +14,12 @@ public class ConfigService
     };
 
     private readonly string _configPath;
+    private readonly string _appDir;
 
     public ConfigService()
     {
-        var appDir = AppDomain.CurrentDomain.BaseDirectory;
-        _configPath = Path.Combine(appDir, "appsettings.Local.json");
+        _appDir = AppDomain.CurrentDomain.BaseDirectory;
+        _configPath = Path.Combine(_appDir, "appsettings.Local.json");
     }
 
     public AppConfig Load()
@@ -27,7 +28,11 @@ public class ConfigService
             return CreateDefault();
 
         var json = File.ReadAllText(_configPath);
-        return JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? CreateDefault();
+        var config = JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? CreateDefault();
+        if (LegacyBatchTaskImporter.TryApply(config, _appDir))
+            Save(config);
+
+        return config;
     }
 
     public void Save(AppConfig config)
@@ -83,6 +88,7 @@ public class ConfigService
             ]
         };
 
+        LegacyBatchTaskImporter.TryApply(config, _appDir);
         Save(config);
         return config;
     }

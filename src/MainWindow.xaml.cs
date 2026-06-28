@@ -10,18 +10,38 @@ namespace Game_Daily_Routine_Launcher;
 
 public partial class MainWindow : Window
 {
+    private bool _cleanupCompleted;
+    private bool _cleanupInProgress;
+
     public MainWindow()
     {
         InitializeComponent();
 
         ((INotifyCollectionChanged)LogListBox.Items).CollectionChanged += (_, _) =>
         {
-            if (LogListBox.Items.Count > 0)
+            if (LogListBox.Items.Count > 0 && (DataContext as MainViewModel)?.AutoScrollLogs == true)
                 LogListBox.ScrollIntoView(LogListBox.Items[^1]);
         };
 
-        Closing += (_, _) => (DataContext as MainViewModel)?.Cleanup();
+        Closing += OnClosing;
         Loaded += OnLoaded;
+    }
+
+    private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_cleanupCompleted)
+            return;
+
+        e.Cancel = true;
+        if (_cleanupInProgress)
+            return;
+
+        _cleanupInProgress = true;
+        if (DataContext is MainViewModel vm)
+            await vm.CleanupAsync();
+
+        _cleanupCompleted = true;
+        _ = Dispatcher.BeginInvoke(new Action(Close));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -40,14 +60,41 @@ public partial class MainWindow : Window
         var monitorLeft = info.rcWork.Left * scaleX;
         var monitorTop = info.rcWork.Top * scaleY;
 
-        var maxWidth = monitorWidth * 0.8;
-        var maxHeight = monitorHeight * 0.8;
+        var maxWidth = monitorWidth * 0.85;
+        var maxHeight = monitorHeight * 0.95;
 
         if (Width > maxWidth) Width = maxWidth;
         if (Height > maxHeight) Height = maxHeight;
 
         Left = monitorLeft + (monitorWidth - Width) / 2;
         Top = monitorTop + (monitorHeight - Height) / 2;
+
+        SizeToContent = SizeToContent.Manual;
+    }
+
+    private void OnDeleteTaskClicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: GameTaskViewModel taskVm } ||
+            DataContext is not MainViewModel vm)
+            return;
+
+        var result = MessageBox.Show(
+            this,
+            $"确定要删除任务“{taskVm.Name}”吗？",
+            "删除任务",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
+            vm.RemoveTask(taskVm);
+    }
+
+    private async void OnLogListBoxMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (LogListBox.SelectedItem is not LogEntryRecord entry)
+            return;
+
+        await ClipboardService.TrySetTextAsync(entry.DisplayText);
     }
 
     [DllImport("user32.dll")]

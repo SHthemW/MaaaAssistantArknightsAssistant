@@ -12,7 +12,6 @@ public class TaskChainRunner : IDisposable
 
     public event Action<string, string>? TaskStateChanged;
     public event Action<string>? LogMessage;
-    public event Action? ChainCompleted;
 
     public bool IsRunning { get; private set; }
 
@@ -22,7 +21,7 @@ public class TaskChainRunner : IDisposable
         _pollIntervalMs = pollIntervalMs;
     }
 
-    public async Task RunChainAsync(IReadOnlyList<GameTaskConfig> tasks, bool muteOnStart, bool shutdownOnComplete)
+    public async Task<bool> RunChainAsync(IReadOnlyList<GameTaskConfig> tasks, bool muteOnStart)
     {
         _cts = new CancellationTokenSource();
         IsRunning = true;
@@ -32,32 +31,30 @@ public class TaskChainRunner : IDisposable
             if (muteOnStart)
             {
                 _audio.SetMute(true);
-                Log("系统音量已静音");
+                Log("系统音量已静音。");
             }
 
             foreach (var task in tasks)
             {
-                if (_cts.Token.IsCancellationRequested) break;
-                if (!task.Enabled) continue;
+                if (_cts.Token.IsCancellationRequested)
+                    break;
+
+                if (!task.Enabled)
+                    continue;
 
                 await RunSingleTaskAsync(task, _cts.Token);
-            }
-
-            if (!_cts.Token.IsCancellationRequested && shutdownOnComplete)
-            {
-                Log("所有任务已完成，10秒后关机...");
-                SystemService.Shutdown();
             }
         }
         catch (OperationCanceledException)
         {
-            Log("任务链已被用户停止");
+            Log("任务链已被用户停止。");
         }
         finally
         {
             IsRunning = false;
-            ChainCompleted?.Invoke();
         }
+
+        return _cts is { IsCancellationRequested: false };
     }
 
     private async Task RunSingleTaskAsync(GameTaskConfig task, CancellationToken ct)
@@ -85,7 +82,7 @@ public class TaskChainRunner : IDisposable
 
         if (!string.IsNullOrEmpty(task.GameProcessName))
         {
-            Log($"正在监控 {task.GameProcessName} 进程，等待启动（超时 {task.TimeoutMinutes} 分钟）...");
+            Log($"正在监控 {task.GameProcessName} 进程，等待关闭，超时 {task.TimeoutMinutes} 分钟...");
             TaskStateChanged?.Invoke(task.Id, "MonitoringWaitStart");
 
             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -94,18 +91,18 @@ public class TaskChainRunner : IDisposable
             try
             {
                 await WaitForProcessExitAsync(task.Id, task.GameProcessName, timeoutCts.Token);
-                Log($"{task.GameProcessName} 进程已退出");
+                Log($"{task.GameProcessName} 进程已退出。");
             }
             catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
-                Log($"{task.Name} 已超时（超过 {task.TimeoutMinutes} 分钟）");
+                Log($"{task.Name} 已超时，超过 {task.TimeoutMinutes} 分钟。");
                 TaskStateChanged?.Invoke(task.Id, "TimedOut");
                 return;
             }
         }
 
         TaskStateChanged?.Invoke(task.Id, "Completed");
-        Log($"{task.Name} 已完成");
+        Log($"{task.Name} 已完成。");
     }
 
     private static void LaunchTool(GameTaskConfig task)
@@ -136,7 +133,6 @@ public class TaskChainRunner : IDisposable
     {
         using var monitor = new ProcessMonitor(processName, _pollIntervalMs);
         _currentMonitor = monitor;
-
         var tcs = new TaskCompletionSource();
 
         monitor.ProcessStarted += () =>
@@ -146,13 +142,18 @@ public class TaskChainRunner : IDisposable
         };
         monitor.ProcessExited += () => tcs.TrySetResult();
 
-        using var reg = ct.Register(() => tcs.TrySetCanceled());
+        using var reg = ct.Register(() => tcs.TrySetCanceled(ct));
 
         monitor.Start();
-
-        await tcs.Task;
-
-        _currentMonitor = null;
+        try
+        {
+            await tcs.Task;
+        }
+        finally
+        {
+            if (ReferenceEquals(_currentMonitor, monitor))
+                _currentMonitor = null;
+        }
     }
 
     public void Stop()
@@ -161,10 +162,7 @@ public class TaskChainRunner : IDisposable
         _currentMonitor?.Stop();
     }
 
-    private void Log(string message)
-    {
-        LogMessage?.Invoke(message);
-    }
+    private void Log(string message) => LogMessage?.Invoke(message);
 
     public void Dispose()
     {
