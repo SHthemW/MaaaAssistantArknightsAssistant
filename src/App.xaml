@@ -45,7 +45,7 @@
             <Setter Property="Padding" Value="16,8" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Background" Value="#E91E63" />
+            <Setter Property="Background" Value="#2196F3" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Template">
@@ -58,7 +58,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#C2185B" />
+                                <Setter Property="Background" Value="#1976D2" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Background" Value="#BDBDBD" />
@@ -151,9 +151,9 @@
             <Setter Property="Height" Value="54" />
             <Setter Property="Margin" Value="0,0,0,6" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Background" Value="#FCE4EC" />
-            <Setter Property="Foreground" Value="#C2185B" />
-            <Setter Property="BorderBrush" Value="#F8BBD0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#2196F3" />
+            <Setter Property="BorderBrush" Value="#BBDEFB" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -167,8 +167,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F8BBD0" />
-                                <Setter Property="BorderBrush" Value="#F06292" />
+                                <Setter Property="Background" Value="#E3F2FD" />
+                                <Setter Property="BorderBrush" Value="#64B5F6" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Background" Value="#EEEEEE" />
