@@ -72,15 +72,21 @@ public partial class MainWindow : Window
         SizeToContent = SizeToContent.Manual;
     }
 
-    private void OnWebhookRelayHelpClicked(object sender, RoutedEventArgs e)
+    private void OnDeleteTaskClicked(object sender, RoutedEventArgs e)
     {
-        var vm = DataContext as MainViewModel;
-        var helpWindow = new WebhookRelayHelpWindow
-        {
-            Owner = this,
-            DataContext = new WebhookRelayHelpViewModel(vm?.WebhookRelayPort ?? 5058, vm?.WebhookRelaySourceUrl)
-        };
-        helpWindow.ShowDialog();
+        if (sender is not FrameworkElement { DataContext: GameTaskViewModel taskVm } ||
+            DataContext is not MainViewModel vm)
+            return;
+
+        var result = MessageBox.Show(
+            this,
+            $"确定要删除任务“{taskVm.Name}”吗？",
+            "删除任务",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
+            vm.RemoveTask(taskVm);
     }
 
     private async void OnLogListBoxMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)

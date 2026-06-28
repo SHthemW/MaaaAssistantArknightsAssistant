@@ -142,7 +142,14 @@ public partial class MainViewModel : ObservableObject
 
     public bool CanRunRecentAiSummaryTest => !IsTestingAiSummary && HasRecentAiSummaryPromptLog;
 
+    public bool CanEditTasks => !IsRunning;
+
     private bool CanStartAll() => !IsRunning;
 
     private bool CanStopAll() => IsRunning;
+
+    partial void OnIsRunningChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanEditTasks));
+    }
 }
