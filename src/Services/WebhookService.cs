@@ -1,6 +1,7 @@
-using System.Diagnostics;
 using System.Net.Http;
+using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 
 namespace Game_Daily_Routine_Launcher;
 
@@ -8,7 +9,7 @@ public static class WebhookService
 {
     private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(10) };
 
-    public static async void Send(string url, string bodyTemplate, string time, string content)
+    public static async Task<WebhookSendResult> SendAsync(string url, string bodyTemplate, string time, string content)
     {
         try
         {
@@ -17,11 +18,14 @@ public static class WebhookService
                 .Replace("__CONTENT__", EscapeJson(content));
 
             using var request = new StringContent(body, Encoding.UTF8, "application/json");
-            await Client.PostAsync(url, request);
+            using var response = await Client.PostAsync(url, request);
+            return new WebhookSendResult(response.IsSuccessStatusCode, response.StatusCode.ToString(), body);
         }
         catch (Exception ex)
         {
+            RuntimeLogService.WriteException("Webhook 发送失败", ex);
             Debug.WriteLine($"Webhook failed: {ex.Message}");
+            return new WebhookSendResult(false, ex.Message, string.Empty);
         }
     }
 
@@ -35,3 +39,5 @@ public static class WebhookService
             .Replace("\t", "\\t");
     }
 }
+
+public sealed record WebhookSendResult(bool Success, string Message, string RequestBody);

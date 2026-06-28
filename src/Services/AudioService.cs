@@ -22,6 +22,23 @@ public class AudioService
         }
     }
 
+    public float Volume
+    {
+        get
+        {
+            try
+            {
+                using var enumerator = new MMDeviceEnumerator();
+                using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                return device.AudioEndpointVolume?.MasterVolumeLevelScalar ?? 0f;
+            }
+            catch
+            {
+                return 0f;
+            }
+        }
+    }
+
     public void SetMute(bool mute)
     {
         try
