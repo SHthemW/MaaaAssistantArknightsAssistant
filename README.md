@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="res/icon.ico" width="20%" alt="MAAA icon" />
+  <img src="res/icon.ico" width="25%" alt="MAAA icon" />
   <h1>Maaa Assistant Arknights Assistant</h1>
   <p>
     <img src="https://img.shields.io/github/downloads/SHthemW/MaaEnd-Webhook-Retransmitter/total" alt="downloads" />
@@ -19,6 +19,7 @@
   <p>
     <em>可能是你用过的最好的助手编排器 !</em>
   </p>
+  <h1></h1>
 </div>
 
 
@@ -74,19 +75,6 @@
     <img src="res/fn_aip.png" width="66%" />
     <img src="res/fn_ai.jpg" width="20%" />
   </p>
-
-
-
-## 支持的游戏与工具
-
-| 游戏 | 自动化工具 |
-| --- | --- |
-| 明日方舟 | [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights) |
-| 崩坏：星穹铁道 | [March7th Assistant](https://github.com/moesnow/March7thAssistant) |
-| 绝区零 | [ZenlessZoneZero-OneDragon](https://github.com/DoctorReid/ZenlessZoneZero-OneDragon) |
-| 原神 | [BetterGI](https://github.com/babalae/better-genshin-impact) |
-| 鸣潮 | [ok-ww](https://github.com/ok-oldking/ok-ww) |
-| MaaEnd | 本仓库内置批处理任务 |
 
 
 
