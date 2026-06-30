@@ -280,7 +280,7 @@ public static class SystemService
         if (string.IsNullOrWhiteSpace(fileName))
             return "UnknownApp";
 
-        return string.Equals(fileName, "MaaaAssistantArknightsAssistant", StringComparison.OrdinalIgnoreCase)
+        return string.Equals(fileName, "MaaaAssortedAssistantArranger", StringComparison.OrdinalIgnoreCase)
             ? "MAAA"
             : fileName;
     }

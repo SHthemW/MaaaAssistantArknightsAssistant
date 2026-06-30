@@ -9,7 +9,7 @@
     <UseWPF>true</UseWPF>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationIcon>res\icon.ico</ApplicationIcon>
-    <AssemblyName>MaaaAssistantArknightsAssistant</AssemblyName>
+    <AssemblyName>MaaaAssortedAssistantArranger</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

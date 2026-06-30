@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Game_Daily_Routine_Launcher"
         xmlns:views="clr-namespace:Game_Daily_Routine_Launcher.Views"
         mc:Ignorable="d"
-        Title="Maaa Assistant Arknights Assistant"
+        Title="Maaa Assorted Assistant Arranger"
         Icon="/res/icon.ico"
         Width="840"
         MinHeight="700"
@@ -33,7 +33,7 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,12">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <Image Source="/res/icon.ico" Width="28" Height="28" Margin="0,0,8,0" />
-                <TextBlock Text="Maaa Assistant Arknights Assistant" FontSize="18" FontWeight="SemiBold" Foreground="#212121" VerticalAlignment="Center" />
+                <TextBlock Text="Maaa Assorted Assistant Arranger" FontSize="18" FontWeight="SemiBold" Foreground="#212121" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="启动全部" Style="{StaticResource ActionButton}" Command="{Binding StartAllCommand}" Margin="0,0,8,0" />

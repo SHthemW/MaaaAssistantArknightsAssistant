@@ -1,6 +1,6 @@
 <div align="center">
   <img src="res/icon.ico" width="25%" alt="MAAA icon" />
-  <h1>Maaa Assistant Arknights Assistant</h1>
+  <h1>Maaa Assorted Assistant Arranger</h1>
   <p>
     <img src="https://img.shields.io/github/downloads/SHthemW/MaaEnd-Webhook-Retransmitter/total" alt="downloads" />
   </p>
@@ -96,7 +96,7 @@
 
 ### 直接使用
 
-从 [Releases](https://github.com/SHthemW/MaaaAssistantArknightsAssistant/releases) 下载最新版本，解压后运行主程序即可。
+从 [Releases](https://github.com/SHthemW/MaaaAssortedAssistantArranger/releases) 下载最新版本，解压后运行主程序即可。
 
 ### 首次启动
 
@@ -242,7 +242,7 @@ dotnet run
 dotnet publish -c Release -r win-x64 --self-contained false
 ```
 
-发布完成后会自动压缩输出目录，并生成到 `bin/Release-Archives/`，文件名格式为 `MaaaAssistantArknightsAssistant-{RID}-{yyyyMMdd-HHmm}.zip`。
+发布完成后会自动压缩输出目录，并生成到 `bin/Release-Archives/`，文件名格式为 `MaaaAssortedAssistantArranger-{RID}-{yyyyMMdd-HHmm}.zip`。
 
 
 
