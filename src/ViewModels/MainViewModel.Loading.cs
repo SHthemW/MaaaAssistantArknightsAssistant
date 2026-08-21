@@ -77,15 +77,25 @@ public partial class MainViewModel
         ZhipuApiKey = _appConfig.AiSummary.ZhipuAi.ApiKey;
         ZhipuApiUrl = _appConfig.AiSummary.ZhipuAi.ApiUrl;
         ZhipuModel = _appConfig.AiSummary.ZhipuAi.Model;
-        ZhipuSystemPrompt = _appConfig.AiSummary.ZhipuAi.SystemPrompt;
-        ZhipuSummaryPrompt = string.IsNullOrWhiteSpace(_appConfig.AiSummary.ZhipuAi.SummaryPrompt)
-            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
-            : _appConfig.AiSummary.ZhipuAi.SummaryPrompt;
-        ZhipuTemperature = _appConfig.AiSummary.ZhipuAi.Temperature;
-        ZhipuTimeoutSeconds = _appConfig.AiSummary.ZhipuAi.TimeoutSeconds;
-        ZhipuRequestRetryCount = _appConfig.AiSummary.ZhipuAi.RequestRetryCount;
         ZhipuThinkingEnabled = _appConfig.AiSummary.ZhipuAi.ThinkingEnabled;
-        ZhipuStream = _appConfig.AiSummary.ZhipuAi.Stream;
+        ChatGptApiKey = _appConfig.AiSummary.ChatGpt.ApiKey;
+        ChatGptApiUrl = AiSummaryEndpointResolver.Resolve(
+            AiSummaryProviderType.ChatGpt,
+            _appConfig.AiSummary.ChatGpt.ApiUrl);
+        ChatGptModel = _appConfig.AiSummary.ChatGpt.Model;
+        DeepSeekApiKey = _appConfig.AiSummary.DeepSeek.ApiKey;
+        DeepSeekApiUrl = AiSummaryEndpointResolver.Resolve(
+            AiSummaryProviderType.DeepSeek,
+            _appConfig.AiSummary.DeepSeek.ApiUrl);
+        DeepSeekModel = _appConfig.AiSummary.DeepSeek.Model;
+        AiSystemPrompt = _appConfig.AiSummary.Common.SystemPrompt;
+        AiSummaryPrompt = string.IsNullOrWhiteSpace(_appConfig.AiSummary.Common.SummaryPrompt)
+            ? AiSummaryCommonConfig.DefaultSummaryPrompt
+            : _appConfig.AiSummary.Common.SummaryPrompt;
+        AiTemperature = _appConfig.AiSummary.Common.Temperature;
+        AiTimeoutSeconds = _appConfig.AiSummary.Common.TimeoutSeconds;
+        AiRequestRetryCount = _appConfig.AiSummary.Common.RequestRetryCount;
+        AiStream = _appConfig.AiSummary.Common.Stream;
     }
 
     private void LoadWebhookConfig()

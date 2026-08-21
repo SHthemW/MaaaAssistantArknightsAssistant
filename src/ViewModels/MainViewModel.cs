@@ -19,7 +19,10 @@ public partial class MainViewModel : ObservableObject
         nameof(IsSchedulePolling),
         nameof(WebhookRelayIsRunning),
         nameof(WebhookRelayStatusMessage),
-        nameof(AutoScrollLogs)
+        nameof(AutoScrollLogs),
+        nameof(SelectedAiApiKey),
+        nameof(SelectedAiApiUrl),
+        nameof(SelectedAiModel)
     ];
 
     private readonly ConfigService _configService;
@@ -51,10 +54,6 @@ public partial class MainViewModel : ObservableObject
 
     public ObservableCollection<GameTaskViewModel> Tasks { get; } = [];
     public ObservableCollection<LogEntryRecord> LogEntries { get; } = [];
-    public IReadOnlyList<AiSummaryProviderOption> AiSummaryProviderOptions { get; } =
-    [
-        new(AiSummaryProviderType.ZhipuAi, "智谱AI")
-    ];
     public ObservableCollection<WebhookPushContentCategoryOptionViewModel> WebhookPushContentOptions { get; } = [];
 
     [ObservableProperty]
@@ -99,21 +98,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _twinkleTrayIsAvailable;
     [ObservableProperty] private string _twinkleTrayAvailabilityMessage = string.Empty;
     [ObservableProperty] private bool _shutdownOnlyOnAutoRun;
-    [ObservableProperty] private bool _aiSummaryEnabled;
-    [ObservableProperty] private bool _aiSummaryOnlyOnAutoRun;
-    [ObservableProperty] private bool _aiSummaryExpanded = true;
-    [ObservableProperty] private bool _hasRecentAiSummaryPromptLog;
-    [ObservableProperty] private AiSummaryProviderType _selectedAiSummaryProvider = AiSummaryProviderType.Off;
-    [ObservableProperty] private string _zhipuApiKey = string.Empty;
-    [ObservableProperty] private string _zhipuApiUrl = string.Empty;
-    [ObservableProperty] private string _zhipuModel = string.Empty;
-    [ObservableProperty] private string _zhipuSystemPrompt = string.Empty;
-    [ObservableProperty] private string _zhipuSummaryPrompt = string.Empty;
-    [ObservableProperty] private double _zhipuTemperature = 1.0;
-    [ObservableProperty] private int _zhipuTimeoutSeconds = 800;
-    [ObservableProperty] private int _zhipuRequestRetryCount = 3;
-    [ObservableProperty] private bool _zhipuThinkingEnabled = true;
-    [ObservableProperty] private bool _zhipuStream = true;
     [ObservableProperty] private bool _autoScrollLogs = true;
 
     public MainViewModel()

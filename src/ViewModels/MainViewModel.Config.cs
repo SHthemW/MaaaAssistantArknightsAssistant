@@ -114,13 +114,13 @@ public partial class MainViewModel
             AddLog("AI 智能总结已设置为始终生效。");
     }
 
-    partial void OnZhipuSummaryPromptChanged(string value)
+    partial void OnAiSummaryPromptChanged(string value)
     {
         if (_isLoading)
             return;
 
         if (string.IsNullOrWhiteSpace(value))
-            ZhipuSummaryPrompt = ZhipuAiSummaryConfig.DefaultSummaryPrompt;
+            AiSummaryPrompt = AiSummaryCommonConfig.DefaultSummaryPrompt;
     }
 
     partial void OnIsTestingAiSummaryChanged(bool value)

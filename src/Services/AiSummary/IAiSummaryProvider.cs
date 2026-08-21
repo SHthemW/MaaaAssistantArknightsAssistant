@@ -4,7 +4,7 @@ public interface IAiSummaryProvider
 {
     AiSummaryProviderType ProviderType { get; }
 
-    string BuildRequestBodyJson(ZhipuAiSummaryConfig config, string prompt);
+    string BuildRequestBodyJson(AiSummaryConfig config, string prompt);
 
-    Task<string> GenerateAsync(ZhipuAiSummaryConfig config, string prompt, CancellationToken cancellationToken = default);
+    Task<string> GenerateAsync(AiSummaryConfig config, string prompt, CancellationToken cancellationToken = default);
 }

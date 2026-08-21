@@ -1,0 +1,113 @@
+<UserControl x:Class="Game_Daily_Routine_Launcher.Views.AiSummarySettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <CheckBox Grid.Column="0"
+                      Content="AI智能总结"
+                      IsChecked="{Binding AiSummaryEnabled}"
+                      VerticalAlignment="Center" />
+            <ToggleButton Grid.Column="1"
+                          Style="{StaticResource CollapseToggleButtonStyle}"
+                          IsChecked="{Binding AiSummaryExpanded}"
+                          VerticalAlignment="Center"
+                          Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </Grid>
+        <StackPanel Margin="24,8,0,0"
+                    Visibility="{Binding AiSummaryEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Visibility="{Binding AiSummaryExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <CheckBox Grid.Row="0"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              Content="仅在自动运行时生效"
+                              IsChecked="{Binding AiSummaryOnlyOnAutoRun}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,12,0" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="平台:" VerticalAlignment="Center" Margin="0,4" />
+                    <ComboBox Grid.Row="1"
+                              Grid.Column="1"
+                              Width="170"
+                              HorizontalAlignment="Left"
+                              ItemsSource="{Binding AiSummaryProviderOptions}"
+                              SelectedValuePath="Value"
+                              DisplayMemberPath="DisplayName"
+                              SelectedValue="{Binding SelectedAiSummaryProvider, UpdateSourceTrigger=PropertyChanged}"
+                              Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="API Key:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedAiApiKey, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="API URL:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding SelectedAiApiUrl, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="模型:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedAiModel, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="系统提示:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding AiSystemPrompt, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Height="28" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="总结提示:" VerticalAlignment="Top" Margin="0,4" />
+                    <TextBox Grid.Row="6"
+                             Grid.Column="1"
+                             Text="{Binding AiSummaryPrompt, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Top"
+                             Height="44"
+                             Margin="0,0,0,4" />
+                </Grid>
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="超时时间:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding AiTimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,16,4" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Temperature:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding AiTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="重试次数:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AiRequestRetryCount, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,16,4" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <CheckBox Grid.Row="1" Grid.Column="3" Content="启用" IsChecked="{Binding AiStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="深度思考:"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding SelectedAiSummaryProvider, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=ZhipuAi}" />
+                    <CheckBox Grid.Row="2"
+                              Grid.Column="1"
+                              Content="启用"
+                              IsChecked="{Binding ZhipuThinkingEnabled}"
+                              VerticalAlignment="Center"
+                              Visibility="{Binding SelectedAiSummaryProvider, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=ZhipuAi}" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Margin="70,8,0,0">
+                    <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" IsEnabled="{Binding CanRunAiSummaryTest}" />
+                    <Button Content="使用最近日志测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryWithRecentLogCommand}" IsEnabled="{Binding CanRunRecentAiSummaryTest}" Margin="8,0,0,0" />
+                    <TextBlock Text="{Binding AiSummaryTestStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="#757575" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

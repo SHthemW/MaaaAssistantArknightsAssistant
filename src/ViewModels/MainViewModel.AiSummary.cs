@@ -73,7 +73,7 @@ public partial class MainViewModel
         }
 
         var config = BuildAiSummaryConfig();
-        var prompt = BuildSummaryPrompt(config.ZhipuAi.SummaryPrompt);
+        var prompt = BuildSummaryPrompt(config.Common.SummaryPrompt);
         if (string.IsNullOrWhiteSpace(prompt))
             return;
 
@@ -81,7 +81,7 @@ public partial class MainViewModel
         {
             await _aiPromptLogService.WriteAsync(prompt);
             RefreshRecentAiSummaryPromptLogAvailability();
-            var summary = await GenerateAiSummaryInBackgroundAsync(config, prompt, Math.Max(config.ZhipuAi.TimeoutSeconds, 1));
+            var summary = await GenerateAiSummaryInBackgroundAsync(config, prompt, Math.Max(config.Common.TimeoutSeconds, 1));
             if (string.IsNullOrWhiteSpace(summary))
             {
                 await LogFinalAiSummaryAsync("AI 总结返回为空。");
@@ -92,7 +92,7 @@ public partial class MainViewModel
         }
         catch (OperationCanceledException)
         {
-            await LogFinalAiSummaryAsync($"AI 总结超时：服务器 {Math.Max(config.ZhipuAi.TimeoutSeconds, 1)} 秒内未回应。");
+            await LogFinalAiSummaryAsync($"AI 总结超时：服务器 {Math.Max(config.Common.TimeoutSeconds, 1)} 秒内未回应。");
         }
         catch (Exception ex)
         {
@@ -105,20 +105,35 @@ public partial class MainViewModel
         return new AiSummaryConfig
         {
             Provider = AiSummaryEnabled ? SelectedAiSummaryProvider : AiSummaryProviderType.Off,
+            Common = new AiSummaryCommonConfig
+            {
+                SystemPrompt = AiSystemPrompt,
+                SummaryPrompt = string.IsNullOrWhiteSpace(AiSummaryPrompt)
+                    ? AiSummaryCommonConfig.DefaultSummaryPrompt
+                    : AiSummaryPrompt,
+                Temperature = AiTemperature,
+                TimeoutSeconds = Math.Max(AiTimeoutSeconds, 1),
+                RequestRetryCount = Math.Max(AiRequestRetryCount, 0),
+                Stream = AiStream
+            },
             ZhipuAi = new ZhipuAiSummaryConfig
             {
                 ApiKey = ZhipuApiKey,
                 ApiUrl = ZhipuApiUrl,
                 Model = ZhipuModel,
-                SystemPrompt = ZhipuSystemPrompt,
-                SummaryPrompt = string.IsNullOrWhiteSpace(ZhipuSummaryPrompt)
-                    ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
-                    : ZhipuSummaryPrompt,
-                Temperature = ZhipuTemperature,
-                TimeoutSeconds = Math.Max(ZhipuTimeoutSeconds, 1),
-                RequestRetryCount = Math.Max(ZhipuRequestRetryCount, 0),
-                ThinkingEnabled = ZhipuThinkingEnabled,
-                Stream = ZhipuStream
+                ThinkingEnabled = ZhipuThinkingEnabled
+            },
+            ChatGpt = new ChatGptAiSummaryConfig
+            {
+                ApiKey = ChatGptApiKey,
+                ApiUrl = ChatGptApiUrl,
+                Model = ChatGptModel
+            },
+            DeepSeek = new DeepSeekAiSummaryConfig
+            {
+                ApiKey = DeepSeekApiKey,
+                ApiUrl = DeepSeekApiUrl,
+                Model = DeepSeekModel
             }
         };
     }
@@ -146,7 +161,7 @@ public partial class MainViewModel
         var builder = new StringBuilder();
 
         builder.AppendLine(string.IsNullOrWhiteSpace(summaryPrompt)
-            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
+            ? AiSummaryCommonConfig.DefaultSummaryPrompt
             : summaryPrompt.TrimEnd());
         builder.AppendLine();
         builder.AppendLine("任务最终状态：");

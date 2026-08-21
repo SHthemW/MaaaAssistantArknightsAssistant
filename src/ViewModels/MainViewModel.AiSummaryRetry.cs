@@ -1,14 +1,10 @@
-using System.IO;
-using System.Net.Http;
-using System.Text.Json;
-
 namespace Game_Daily_Routine_Launcher;
 
 public partial class MainViewModel
 {
     private async Task<string> GenerateAiSummaryWithRetryAsync(AiSummaryConfig config, string prompt, int timeoutSeconds)
     {
-        var retryCount = Math.Max(config.ZhipuAi.RequestRetryCount, 0);
+        var retryCount = Math.Max(config.Common.RequestRetryCount, 0);
         Exception? lastException = null;
 
         for (var attempt = 0; attempt <= retryCount; attempt++)
@@ -18,7 +14,7 @@ public partial class MainViewModel
                 using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Max(timeoutSeconds, 1)));
                 return await _aiSummaryService.GenerateAsync(config, prompt, timeoutCts.Token);
             }
-            catch (Exception ex) when (attempt < retryCount && ShouldRetryAiSummaryRequest(ex))
+            catch (Exception ex) when (attempt < retryCount && AiSummaryRetryPolicy.ShouldRetry(ex))
             {
                 lastException = ex;
                 AddLog($"AI 总结请求失败，正在重试（{attempt + 1}/{retryCount}）：{GetRetryMessage(ex)}");
@@ -48,12 +44,6 @@ public partial class MainViewModel
             return;
 
         await PushWebhookAsync(message, rawBody, DateTime.Now.ToString("HH:mm:ss"));
-    }
-
-    private static bool ShouldRetryAiSummaryRequest(Exception ex)
-    {
-        return ex is HttpRequestException or OperationCanceledException or JsonException or IOException
-            || (ex is InvalidOperationException invalidOperationException && !invalidOperationException.Message.Contains("未配置", StringComparison.Ordinal));
     }
 
     private static string GetRetryMessage(Exception ex)

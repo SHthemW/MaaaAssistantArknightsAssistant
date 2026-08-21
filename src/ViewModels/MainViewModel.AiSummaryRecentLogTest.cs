@@ -76,16 +76,16 @@ public partial class MainViewModel
         if (string.IsNullOrWhiteSpace(latestPrompt))
             return null;
 
-        var summaryPrompt = string.IsNullOrWhiteSpace(ZhipuSummaryPrompt)
-            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
-            : ZhipuSummaryPrompt;
+        var summaryPrompt = string.IsNullOrWhiteSpace(AiSummaryPrompt)
+            ? AiSummaryCommonConfig.DefaultSummaryPrompt
+            : AiSummaryPrompt;
         return ReplaceSummaryPrompt(latestPrompt, summaryPrompt);
     }
 
     private static string ReplaceSummaryPrompt(string prompt, string summaryPrompt)
     {
         var normalizedSummaryPrompt = string.IsNullOrWhiteSpace(summaryPrompt)
-            ? ZhipuAiSummaryConfig.DefaultSummaryPrompt
+            ? AiSummaryCommonConfig.DefaultSummaryPrompt
             : summaryPrompt.TrimEnd();
 
         if (string.IsNullOrWhiteSpace(prompt))

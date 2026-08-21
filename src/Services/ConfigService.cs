@@ -29,7 +29,8 @@ public class ConfigService
 
         var json = File.ReadAllText(_configPath);
         var config = JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? CreateDefault();
-        if (LegacyBatchTaskImporter.TryApply(config, _appDir))
+        var aiSummaryConfigMigrated = config.AiSummary.MigrateLegacyCommonConfig();
+        if (LegacyBatchTaskImporter.TryApply(config, _appDir) || aiSummaryConfigMigrated)
             Save(config);
 
         return config;

@@ -8,7 +8,9 @@ public sealed class AiSummaryService
     {
         _providers = new Dictionary<AiSummaryProviderType, IAiSummaryProvider>
         {
-            [AiSummaryProviderType.ZhipuAi] = new ZhipuAiSummaryProvider()
+            [AiSummaryProviderType.ZhipuAi] = new ZhipuAiSummaryProvider(),
+            [AiSummaryProviderType.ChatGpt] = new ChatGptAiSummaryProvider(),
+            [AiSummaryProviderType.DeepSeek] = new DeepSeekAiSummaryProvider()
         };
     }
 
@@ -26,7 +28,7 @@ public sealed class AiSummaryService
         if (!_providers.TryGetValue(config.Provider, out var provider))
             throw new NotSupportedException($"不支持的AI总结平台：{config.Provider}");
 
-        return await provider.GenerateAsync(config.ZhipuAi, prompt, cancellationToken);
+        return await provider.GenerateAsync(config, prompt, cancellationToken);
     }
 
     public string BuildRequestBodyJson(AiSummaryConfig config, string prompt)
@@ -37,6 +39,6 @@ public sealed class AiSummaryService
         if (!_providers.TryGetValue(config.Provider, out var provider))
             throw new NotSupportedException($"不支持的AI总结平台：{config.Provider}");
 
-        return provider.BuildRequestBodyJson(config.ZhipuAi, prompt);
+        return provider.BuildRequestBodyJson(config, prompt);
     }
 }
