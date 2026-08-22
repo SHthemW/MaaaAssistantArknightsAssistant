@@ -22,7 +22,8 @@ public partial class MainViewModel : ObservableObject
         nameof(AutoScrollLogs),
         nameof(SelectedAiApiKey),
         nameof(SelectedAiApiUrl),
-        nameof(SelectedAiModel)
+        nameof(SelectedAiModel),
+        nameof(ScreenRecordingBitrateText)
     ];
 
     private readonly ConfigService _configService;
@@ -31,6 +32,7 @@ public partial class MainViewModel : ObservableObject
     private readonly AiPromptLogService _aiPromptLogService;
     private readonly TwinkleTrayService _twinkleTrayService;
     private readonly WebhookRelayService _webhookRelayService;
+    private readonly ScreenRecordingService _screenRecordingService;
     private readonly DispatcherTimer _scheduleTimer;
     private readonly DispatcherTimer _startupMuteTimer;
     private readonly DispatcherTimer _startupTwinkleTrayTimer;
@@ -108,6 +110,9 @@ public partial class MainViewModel : ObservableObject
         _aiPromptLogService = new AiPromptLogService();
         _twinkleTrayService = new TwinkleTrayService();
         _webhookRelayService = new WebhookRelayService();
+        _screenRecordingService = new ScreenRecordingService();
+        _screenRecordingService.RecordingFailed += message =>
+            AddLog($"录屏失败：{message}");
         _appConfig = _configService.Load();
 
         _scheduleTimer = new DispatcherTimer();

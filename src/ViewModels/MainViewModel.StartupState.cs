@@ -101,6 +101,10 @@ public partial class MainViewModel
         _startupTwinkleTrayTimer.Stop();
         IsSchedulePolling = false;
 
+        _chainRunner?.Stop();
+        await StopScreenRecordingAsync();
+        _screenRecordingService.Dispose();
+
         if (_startupTwinkleTrayTask is not null)
             await _startupTwinkleTrayTask;
 

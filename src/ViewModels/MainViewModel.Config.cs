@@ -31,6 +31,7 @@ public partial class MainViewModel
         _appConfig.WebhookRelayExpanded = WebhookRelayExpanded;
         _appConfig.WebhookCustomPushContentExpanded = WebhookCustomPushContentExpanded;
         _appConfig.AiSummaryExpanded = AiSummaryExpanded;
+        _appConfig.ScreenRecording = BuildScreenRecordingConfig();
         _appConfig.WebhookPushCategories = WebhookPushContentOptions
             .Where(x => x.IsEnabled)
             .Select(x => x.Category)
@@ -133,4 +134,15 @@ public partial class MainViewModel
     {
         OnPropertyChanged(nameof(CanRunRecentAiSummaryTest));
     }
+
+    private ScreenRecordingConfig BuildScreenRecordingConfig() => new()
+    {
+        Enabled = ScreenRecordingEnabled,
+        Expanded = ScreenRecordingExpanded,
+        Resolution = Enum.IsDefined(ScreenRecordingResolution)
+            ? ScreenRecordingResolution
+            : ScreenRecordingResolution.Hd720p,
+        Framerate = ScreenRecordingProfile.NormalizeFramerate(ScreenRecordingFramerate),
+        RecordSystemAudio = ScreenRecordingRecordSystemAudio
+    };
 }

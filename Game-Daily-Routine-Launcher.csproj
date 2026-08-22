@@ -10,16 +10,21 @@
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
     <ApplicationIcon>res\icon.ico</ApplicationIcon>
     <AssemblyName>MaaaAssortedAssistantArranger</AssemblyName>
+    <Platforms>x64</Platforms>
+    <Platform>x64</Platform>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
     <ApplicationDefinition Include="src\App.xaml" />
+    <Compile Remove="src\Tests\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="ScreenRecorderLib" Version="6.6.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,11 +38,13 @@
   <!-- publish 后自动压缩 -->
   <Target Name="ZipAfterPublish" AfterTargets="Publish">
     <PropertyGroup>
-      <_Timestamp>$([System.DateTime]::Now.ToString('yyyyMMdd-HHmm'))</_Timestamp>
-      <_Rid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</_Rid>
-      <_Rid Condition="'$(RuntimeIdentifier)' == ''">portable</_Rid>
+      <_Timestamp>$([System.DateTime]::Now.ToString('yyMMdd-HHmmss'))</_Timestamp>
+      <_PlatformName Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</_PlatformName>
+      <_PlatformName Condition="'$(RuntimeIdentifier)' == ''">win-x64</_PlatformName>
+      <_PackageType Condition="'$(SelfContained)' == 'true'">self-contained</_PackageType>
+      <_PackageType Condition="'$(SelfContained)' != 'true'">portable</_PackageType>
       <_ZipDir>$(MSBuildProjectDirectory)\bin\Release-Archives</_ZipDir>
-      <_ZipName>$(AssemblyName)-$(_Rid)-$(_Timestamp).zip</_ZipName>
+      <_ZipName>$(AssemblyName)-$(_PlatformName)-$(_PackageType)-$(_Timestamp).zip</_ZipName>
     </PropertyGroup>
     <MakeDir Directories="$(_ZipDir)" />
     <Delete Files="$(_ZipDir)\$(_ZipName)" Condition="Exists('$(_ZipDir)\$(_ZipName)')" />

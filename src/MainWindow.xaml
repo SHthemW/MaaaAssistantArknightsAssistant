@@ -191,9 +191,11 @@
             </Grid>
         </GroupBox>
 
-        <views:PushSettingsView Grid.Row="5" />
+        <views:ScreenRecordingSettingsView Grid.Row="5" />
 
-        <GroupBox Grid.Row="6" Header="设置" Padding="8" Margin="0,8,0,0">
+        <views:PushSettingsView Grid.Row="6" />
+
+        <GroupBox Grid.Row="7" Header="设置" Padding="8" Margin="0,8,0,0">
             <WrapPanel>
                 <TextBlock Text="定时启动时间:" VerticalAlignment="Center" Margin="0,0,4,0" />
                 <TextBox Text="{Binding ScheduledHour, StringFormat={}{0:D2}}" Width="35" Margin="0,0,2,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />

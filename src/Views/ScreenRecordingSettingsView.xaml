@@ -1,0 +1,61 @@
+<UserControl x:Class="Game_Daily_Routine_Launcher.Views.ScreenRecordingSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <GroupBox Header="任务录屏" Padding="8" Margin="0,8,0,0">
+        <StackPanel IsEnabled="{Binding CanEditTasks}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Column="0"
+                          Content="任务期间录制主显示器"
+                          IsChecked="{Binding ScreenRecordingEnabled}"
+                          VerticalAlignment="Center" />
+                <ToggleButton Grid.Column="1"
+                              Style="{StaticResource CollapseToggleButtonStyle}"
+                              IsChecked="{Binding ScreenRecordingExpanded}"
+                              VerticalAlignment="Center"
+                              Visibility="{Binding ScreenRecordingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
+            <StackPanel Margin="24,8,0,0"
+                        Visibility="{Binding ScreenRecordingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Visibility="{Binding ScreenRecordingExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="分辨率:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                  ItemsSource="{Binding ScreenRecordingResolutionOptions}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectedValue="{Binding ScreenRecordingResolution, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0,0,16,4" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="帧率:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <ComboBox Grid.Row="0" Grid.Column="3"
+                                  ItemsSource="{Binding ScreenRecordingFramerateOptions}"
+                                  SelectedItem="{Binding ScreenRecordingFramerate, UpdateSourceTrigger=PropertyChanged}"
+                                  Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="标准码率:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ScreenRecordingBitrateText}" VerticalAlignment="Center" Margin="0,0,16,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="保留时间:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="3" Text="7 天" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
+                                  Content="录制系统声音"
+                                  IsChecked="{Binding ScreenRecordingRecordSystemAudio}"
+                                  VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </GroupBox>
+</UserControl>

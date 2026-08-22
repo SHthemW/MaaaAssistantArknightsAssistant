@@ -14,6 +14,7 @@ public partial class MainViewModel
         }
 
         LoadBasicConfig();
+        LoadScreenRecordingConfig();
         LoadAiSummaryConfig();
         LoadWebhookConfig();
 
@@ -64,6 +65,18 @@ public partial class MainViewModel
         TwinkleTrayOnStart = _appConfig.TwinkleTrayOnStart;
         TwinkleTrayOnlyOnAutoRun = _appConfig.TwinkleTrayOnlyOnAutoRun;
         ShutdownOnlyOnAutoRun = _appConfig.ShutdownOnlyOnAutoRun;
+    }
+
+    private void LoadScreenRecordingConfig()
+    {
+        var config = _appConfig.ScreenRecording ?? new ScreenRecordingConfig();
+        ScreenRecordingEnabled = config.Enabled;
+        ScreenRecordingExpanded = config.Expanded;
+        ScreenRecordingResolution = Enum.IsDefined(config.Resolution)
+            ? config.Resolution
+            : ScreenRecordingResolution.Hd720p;
+        ScreenRecordingFramerate = ScreenRecordingProfile.NormalizeFramerate(config.Framerate);
+        ScreenRecordingRecordSystemAudio = config.RecordSystemAudio;
     }
 
     private void LoadAiSummaryConfig()
