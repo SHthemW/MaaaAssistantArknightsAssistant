@@ -23,6 +23,10 @@ public partial class MainViewModel : ObservableObject
         nameof(SelectedAiApiKey),
         nameof(SelectedAiApiUrl),
         nameof(SelectedAiModel),
+        nameof(SelectedAiProxyEnabled),
+        nameof(SelectedAiProxyUrl),
+        nameof(SelectedAiProxyUsername),
+        nameof(SelectedAiProxyPassword),
         nameof(ScreenRecordingBitrateText)
     ];
 

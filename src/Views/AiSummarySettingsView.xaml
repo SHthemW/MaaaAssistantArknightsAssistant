@@ -70,6 +70,42 @@
                              Height="44"
                              Margin="0,0,0,4" />
                 </Grid>
+                <StackPanel Margin="0,4,0,8">
+                    <CheckBox Content="使用 HTTP(S) 代理"
+                              IsChecked="{Binding SelectedAiProxyEnabled}"
+                              VerticalAlignment="Center" />
+                    <Grid Margin="0,4,0,0"
+                          Visibility="{Binding SelectedAiProxyEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="代理地址:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="1"
+                                 Text="{Binding SelectedAiProxyUrl, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="例如 http://127.0.0.1:7890"
+                                 VerticalContentAlignment="Center"
+                                 Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="代理用户名:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="1"
+                                 Grid.Column="1"
+                                 Text="{Binding SelectedAiProxyUsername, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Margin="0,0,0,4" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="代理密码:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                        <TextBox Grid.Row="2"
+                                 Grid.Column="1"
+                                 Text="{Binding SelectedAiProxyPassword, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Margin="0,0,0,4" />
+                    </Grid>
+                </StackPanel>
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />

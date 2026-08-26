@@ -7,7 +7,6 @@ namespace Game_Daily_Routine_Launcher;
 
 public abstract class OpenAiCompatibleAiSummaryProvider : IAiSummaryProvider
 {
-    private static readonly HttpClient Client = new() { Timeout = Timeout.InfiniteTimeSpan };
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public abstract AiSummaryProviderType ProviderType { get; }
@@ -27,6 +26,7 @@ public abstract class OpenAiCompatibleAiSummaryProvider : IAiSummaryProvider
         var providerConfig = GetProviderConfig(config);
         ValidateConfig(providerConfig);
         var apiUrl = AiSummaryEndpointResolver.Resolve(ProviderType, providerConfig.ApiUrl);
+        using var client = AiSummaryHttpClientFactory.Create(providerConfig.Proxy);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, apiUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", providerConfig.ApiKey);
@@ -35,7 +35,7 @@ public abstract class OpenAiCompatibleAiSummaryProvider : IAiSummaryProvider
             Encoding.UTF8,
             "application/json");
 
-        using var response = await Client.SendAsync(
+        using var response = await client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);

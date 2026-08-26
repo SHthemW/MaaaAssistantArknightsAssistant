@@ -91,16 +91,19 @@ public partial class MainViewModel
         ZhipuApiUrl = _appConfig.AiSummary.ZhipuAi.ApiUrl;
         ZhipuModel = _appConfig.AiSummary.ZhipuAi.Model;
         ZhipuThinkingEnabled = _appConfig.AiSummary.ZhipuAi.ThinkingEnabled;
+        LoadZhipuProxyConfig(_appConfig.AiSummary.ZhipuAi.Proxy);
         ChatGptApiKey = _appConfig.AiSummary.ChatGpt.ApiKey;
         ChatGptApiUrl = AiSummaryEndpointResolver.Resolve(
             AiSummaryProviderType.ChatGpt,
             _appConfig.AiSummary.ChatGpt.ApiUrl);
         ChatGptModel = _appConfig.AiSummary.ChatGpt.Model;
+        LoadChatGptProxyConfig(_appConfig.AiSummary.ChatGpt.Proxy);
         DeepSeekApiKey = _appConfig.AiSummary.DeepSeek.ApiKey;
         DeepSeekApiUrl = AiSummaryEndpointResolver.Resolve(
             AiSummaryProviderType.DeepSeek,
             _appConfig.AiSummary.DeepSeek.ApiUrl);
         DeepSeekModel = _appConfig.AiSummary.DeepSeek.Model;
+        LoadDeepSeekProxyConfig(_appConfig.AiSummary.DeepSeek.Proxy);
         AiSystemPrompt = _appConfig.AiSummary.Common.SystemPrompt;
         AiSummaryPrompt = string.IsNullOrWhiteSpace(_appConfig.AiSummary.Common.SummaryPrompt)
             ? AiSummaryCommonConfig.DefaultSummaryPrompt
@@ -109,6 +112,31 @@ public partial class MainViewModel
         AiTimeoutSeconds = _appConfig.AiSummary.Common.TimeoutSeconds;
         AiRequestRetryCount = _appConfig.AiSummary.Common.RequestRetryCount;
         AiStream = _appConfig.AiSummary.Common.Stream;
+        RefreshSelectedAiProviderProperties();
+    }
+
+    private void LoadZhipuProxyConfig(AiSummaryProxyConfig? proxy)
+    {
+        ZhipuProxyEnabled = proxy?.Enabled == true;
+        ZhipuProxyUrl = proxy?.Url ?? string.Empty;
+        ZhipuProxyUsername = proxy?.Username ?? string.Empty;
+        ZhipuProxyPassword = proxy?.Password ?? string.Empty;
+    }
+
+    private void LoadChatGptProxyConfig(AiSummaryProxyConfig? proxy)
+    {
+        ChatGptProxyEnabled = proxy?.Enabled == true;
+        ChatGptProxyUrl = proxy?.Url ?? string.Empty;
+        ChatGptProxyUsername = proxy?.Username ?? string.Empty;
+        ChatGptProxyPassword = proxy?.Password ?? string.Empty;
+    }
+
+    private void LoadDeepSeekProxyConfig(AiSummaryProxyConfig? proxy)
+    {
+        DeepSeekProxyEnabled = proxy?.Enabled == true;
+        DeepSeekProxyUrl = proxy?.Url ?? string.Empty;
+        DeepSeekProxyUsername = proxy?.Username ?? string.Empty;
+        DeepSeekProxyPassword = proxy?.Password ?? string.Empty;
     }
 
     private void LoadWebhookConfig()

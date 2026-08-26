@@ -121,20 +121,50 @@ public partial class MainViewModel
                 ApiKey = ZhipuApiKey,
                 ApiUrl = ZhipuApiUrl,
                 Model = ZhipuModel,
-                ThinkingEnabled = ZhipuThinkingEnabled
+                ThinkingEnabled = ZhipuThinkingEnabled,
+                Proxy = BuildProxyConfig(
+                    ZhipuProxyEnabled,
+                    ZhipuProxyUrl,
+                    ZhipuProxyUsername,
+                    ZhipuProxyPassword)
             },
             ChatGpt = new ChatGptAiSummaryConfig
             {
                 ApiKey = ChatGptApiKey,
                 ApiUrl = ChatGptApiUrl,
-                Model = ChatGptModel
+                Model = ChatGptModel,
+                Proxy = BuildProxyConfig(
+                    ChatGptProxyEnabled,
+                    ChatGptProxyUrl,
+                    ChatGptProxyUsername,
+                    ChatGptProxyPassword)
             },
             DeepSeek = new DeepSeekAiSummaryConfig
             {
                 ApiKey = DeepSeekApiKey,
                 ApiUrl = DeepSeekApiUrl,
-                Model = DeepSeekModel
+                Model = DeepSeekModel,
+                Proxy = BuildProxyConfig(
+                    DeepSeekProxyEnabled,
+                    DeepSeekProxyUrl,
+                    DeepSeekProxyUsername,
+                    DeepSeekProxyPassword)
             }
+        };
+    }
+
+    private static AiSummaryProxyConfig BuildProxyConfig(
+        bool enabled,
+        string url,
+        string username,
+        string password)
+    {
+        return new AiSummaryProxyConfig
+        {
+            Enabled = enabled,
+            Url = url,
+            Username = username,
+            Password = password
         };
     }
 

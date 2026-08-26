@@ -9,6 +9,8 @@ public abstract class AiSummaryProviderConfig
     public string ApiUrl { get; set; } = string.Empty;
 
     public string Model { get; set; } = string.Empty;
+
+    public AiSummaryProxyConfig Proxy { get; set; } = new();
 }
 
 public sealed class ZhipuAiSummaryConfig : AiSummaryProviderConfig
