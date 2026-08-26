@@ -5,6 +5,7 @@ public partial class MainViewModel
     private async Task<string> GenerateAiSummaryWithRetryAsync(AiSummaryConfig config, string prompt, int timeoutSeconds)
     {
         var retryCount = Math.Max(config.Common.RequestRetryCount, 0);
+        var retryDelaySeconds = Math.Clamp(config.Common.RequestRetryDelaySeconds, 0, 86_400);
         Exception? lastException = null;
 
         for (var attempt = 0; attempt <= retryCount; attempt++)
@@ -17,7 +18,14 @@ public partial class MainViewModel
             catch (Exception ex) when (attempt < retryCount && AiSummaryRetryPolicy.ShouldRetry(ex))
             {
                 lastException = ex;
-                AddLog($"AI 总结请求失败，正在重试（{attempt + 1}/{retryCount}）：{GetRetryMessage(ex)}");
+                if (retryDelaySeconds == 0)
+                {
+                    AddLog($"AI 总结请求失败，正在重试（{attempt + 1}/{retryCount}）：{GetRetryMessage(ex)}");
+                    continue;
+                }
+
+                AddLog($"AI 总结请求失败，将在 {retryDelaySeconds} 秒后重试（{attempt + 1}/{retryCount}）：{GetRetryMessage(ex)}");
+                await Task.Delay(TimeSpan.FromSeconds(retryDelaySeconds));
             }
             catch (Exception ex)
             {

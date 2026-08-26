@@ -15,5 +15,7 @@ public class AiSummaryCommonConfig
 
     public int RequestRetryCount { get; set; } = 3;
 
+    public int RequestRetryDelaySeconds { get; set; } = 30;
+
     public bool Stream { get; set; } = true;
 }

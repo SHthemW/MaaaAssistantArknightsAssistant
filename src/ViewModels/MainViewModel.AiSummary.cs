@@ -114,6 +114,7 @@ public partial class MainViewModel
                 Temperature = AiTemperature,
                 TimeoutSeconds = Math.Max(AiTimeoutSeconds, 1),
                 RequestRetryCount = Math.Max(AiRequestRetryCount, 0),
+                RequestRetryDelaySeconds = Math.Clamp(AiRequestRetryDelaySeconds, 0, 86_400),
                 Stream = AiStream
             },
             ZhipuAi = new ZhipuAiSummaryConfig

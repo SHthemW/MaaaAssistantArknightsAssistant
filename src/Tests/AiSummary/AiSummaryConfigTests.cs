@@ -6,6 +6,14 @@ namespace Game_Daily_Routine_Launcher.Tests;
 public sealed class AiSummaryConfigTests
 {
     [Fact]
+    public void RetryDelayDefaultsToThirtySeconds()
+    {
+        var common = new AiSummaryCommonConfig();
+
+        Assert.Equal(30, common.RequestRetryDelaySeconds);
+    }
+
+    [Fact]
     public void LegacyCommonProxyIsCopiedToEachProvider()
     {
         var config = new AiSummaryConfig

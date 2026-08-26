@@ -111,6 +111,7 @@ public partial class MainViewModel
         AiTemperature = _appConfig.AiSummary.Common.Temperature;
         AiTimeoutSeconds = _appConfig.AiSummary.Common.TimeoutSeconds;
         AiRequestRetryCount = _appConfig.AiSummary.Common.RequestRetryCount;
+        AiRequestRetryDelaySeconds = Math.Clamp(_appConfig.AiSummary.Common.RequestRetryDelaySeconds, 0, 86_400);
         AiStream = _appConfig.AiSummary.Common.Stream;
         RefreshSelectedAiProviderProperties();
     }

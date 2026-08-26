@@ -108,12 +108,13 @@
                 </StackPanel>
                 <Grid Margin="0,0,0,4">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="90" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="90" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -124,21 +125,33 @@
                     <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding AiTemperature, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,0,4" />
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="重试次数:" VerticalAlignment="Center" Margin="0,0,0,4" />
                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AiRequestRetryCount, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" Width="80" HorizontalAlignment="Left" Margin="0,0,16,4" />
-                    <TextBlock Grid.Row="1" Grid.Column="2" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
-                    <CheckBox Grid.Row="1" Grid.Column="3" Content="启用" IsChecked="{Binding AiStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
                     <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="重试间隔(秒):"
+                               VerticalAlignment="Center"
+                               Margin="0,0,0,4" />
+                    <TextBox Grid.Row="2"
+                             Grid.Column="1"
+                             Text="{Binding AiRequestRetryDelaySeconds, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalContentAlignment="Center"
+                             Width="80"
+                             HorizontalAlignment="Left"
+                             Margin="0,0,16,4" />
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="流式返回:" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <CheckBox Grid.Row="2" Grid.Column="3" Content="启用" IsChecked="{Binding AiStream}" VerticalAlignment="Center" Margin="0,0,0,4" />
+                    <TextBlock Grid.Row="3"
                                Grid.Column="0"
                                Text="深度思考:"
                                VerticalAlignment="Center"
                                Visibility="{Binding SelectedAiSummaryProvider, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=ZhipuAi}" />
-                    <CheckBox Grid.Row="2"
+                    <CheckBox Grid.Row="3"
                               Grid.Column="1"
                               Content="启用"
                               IsChecked="{Binding ZhipuThinkingEnabled}"
                               VerticalAlignment="Center"
                               Visibility="{Binding SelectedAiSummaryProvider, Converter={StaticResource EnumEqualsToVisibility}, ConverterParameter=ZhipuAi}" />
                 </Grid>
-                <StackPanel Orientation="Horizontal" Margin="70,8,0,0">
+                <StackPanel Orientation="Horizontal" Margin="90,8,0,0">
                     <Button Content="测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryCommand}" IsEnabled="{Binding CanRunAiSummaryTest}" />
                     <Button Content="使用最近日志测试" Style="{StaticResource SmallButton}" Command="{Binding TestAiSummaryWithRecentLogCommand}" IsEnabled="{Binding CanRunRecentAiSummaryTest}" Margin="8,0,0,0" />
                     <TextBlock Text="{Binding AiSummaryTestStatus}" VerticalAlignment="Center" Margin="8,0,0,0" Foreground="#757575" TextWrapping="Wrap" />

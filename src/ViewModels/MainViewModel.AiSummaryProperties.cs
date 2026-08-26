@@ -47,6 +47,7 @@ public partial class MainViewModel
     [ObservableProperty] private double _aiTemperature = 1.0;
     [ObservableProperty] private int _aiTimeoutSeconds = 800;
     [ObservableProperty] private int _aiRequestRetryCount = 3;
+    [ObservableProperty] private int _aiRequestRetryDelaySeconds = 30;
     [ObservableProperty] private bool _aiStream = true;
 
     partial void OnZhipuProxyEnabledChanged(bool value) =>
